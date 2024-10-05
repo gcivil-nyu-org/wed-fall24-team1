@@ -37,7 +37,7 @@ media
 .idea/**/libraries
 
 # File-based project format
-*.iws
+*.iws 
 
 # IntelliJ
 out/
