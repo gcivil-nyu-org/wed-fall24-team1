@@ -20,6 +20,9 @@ media
 # AWS User-specific
 .idea/**/aws.xml
 
+# Jetbrains
+.idea/
+
 # Generated files
 .idea/**/contentModel.xml
 

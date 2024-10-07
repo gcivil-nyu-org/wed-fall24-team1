@@ -54,8 +54,8 @@ def insert_food_data_to_dynamodb(df, table):
             'Id': str(uuid.uuid4()),  # Auto-generate a unique ID
             'Name': row['Provider'],  # Provider name
             'Address': row['Address'],  # Address
-            'Lat': "NA",  # Lat is not available
-            'Log': "NA",  # Log is not available
+            'Lat': convert_to_decimal(row["Latitude"]),
+            'Log': convert_to_decimal(row["longitude"]),
             'Ratings': "NoRatings",  # Default value for Ratings
             'Description': description_json  # JSON object with all other fields
         }
