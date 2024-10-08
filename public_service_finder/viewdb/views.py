@@ -18,8 +18,17 @@ class DecimalEncoder(json.JSONEncoder):
 
 # Function to fetch data from DynamoDB and paginate it
 def fetch_dynamodb_data(request):
-    # Scan the DynamoDB table to get all items
-    response = table.scan()
+    # Get search query from request
+    search_query = request.GET.get('search', '')
+
+    # Prepare scan parameters
+    scan_kwargs = {}
+    if search_query:
+        from boto3.dynamodb.conditions import Attr
+        scan_kwargs['FilterExpression'] = Attr('Name').contains(search_query)
+
+    # Scan the DynamoDB table to get items
+    response = table.scan(**scan_kwargs)
     items = response.get('Items', [])
 
     # Exclude the Description field from the items
@@ -37,5 +46,21 @@ def fetch_dynamodb_data(request):
     # Calculate the base index for the current page
     base_index = paginator.per_page * (page_obj.number - 1)
 
-    # Render the template with the paginated data and base index
-    return render(request, 'dynamodb_table.html', {'page_obj': page_obj, 'base_index': base_index})
+    # Serialize current page's items to JSON for the map
+    serialized_items = [
+        {
+            "Name": item.get('Name', 'No Name'),
+            "Address": item.get('Address', 'N/A'),
+            "Lat": float(item.get('Lat')) if item.get('Lat') else None,
+            "Log": float(item.get('Log')) if item.get('Log') else None,
+            "Ratings": str(item.get('Ratings')) if item.get('Ratings') else "No ratings"
+        }
+        for item in page_obj
+    ]
+
+    return render(request, 'dynamodb_table.html', {
+        'page_obj': page_obj,
+        'base_index': base_index,
+        'search_query': search_query,
+        'serialized_items': json.dumps(serialized_items)  # Pass serialized data
+    })
