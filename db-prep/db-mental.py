@@ -27,29 +27,31 @@ def convert_to_decimal(value):
     return value
 
 
-def insert_shelter_data_to_dynamodb(df, table, name):
+def insert_mental_data_to_dynamodb(df, table, name):
     for index, row in df.iterrows():
-        if pd.isna(row['Center Name']):
-            continue
+        street_2 = row['street_2'] if pd.notna(row['street_2']) else ""
+        address = f"{row['street_1']} {street_2.strip()} {row['city']} {row['zip']}".strip()
 
         description_json = {
-            "Borough": row['Borough'],
-            "Hours_of_Operation": row['Hours_of_Operation'],
-            "Community_Board": row['Community Board'],
-            "Council_District": row['Council District'],
-            "Census_Tract": row['Census Tract']
+            "Branch": row['Branch'],
+            "Phone": row['phone'],
+            "Website": row['website'],
+            "Filter_Military": row.get('filter_military'),
+            "Filter_Inpatient_SVC": row.get('filter_inpatient_svc'),
+            "Filter_Residential_PGM": row.get('filter_residential_pgm')
         }
 
         description_json = {key: convert_to_decimal(value) for key, value in description_json.items()}
 
         item = {
             'Id': str(uuid.uuid4()),
-            'Name': row['Center Name'],
-            'Address': row['Address'],
-            'Lat': convert_to_decimal(row['Latitude']),
-            'Log': convert_to_decimal(row['Longitude']),
+            'Name': row['Organization'],
+            'Address': address,
+            'Lat': convert_to_decimal(row['latitude']),
+            'Log': convert_to_decimal(row['longitude']),
             'Ratings': "NoRatings",
-            'Description': description_json
+            'Description': description_json,
+            'Category': 'MENTAL'
         }
 
         table.put_item(Item=item)
@@ -59,16 +61,16 @@ def insert_shelter_data_to_dynamodb(df, table, name):
 
 def main():
     if len(sys.argv) != 3:
-        print(f"Usage: python3 db-shelters.py /path/to/csv <dynamoDB table name>")
+        print(f"Usage: python3 db-mental.py /path/to/csv <dynamoDB table name>")
         exit(1)
 
-    shelter_file = sys.argv[1]
+    mental_file = sys.argv[1]
     dynamodb = boto3.resource('dynamodb', region_name='us-east-1')  # Replace with your actual region
     table_name = sys.argv[2]
     table = dynamodb.Table(table_name)
 
-    df = pd.read_csv(shelter_file)
-    insert_shelter_data_to_dynamodb(df, table, table_name)
+    df = pd.read_csv(mental_file)
+    insert_mental_data_to_dynamodb(df, table, table_name)
 
 
 if __name__ == "__main__":

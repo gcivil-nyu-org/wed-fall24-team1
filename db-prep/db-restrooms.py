@@ -53,7 +53,8 @@ def insert_restroom_data_to_dynamodb(df, table, name):
             'Lat': convert_to_decimal(row['Latitude']),  # Convert latitude to Decimal or handle NaN
             'Log': convert_to_decimal(row['Longitude']),  # Convert longitude to Decimal or handle NaN
             'Ratings': "NoRatings",  # Default value for Ratings
-            'Description': description_json  # JSON object with all other fields
+            'Description': description_json,  # JSON object with all other fields
+            'Category': 'RESTROOM'
         }
 
         # Insert the item into DynamoDB

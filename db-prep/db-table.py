@@ -26,7 +26,7 @@ def create_service_table(dynamodb, table_name):
     )
     
     # Wait for the table to be created
-    table.meta.client.get_waiter('table_exists').wait(TableName='ServiceTable')
+    table.meta.client.get_waiter('table_exists').wait(TableName=table_name)
     print("Table has been created successfully.")
     return table
 

@@ -16,11 +16,6 @@ class DecimalEncoder(json.JSONEncoder):
         return super(DecimalEncoder, self).default(obj)
 
 
-def convert_to_string(value):
-    if pd.isna(value):  # Handle NaN
-        return None
-    return str(value)
-
 def convert_to_decimal(value):
     if pd.isna(value):  # Check for NaN
         return None
@@ -32,28 +27,30 @@ def convert_to_decimal(value):
     return value
 
 
-def insert_food_data_to_dynamodb(df, table, name):
+def insert_shelter_data_to_dynamodb(df, table, name):
     for index, row in df.iterrows():
-        if pd.isna(row['Provider']) or (pd.isna(row["Latitude"]) and pd.isna(row["longitude"])):
+        if pd.isna(row['Center Name']):
             continue
 
         description_json = {
-            "Borough": convert_to_string(row['Borough']),
-            "Contact_Name": convert_to_string(row['Contact Name']),
-            "Phone": convert_to_string(row['Phone']),
-            "Email_Website": convert_to_string(row['Email/Website'])
+            "Borough": row['Borough'],
+            "Hours_of_Operation": row['Hours_of_Operation'],
+            "Community_Board": row['Community Board'],
+            "Council_District": row['Council District'],
+            "Census_Tract": row['Census Tract']
         }
 
         description_json = {key: convert_to_decimal(value) for key, value in description_json.items()}
 
         item = {
             'Id': str(uuid.uuid4()),
-            'Name': row['Provider'],
+            'Name': row['Center Name'],
             'Address': row['Address'],
-            'Lat': convert_to_decimal(row["Latitude"]),
-            'Log': convert_to_decimal(row["longitude"]),
+            'Lat': convert_to_decimal(row['Latitude']),
+            'Log': convert_to_decimal(row['Longitude']),
             'Ratings': "NoRatings",
-            'Description': description_json
+            'Description': description_json,
+            'Category': 'SHELTER'
         }
 
         table.put_item(Item=item)
@@ -63,16 +60,16 @@ def insert_food_data_to_dynamodb(df, table, name):
 
 def main():
     if len(sys.argv) != 3:
-        print(f"Usage: python3 db-foods.py /path/to/csv <dynamoDB table name>")
+        print(f"Usage: python3 db-shelters.py /path/to/csv <dynamoDB table name>")
         exit(1)
 
-    foods_file = sys.argv[1]
+    shelter_file = sys.argv[1]
     dynamodb = boto3.resource('dynamodb', region_name='us-east-1')  # Replace with your actual region
     table_name = sys.argv[2]
     table = dynamodb.Table(table_name)
 
-    df = pd.read_csv(foods_file)
-    insert_food_data_to_dynamodb(df, table, table_name)
+    df = pd.read_csv(shelter_file)
+    insert_shelter_data_to_dynamodb(df, table, table_name)
 
 
 if __name__ == "__main__":
