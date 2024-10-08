@@ -1,12 +1,12 @@
+#!/usr/bin/env python3
+
+import sys
 import boto3
 
-# Initialize DynamoDB resource
-dynamodb = boto3.resource('dynamodb', region_name='us-east-1')  # Replace with your actual region
 
-
-def create_service_table():
+def create_service_table(dynamodb, table_name):
     table = dynamodb.create_table(
-        TableName='ServiceTable',
+        TableName=table_name,
         KeySchema=[
             {
                 'AttributeName': 'Id',  # Partition key
@@ -30,4 +30,15 @@ def create_service_table():
     print("Table has been created successfully.")
     return table
 
-create_service_table()
+
+def main():
+    if len(sys.argv) != 2:
+        print(f"Usage: python3 db-table.py <dynamoDB table name>")
+        exit(1)
+    table_name = sys.argv[1]
+    dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
+    create_service_table(dynamodb, table_name)
+
+
+if __name__ == "__main__":
+    main()

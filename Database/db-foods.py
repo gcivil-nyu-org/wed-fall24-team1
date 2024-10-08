@@ -1,47 +1,42 @@
+#!/usr/bin/env python3
+
+import sys
 import pandas as pd
 import boto3
 import json
 from decimal import Decimal
 import uuid
+import math
 
-# Custom JSON encoder for Decimal objects
+
 class DecimalEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, Decimal):
             return str(obj)  # Convert Decimal to string for JSON encoding
         return super(DecimalEncoder, self).default(obj)
 
-# Initialize DynamoDB resource
-dynamodb = boto3.resource('dynamodb', region_name='us-east-1')  # Replace with your actual region
-table_name = 'ServiceTable'  # Replace with your actual table name
-table = dynamodb.Table(table_name)
 
-# Load the dataset from CSV
-foods_file = 'foods.csv'  # Replace with the path to your foods dataset
-df = pd.read_csv(foods_file)
+def convert_to_string(value):
+    if pd.isna(value):  # Handle NaN
+        return None
+    return str(value)
 
-# Function to convert any value to Decimal if it's a float or handle NaN/Infinity
 def convert_to_decimal(value):
     if pd.isna(value):  # Check for NaN
         return None
     if isinstance(value, float):
-        return Decimal(str(value))  # Convert float to Decimal
+        if math.isnan(value) or math.isinf(value):
+            return None  # Handle NaN and Infinity
+        else:
+            return Decimal(str(value))  # Convert float to Decimal
     return value
 
-# Function to handle fields like Phone and Email, converting to string
-def convert_to_string(value):
-    if pd.isna(value):  # Handle NaN
-        return None
-    return str(value)  # Convert to string
 
-# Function to insert food provider data into DynamoDB
-def insert_food_data_to_dynamodb(df, table):
+def insert_food_data_to_dynamodb(df, table, name):
     for index, row in df.iterrows():
-        # Skip rows where 'Provider' is NaN
-        if pd.isna(row['Provider']):
-            continue  # Skip this record
+        if pd.isna(row['Provider']) or (pd.isna(row["Latitude"]) and pd.isna(row["longitude"])):
+            continue
 
-        # Create JSON fields for Description (all other fields except Name, Address, Lat, and Log)
         description_json = {
             "Borough": convert_to_string(row['Borough']),
             "Contact_Name": convert_to_string(row['Contact Name']),
@@ -49,22 +44,36 @@ def insert_food_data_to_dynamodb(df, table):
             "Email_Website": convert_to_string(row['Email/Website'])
         }
 
-        # Define the item to insert into DynamoDB
+        description_json = {key: convert_to_decimal(value) for key, value in description_json.items()}
+
         item = {
-            'Id': str(uuid.uuid4()),  # Auto-generate a unique ID
-            'Name': row['Provider'],  # Provider name
-            'Address': row['Address'],  # Address
+            'Id': str(uuid.uuid4()),
+            'Name': row['Provider'],
+            'Address': row['Address'],
             'Lat': convert_to_decimal(row["Latitude"]),
             'Log': convert_to_decimal(row["longitude"]),
-            'Ratings': "NoRatings",  # Default value for Ratings
-            'Description': description_json  # JSON object with all other fields
+            'Ratings': "NoRatings",
+            'Description': description_json
         }
 
-        # Insert the item into DynamoDB
         table.put_item(Item=item)
 
-    # Final success message after all records are inserted
-    print(f"Successfully inserted all food provider records into {table_name}.")
+    print(f"Successfully inserted all records into {name}")
 
-# Example usage
-insert_food_data_to_dynamodb(df, table)
+
+def main():
+    if len(sys.argv) != 3:
+        print(f"Usage: python3 db-foods.py /path/to/csv <dynamoDB table name>")
+        exit(1)
+
+    foods_file = sys.argv[1]
+    dynamodb = boto3.resource('dynamodb', region_name='us-east-1')  # Replace with your actual region
+    table_name = sys.argv[2]
+    table = dynamodb.Table(table_name)
+
+    df = pd.read_csv(foods_file)
+    insert_food_data_to_dynamodb(df, table, table_name)
+
+
+if __name__ == "__main__":
+    main()
