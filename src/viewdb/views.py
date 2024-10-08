@@ -5,8 +5,10 @@ from django.core.paginator import Paginator
 import json
 
 # Initialize DynamoDB resource
+
+# TODO: This definitely needs to be refactored into a common module. Maybe part of a future patch
 dynamodb = boto3.resource('dynamodb', region_name='us-east-1')  # Replace with your region
-table_name = 'ServiceTable'  # Replace with your table name
+table_name = 'services'  # Replace with your table name
 table = dynamodb.Table(table_name)
 
 # Custom JSON encoder to handle Decimal objects
@@ -53,7 +55,8 @@ def fetch_dynamodb_data(request):
             "Address": item.get('Address', 'N/A'),
             "Lat": float(item.get('Lat')) if item.get('Lat') else None,
             "Log": float(item.get('Log')) if item.get('Log') else None,
-            "Ratings": str(item.get('Ratings')) if item.get('Ratings') else "No ratings"
+            "Ratings": str(item.get('Ratings')) if item.get('Ratings') else "No ratings",
+            "Category": str(item.get('Category'))
         }
         for item in page_obj
     ]

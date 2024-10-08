@@ -231,6 +231,7 @@
                 <th>Latitude</th>
                 <th>Longitude</th>
                 <th>Ratings</th>
+                <th>Type</th>
             </tr>
         </thead>
         <tbody>
@@ -242,6 +243,7 @@
                 <td data-label="Latitude">{{ item.Lat|default:"N/A" }}</td>
                 <td data-label="Longitude">{{ item.Log|default:"N/A" }}</td>
                 <td data-label="Ratings">{{ item.Ratings|default:"No ratings" }}</td>
+                <td data-label="Type">{{ item.Category|default:"None" }}</td>
             </tr>
             {% empty %}
             <tr>
