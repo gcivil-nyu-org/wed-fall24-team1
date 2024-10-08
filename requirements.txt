@@ -18,3 +18,4 @@ six==1.16.0
 sqlparse==0.5.1
 urllib3==2.2.3
 wheel==0.44.0
+pandas~=2.2.3
