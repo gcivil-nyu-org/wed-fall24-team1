@@ -224,32 +224,36 @@
     <!-- Table for Data Display -->
     <table id="data-table">
         <thead>
-            <tr>
-                <th>#</th>
-                <th>Name</th>
-                <th>Address</th>
-                <th>Latitude</th>
-                <th>Longitude</th>
-                <th>Ratings</th>
-                <th>Type</th>
-            </tr>
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Address</th>
+            <th>Latitude</th>
+            <th>Longitude</th>
+            <th>Ratings</th>
+            <th>Type</th>
+        </tr>
         </thead>
         <tbody>
-            {% for item in page_obj %}
-            <tr>
-                <td data-label="#">{{ forloop.counter0|add:base_index|add:1 }}</td>
-                <td data-label="Name">{{ item.Name|default:"No Name" }}</td>
-                <td data-label="Address">{{ item.Address|default:"N/A" }}</td>
-                <td data-label="Latitude">{{ item.Lat|default:"N/A" }}</td>
-                <td data-label="Longitude">{{ item.Log|default:"N/A" }}</td>
-                <td data-label="Ratings">{{ item.Ratings|default:"No ratings" }}</td>
-                <td data-label="Type">{{ item.Category|default:"None" }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="6" style="text-align: center;">No records found.</td>
-            </tr>
-            {% endfor %}
+        {% for item in page_obj %}
+        <tr>
+            <td data-label="#">{{ forloop.counter0|add:base_index|add:1 }}</td>
+            <td data-label="Name">{{ item.Name|default:"No Name" }}</td>
+            <td data-label="Address">
+                <a href="{{ item.MapLink }}" target="_blank" class="map-link">
+                    Get Directions
+                </a>
+            </td>
+            <td data-label="Latitude">{{ item.Lat|default:"N/A" }}</td>
+            <td data-label="Longitude">{{ item.Log|default:"N/A" }}</td>
+            <td data-label="Ratings">{{ item.Ratings|default:"No ratings" }}</td>
+            <td data-label="Type">{{ item.Category|default:"None" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="7" style="text-align: center;">No records found.</td>
+        </tr>
+        {% endfor %}
         </tbody>
     </table>
 
@@ -296,15 +300,18 @@
         function addMarkers(items) {
             const markers = [];
             items.forEach(item => {
-                // Ensure that both Lat and Log are present and are valid numbers
                 if (item.Lat && item.Log && !isNaN(item.Lat) && !isNaN(item.Log)) {
                     const marker = L.marker([item.Lat, item.Log]).addTo(map)
-                        .bindPopup(`<b>${item.Name}</b><br>${item.Address}<br>Rating: ${item.Ratings}`);
+                        .bindPopup(`
+                            <b>${item.Name}</b><br>
+                            ${item.Address}<br>
+                            Rating: ${item.Ratings}<br>
+                            <a href="${item.MapLink}" target="_blank" class="map-link">Get Directions</a>
+                        `);
                     markers.push(marker);
                 }
             });
 
-            // If there are markers, fit the map to the markers
             if (markers.length > 0) {
                 const group = L.featureGroup(markers);
                 map.fitBounds(group.getBounds().pad(0.2));

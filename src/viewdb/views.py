@@ -1,3 +1,5 @@
+from urllib.parse import quote
+
 from django.shortcuts import render
 import boto3
 from decimal import Decimal
@@ -34,13 +36,19 @@ def fetch_dynamodb_data(request):
     items = response.get('Items', [])
 
     # Exclude the Description field from the items
-    filtered_items = [
-        {key: value for key, value in item.items() if key != 'Description'}
-        for item in items
-    ]
+
+    processed_items = []
+    for item in items:
+        address = item.get('Address', 'N/A')
+        map_link = f"https://www.google.com/maps/dir/?api=1&destination={quote(address)}"
+        processed_item = {
+            key: value for key, value in item.items() if key != 'Description'
+        }
+        processed_item['MapLink'] = map_link
+        processed_items.append(processed_item)
 
     # Paginate the items (10 items per page)
-    paginator = Paginator(filtered_items, 10)  # Show 10 items per page
+    paginator = Paginator(processed_items, 10)  # Show 10 items per page
 
     page_number = request.GET.get('page', 1)  # Get the page number from the request (default to 1)
     page_obj = paginator.get_page(page_number)
@@ -56,7 +64,8 @@ def fetch_dynamodb_data(request):
             "Lat": float(item.get('Lat')) if item.get('Lat') else None,
             "Log": float(item.get('Log')) if item.get('Log') else None,
             "Ratings": str(item.get('Ratings')) if item.get('Ratings') else "No ratings",
-            "Category": str(item.get('Category'))
+            "Category": str(item.get('Category')),
+            "MapLink": item.get('MapLink', '#')
         }
         for item in page_obj
     ]
