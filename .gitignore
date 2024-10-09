@@ -137,3 +137,8 @@ GitHub.sublime-settings
 !.vscode/extensions.json 
 .history
 .env
+
+
+# Elastic Beanstalk Files
+public_service_finder/.*/*
+public_service_finder/.*
