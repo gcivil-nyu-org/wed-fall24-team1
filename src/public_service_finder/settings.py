@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'users',
+    'viewdb',
     'services'
 ]
 
@@ -75,7 +75,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'public_service_finder.wsgi.application'
 
 
-# Database
+# db-prep
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
