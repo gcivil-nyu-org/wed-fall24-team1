@@ -7,12 +7,14 @@ from django.conf import settings
 from boto3.dynamodb.conditions import Attr
 from django.contrib import messages
 
+
 def get_services_table():
     """
     Helper function to initialize and return the DynamoDB table object.
     """
     dynamodb = boto3.resource("dynamodb", region_name=settings.AWS_REGION)
     return dynamodb.Table(settings.DYNAMODB_TABLE_SERVICES)
+
 
 # Function to fetch data from DynamoDB and paginate it
 def home_view(request):
@@ -33,7 +35,7 @@ def home_view(request):
         items = response.get("Items", [])
     except Exception as e:
         # Handle any errors during the scan
-        messages.error(request, "Could not retrieve data. Please try again.")
+        messages.error(request, f"Could not retrieve data. Error: {str(e)}")
         items = []
 
     # Process the items, excluding the Description field
@@ -52,7 +54,9 @@ def home_view(request):
     # Paginate the items (10 items per page)
     paginator = Paginator(processed_items, 10)  # Show 10 items per page
 
-    page_number = request.GET.get("page", 1)  # Get the page number from the request (default to 1)
+    page_number = request.GET.get(
+        "page", 1
+    )  # Get the page number from the request (default to 1)
     page_obj = paginator.get_page(page_number)
 
     # Calculate the base index for the current page
@@ -79,6 +83,8 @@ def home_view(request):
             "page_obj": page_obj,
             "base_index": base_index,
             "search_query": search_query,
-            "serialized_items": json.dumps(serialized_items),  # Pass serialized data for maps or other uses
+            "serialized_items": json.dumps(
+                serialized_items
+            ),  # Pass serialized data for maps or other uses
         },
     )
