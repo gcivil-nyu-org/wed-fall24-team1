@@ -1,325 +1,125 @@
-<!-- home.html -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NYC Public Service Finder</title>
-    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-    <style>
-        /* Enhanced Table Styles */
-        #data-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            margin-bottom: 20px;
-            background-color: #fff;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        #data-table th, #data-table td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        #data-table thead {
-            background-color: #3498db;
-            color: #ffffff;
-        }
-        #data-table th {
-            font-weight: bold;
-            text-transform: uppercase;
-            font-size: 0.85em;
-            letter-spacing: 0.1em;
-        }
-        #data-table tbody tr:nth-child(even) {
-            background-color: #f8f9fa;
-        }
-        #data-table tbody tr:hover {
-            background-color: #e9ecef;
-            transition: background-color 0.3s ease;
-        }
-        #data-table td {
-            font-size: 0.95em;
-        }
-
-        /* Base Styles */
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f4f4f4;
-        }
-        h1 {
-            text-align: center;
-            color: #2c3e50;
-        }
-
-        /* Search Form */
-        .search-form {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .search-form input[type="text"] {
-            padding: 8px;
-            width: 250px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        .search-form button {
-            padding: 8px 16px;
-            border: none;
-            background-color: #3498db;
-            color: white;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-left: 5px;
-            transition: background-color 0.3s ease;
-        }
-        .search-form button:hover {
-            background-color: #2980b9;
-        }
-
-        /* Map Container */
-        #map {
-            height: 400px;
-            margin-bottom: 20px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-        }
-
-        /* Pagination Styles */
-        .pagination {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-            flex-wrap: wrap;
-            gap: 5px;
-        }
-        .pagination a, .pagination span {
-            margin: 2px;
-            padding: 8px 12px;
-            text-decoration: none;
-            background-color: #3498db;
-            color: white;
-            border-radius: 4px;
-            transition: background-color 0.3s ease;
-            min-width: 40px;
-            text-align: center;
-        }
-        .pagination a:hover {
-            background-color: #2980b9;
-        }
-        .pagination .active {
-            background-color: #2c3e50;
-        }
-
-        /* Responsive Adjustments */
-        @media (max-width: 600px) {
-            .search-form input[type="text"] {
-                width: 100%;
-                max-width: 300px;
-            }
-            .search-form button {
-                width: 100%;
-                margin-top: 10px;
-                margin-left: 0;
-            }
-            .pagination a, .pagination span {
-                padding: 6px 10px;
-                min-width: auto;
-            }
-            #data-table {
-                border: 0;
-                box-shadow: none;
-            }
-            #data-table thead {
-                display: none;
-            }
-            #data-table tr {
-                margin-bottom: 10px;
-                display: block;
-                border-bottom: 2px solid #ddd;
-            }
-            #data-table td {
-                display: block;
-                text-align: right;
-                font-size: 13px;
-                border-bottom: 1px dotted #ccc;
-                position: relative;
-            }
-            #data-table td:last-child {
-                border-bottom: 0;
-            }
-            #data-table td:before {
-                content: attr(data-label);
-                position: absolute;
-                left: 15px;
-                text-transform: uppercase;
-                font-weight: bold;
-                font-size: 0.85em;
-                color: #555;
-            }
-        }
-
-        /* Optional: Loading Spinner */
-        /* Uncomment the following styles and add corresponding HTML if you want to include a loading spinner */
-
-        /*
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
-        .spinner {
-            border: 8px solid #f3f3f3;
-            border-top: 8px solid #3498db;
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        */
-    </style>
+    <link href="{% static 'css/styles.css' %}" rel="stylesheet">
 </head>
 <body>
-    <h1>NYC Public Service Finder</h1>
+    <nav class="navbar">
+        <div class="container">
+            <span class="logo">NYC Public Service Finder</span>
+            <div class="nav-right">
+                {% if user.is_authenticated %}
+                    <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-logout">Logout</button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
 
-    <!-- Search Form -->
-    <form method="get" action="" class="search-form">
-        <input type="text" name="search" placeholder="Search by Name" value="{{ search_query|default:'' }}">
-        <button type="submit">Search</button>
-    </form>
+    <header class="hero">
+        <div class="container">
+            <form method="get" action="" class="search-form">
+                <input type="text" name="search" placeholder="Search by Name" value="{{ search_query }}">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </form>
+        </div>
+    </header>
 
-    <!-- Optional: Loading Overlay -->
-    <!-- Uncomment the following block if you implement a loading spinner with JavaScript -->
-    <!--
-    <div class="loading-overlay" id="loadingOverlay" style="display: none;">
-        <div class="spinner"></div>
-    </div>
-    -->
+    <main class="container">
+        <div id="map" class="map-container"></div>
 
-    <!-- Map Container -->
-    <div id="map"></div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Address</th>
+                        <th>Latitude</th>
+                        <th>Longitude</th>
+                        <th>Ratings</th>
+                        <th>Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in page_obj %}
+                        <tr>
+                            <td>{{ forloop.counter0|add:base_index|add:1 }}</td>
+                            <td>{{ item.Name|default:"No Name" }}</td>
+                            <td><a href="{{ item.MapLink }}" target="_blank" rel="noopener noreferrer">Get Directions</a></td>
+                            <td>{{ item.Lat|default:"N/A" }}</td>
+                            <td>{{ item.Log|default:"N/A" }}</td>
+                            <td>{{ item.Ratings|default:"No ratings" }}</td>
+                            <td>{{ item.Category|default:"Unknown" }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="no-data">No data available</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
-    <!-- Table for Data Display -->
-    <table id="data-table">
-        <thead>
-        <tr>
-            <th>#</th>
-            <th>Name</th>
-            <th>Address</th>
-            <th>Latitude</th>
-            <th>Longitude</th>
-            <th>Ratings</th>
-            <th>Type</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for item in page_obj %}
-        <tr>
-            <td data-label="#">{{ forloop.counter0|add:base_index|add:1 }}</td>
-            <td data-label="Name">{{ item.Name|default:"No Name" }}</td>
-            <td data-label="Address">
-                <a href="{{ item.MapLink }}" target="_blank" class="map-link">
-                    Get Directions
-                </a>
-            </td>
-            <td data-label="Latitude">{{ item.Lat|default:"N/A" }}</td>
-            <td data-label="Longitude">{{ item.Log|default:"N/A" }}</td>
-            <td data-label="Ratings">{{ item.Ratings|default:"No ratings" }}</td>
-            <td data-label="Type">{{ item.Category|default:"None" }}</td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="7" style="text-align: center;">No records found.</td>
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-
-    <!-- Pagination Controls -->
-    <div class="pagination">
-        {% if page_obj.has_previous %}
-            <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}">First</a>
-            <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Previous</a>
-        {% endif %}
-
-        {% for num in page_obj.paginator.page_range %}
-            {% if num == page_obj.number %}
-                <span class="active">{{ num }}</span>
-            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                <a href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ num }}</a>
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+                <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}" class="btn">First</a>
+                <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" class="btn">Previous</a>
             {% endif %}
-        {% endfor %}
+            
+            {% for num in page_obj.paginator.page_range %}
+                {% if num == page_obj.number %}
+                    <span class="btn btn-active">{{ num }}</span>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <a href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}" class="btn">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
 
-        {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Next</a>
-            <a href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}">Last</a>
-        {% endif %}
-    </div>
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" class="btn">Next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}" class="btn">Last</a>
+            {% endif %}
+        </div>
+    </main>
 
-    <!-- JSON Data Script -->
-    <script id="items-data" type="application/json">
-        {{ serialized_items|safe }}
-    </script>
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2023 NYC Public Service Finder. All rights reserved.</p>
+        </div>
+    </footer>
 
-    <!-- Leaflet JS and Marker Integration -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script>
-        // Parse JSON data from the script tag
-        const items = JSON.parse(document.getElementById('items-data').textContent);
+        const itemsData = {{ serialized_items|safe }};
+        const map = L.map('map').setView([40.7128, -74.0060], 12);
 
-        // Initialize map centered on New York City
-        const map = L.map('map').setView([40.7128, -74.0060], 12); // New York City coordinates with closer zoom
-
-        // Add OpenStreetMap tiles
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
         }).addTo(map);
 
-        // Function to add markers to the map
-        function addMarkers(items) {
-            const markers = [];
-            items.forEach(item => {
-                if (item.Lat && item.Log && !isNaN(item.Lat) && !isNaN(item.Log)) {
-                    const marker = L.marker([item.Lat, item.Log]).addTo(map)
-                        .bindPopup(`
-                            <b>${item.Name}</b><br>
-                            ${item.Address}<br>
-                            Rating: ${item.Ratings}<br>
-                            <a href="${item.MapLink}" target="_blank" class="map-link">Get Directions</a>
-                        `);
-                    markers.push(marker);
-                }
-            });
-
-            if (markers.length > 0) {
-                const group = L.featureGroup(markers);
-                map.fitBounds(group.getBounds().pad(0.2));
+        const markers = [];
+        itemsData.forEach(item => {
+            if (item.Lat && item.Log) {
+                const marker = L.marker([item.Lat, item.Log])
+                    .addTo(map)
+                    .bindPopup(`<b>${item.Name}</b><br>${item.Address}<br>Rating: ${item.Ratings}`);
+                markers.push(marker);
             }
-        }
+        });
 
-        // Add markers to the map
-        addMarkers(items);
+        if (markers.length > 0) {
+            const group = L.featureGroup(markers);
+            map.fitBounds(group.getBounds());
+        } else {
+            map.setView([40.7128, -74.0060], 10);
+        }
     </script>
 </body>
 </html>

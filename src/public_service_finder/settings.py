@@ -12,8 +12,9 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import boto3
+import os
 from decouple import config
-from .configs import GlobalConfig
+# from .configs import GlobalConfig
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -25,7 +26,7 @@ SECRET_KEY = "vst4p$jpg3_bxmz2aqlm8$*a947z$4vpdg4stkz&qmv+i^h@=v"
 
 
 AWS_REGION = "us-east-1"
-DYNAMODB_TABLE_SERVICES = "services"
+DYNAMODB_TABLE_SERVICES = "ServiceTable"
 
 
 ALLOWED_HOSTS = [
@@ -44,7 +45,23 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "home",
     "services",
+    "accounts"
 ]
+
+AUTH_USER_MODEL = 'accounts.CustomUser'
+LOGIN_URL = 'user_login'
+LOGIN_REDIRECT_URL = 'home'  # Redirect to the home page after login
+LOGOUT_REDIRECT_URL = 'user_login'   # Redirect to user login after logout
+
+
+LANGUAGE_CODE = 'en-us'
+TIME_ZONE = 'UTC'
+USE_I18N = True
+USE_TZ = True
+
+# Static files (CSS, JavaScript, Images)
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -61,7 +78,7 @@ ROOT_URLCONF = "public_service_finder.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [os.path.join(BASE_DIR, 'templates')],  # Updated to include 'templates' directory
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
