@@ -88,7 +88,33 @@
             background-color: #2980b9;
         }
 
-        /* Button Style */
+        /* Style the button container to align the buttons in one line */
+        .filter-container {
+            text-align: center; /* Center-align the buttons */
+            margin-bottom: 20px;
+        }
+
+        /* Style for both buttons */
+        .filter-container button {
+            display: inline-block; /* Keep them on the same line */
+            padding: 10px 20px;
+            margin: 5px; /* Add some margin between the buttons */
+            font-size: 16px;
+            background-color: #3498db; /* Default button color */
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Hover effect for buttons */
+        .filter-container button:hover {
+            background-color: #2980b9; /* Darker shade on hover */
+        }
+
+
+        /* Button Style
         #find-services-btn {
             display: block;
             margin: 0 auto 20px auto;
@@ -103,7 +129,7 @@
         }
         #find-services-btn:hover {
             background-color: #2980b9;
-        }
+        } */
 
         /* Map Container */
         #map {
@@ -227,8 +253,15 @@
         <button type="submit">Search</button>
     </form>
 
-    <!-- "Find Services Near Me" Button -->
-    <button id="find-services-btn">Find Services Near Me</button>
+    <!-- Button Container -->
+    <div class="filter-container">
+        <!-- Find Services Near Me Button -->
+        <button id="find-services-btn">Find Services Near Me</button>
+
+        <!-- Reset Button -->
+        <button id="reset-btn">Reset Map</button>
+    </div>
+
 
     <!-- Optional: Loading Overlay -->
     <!-- Uncomment the following block if you implement a loading spinner with JavaScript -->
@@ -332,7 +365,7 @@
                             Rating: ${item.Ratings}<br>
                             <a href="${item.MapLink}" target="_blank" class="map-link">Get Directions</a>
                         `);
-                    allMarkers.push(marker);  // Add marker to the array for later removal
+                    allMarkers.push(marker); // Add marker to the array for later removal
                     markers.push(marker);  // For map fitting bounds later
                 }
             });
@@ -374,13 +407,9 @@
                             map.removeLayer(currentLocationMarker); // Clear previous user marker if exists
                         }
     
-                        currentLocationMarker = L.marker([userLat, userLng], { icon: userLocationIcon }).addTo(map)
-                            .bindPopup("You are here")
-                            .openPopup();
-
-                        setTimeout(() => {
-                            map.closePopup();
-                        }, 1000);
+                        currentLocationMarker = L.marker([userLat, userLng], { icon: userLocationIcon }).addTo(map);
+                            // .bindPopup("You are here")
+                            // .openPopup();
     
                         // Filter locations by proximity to the user's location
                         filterLocationsByDistance(userLat, userLng);
@@ -446,7 +475,22 @@
             });
         }
     
-    </script>
+        // Add Reset button functionality
+        document.getElementById('reset-btn').addEventListener('click', () => {
+            // Clear all markers
+            clearAllMarkers();
+     
+            if (currentLocationMarker) {
+                map.removeLayer(currentLocationMarker);
+                currentLocationMarker = null; // Reset the variable to avoid errors in future use
+            }
+    
+            // Add all original markers back and center the map on New York City
+            map.setView([40.7128, -74.0060], 12); // Reset to New York City coordinates
+            addAllMarkers(items);  // Add all markers back
+        });
+    
+    </script>    
         
 </body>
 </html>
