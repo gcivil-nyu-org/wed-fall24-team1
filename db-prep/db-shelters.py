@@ -29,28 +29,30 @@ def convert_to_decimal(value):
 
 def insert_shelter_data_to_dynamodb(df, table, name):
     for index, row in df.iterrows():
-        if pd.isna(row['Center Name']):
+        if pd.isna(row["Center Name"]):
             continue
 
         description_json = {
-            "Borough": row['Borough'],
-            "Hours_of_Operation": row['Hours_of_Operation'],
-            "Community_Board": row['Community Board'],
-            "Council_District": row['Council District'],
-            "Census_Tract": row['Census Tract']
+            "Borough": row["Borough"],
+            "Hours_of_Operation": row["Hours_of_Operation"],
+            "Community_Board": row["Community Board"],
+            "Council_District": row["Council District"],
+            "Census_Tract": row["Census Tract"],
         }
 
-        description_json = {key: convert_to_decimal(value) for key, value in description_json.items()}
+        description_json = {
+            key: convert_to_decimal(value) for key, value in description_json.items()
+        }
 
         item = {
-            'Id': str(uuid.uuid4()),
-            'Name': row['Center Name'],
-            'Address': row['Address'],
-            'Lat': convert_to_decimal(row['Latitude']),
-            'Log': convert_to_decimal(row['Longitude']),
-            'Ratings': "NoRatings",
-            'Description': description_json,
-            'Category': 'SHELTER'
+            "Id": str(uuid.uuid4()),
+            "Name": row["Center Name"],
+            "Address": row["Address"],
+            "Lat": convert_to_decimal(row["Latitude"]),
+            "Log": convert_to_decimal(row["Longitude"]),
+            "Ratings": "NoRatings",
+            "Description": description_json,
+            "Category": "SHELTER",
         }
 
         table.put_item(Item=item)
@@ -60,11 +62,13 @@ def insert_shelter_data_to_dynamodb(df, table, name):
 
 def main():
     if len(sys.argv) != 3:
-        print(f"Usage: python3 db-shelters.py /path/to/csv <dynamoDB table name>")
+        print("Usage: python3 db-shelters.py /path/to/csv <dynamoDB table name>")
         exit(1)
 
     shelter_file = sys.argv[1]
-    dynamodb = boto3.resource('dynamodb', region_name='us-east-1')  # Replace with your actual region
+    dynamodb = boto3.resource(
+        "dynamodb", region_name="us-east-1"
+    )  # Replace with your actual region
     table_name = sys.argv[2]
     table = dynamodb.Table(table_name)
 
