@@ -377,6 +377,10 @@
                         currentLocationMarker = L.marker([userLat, userLng], { icon: userLocationIcon }).addTo(map)
                             .bindPopup("You are here")
                             .openPopup();
+
+                        setTimeout(() => {
+                            map.closePopup();
+                        }, 1000);
     
                         // Filter locations by proximity to the user's location
                         filterLocationsByDistance(userLat, userLng);
