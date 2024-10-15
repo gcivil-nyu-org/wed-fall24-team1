@@ -1,125 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    {% load static %}
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NYC Public Service Finder</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    <link href="{% static 'css/styles.css' %}" rel="stylesheet">
-</head>
-<body>
-    <nav class="navbar">
-        <div class="container">
-            <span class="logo">NYC Public Service Finder</span>
-            <div class="nav-right">
-                {% if user.is_authenticated %}
-                    <form method="post" action="{% url 'logout' %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-logout">Logout</button>
-                    </form>
-                {% endif %}
-            </div>
-        </div>
-    </nav>
+{% extends 'base.html' %} {% block title %}Home - Public Service Finder{% endblock %}
 
-    <header class="hero">
-        <div class="container">
-            <form method="get" action="" class="search-form">
-                <input type="text" name="search" placeholder="Search by Name" value="{{ search_query }}">
-                <button type="submit" class="btn btn-primary">Search</button>
-            </form>
-        </div>
-    </header>
+{% block content %}
+<!-- Hero Section with Form -->
+{% include 'partials/_header.html' %}
+<!-- Map Section -->
+<div id="map" class="h-96 mb-10 rounded-lg shadow-lg"></div>
 
-    <main class="container">
-        <div id="map" class="map-container"></div>
+<!-- Table Section -->
+{% include 'partials/_table.html' %}
 
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Name</th>
-                        <th>Address</th>
-                        <th>Latitude</th>
-                        <th>Longitude</th>
-                        <th>Ratings</th>
-                        <th>Type</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in page_obj %}
-                        <tr>
-                            <td>{{ forloop.counter0|add:base_index|add:1 }}</td>
-                            <td>{{ item.Name|default:"No Name" }}</td>
-                            <td><a href="{{ item.MapLink }}" target="_blank" rel="noopener noreferrer">Get Directions</a></td>
-                            <td>{{ item.Lat|default:"N/A" }}</td>
-                            <td>{{ item.Log|default:"N/A" }}</td>
-                            <td>{{ item.Ratings|default:"No ratings" }}</td>
-                            <td>{{ item.Category|default:"Unknown" }}</td>
-                        </tr>
-                    {% empty %}
-                        <tr>
-                            <td colspan="7" class="no-data">No data available</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-        <div class="pagination">
-            {% if page_obj.has_previous %}
-                <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}" class="btn">First</a>
-                <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" class="btn">Previous</a>
-            {% endif %}
-            
-            {% for num in page_obj.paginator.page_range %}
-                {% if num == page_obj.number %}
-                    <span class="btn btn-active">{{ num }}</span>
-                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                    <a href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}" class="btn">{{ num }}</a>
-                {% endif %}
-            {% endfor %}
-
-            {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" class="btn">Next</a>
-                <a href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}" class="btn">Last</a>
-            {% endif %}
-        </div>
-    </main>
-
-    <footer class="footer">
-        <div class="container">
-            <p>&copy; 2023 NYC Public Service Finder. All rights reserved.</p>
-        </div>
-    </footer>
-
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-    <script>
-        const itemsData = {{ serialized_items|safe }};
-        const map = L.map('map').setView([40.7128, -74.0060], 12);
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
-        }).addTo(map);
-
-        const markers = [];
-        itemsData.forEach(item => {
-            if (item.Lat && item.Log) {
-                const marker = L.marker([item.Lat, item.Log])
-                    .addTo(map)
-                    .bindPopup(`<b>${item.Name}</b><br>${item.Address}<br>Rating: ${item.Ratings}`);
-                markers.push(marker);
-            }
-        });
-
-        if (markers.length > 0) {
-            const group = L.featureGroup(markers);
-            map.fitBounds(group.getBounds());
-        } else {
-            map.setView([40.7128, -74.0060], 10);
-        }
-    </script>
-</body>
-</html>
+<!-- Pagination Section -->
+{% include 'partials/_pagination.html' %} {% endblock %}

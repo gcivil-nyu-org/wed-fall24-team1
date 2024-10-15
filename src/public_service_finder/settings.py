@@ -78,7 +78,7 @@ TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
-            os.path.join(BASE_DIR, "templates")
+            os.path.join(BASE_DIR, "public_service_finder/templates")
         ],  # Updated to include 'templates' directory
         "APP_DIRS": True,
         "OPTIONS": {

@@ -1,0 +1,32 @@
+<div class="bg-white p-6 rounded-lg shadow-lg">
+    <table class="w-full table-auto border-collapse">
+        <thead>
+            <tr class="bg-blue-400 text-white">
+                <th class="p-4 text-left">#</th>
+                <th class="p-4 text-left">Name</th>
+                <th class="p-4 text-left">Address</th>
+                <th class="p-4 text-left">Latitude</th>
+                <th class="p-4 text-left">Longitude</th>
+                <th class="p-4 text-left">Ratings</th>
+                <th class="p-4 text-left">Type</th>
+            </tr>
+        </thead>
+        <tbody class="text-gray-700">
+            {% for item in page_obj %}
+                <tr class="border-b hover:bg-gray-50 transition">
+                    <td class="p-4">{{ forloop.counter0|add:base_index|add:1 }}</td>
+                    <td class="p-4">{{ item.Name|default:"No Name" }}</td>
+                    <td class="p-4"><a href="{{ item.MapLink }}" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:underline">Get Directions</a></td>
+                    <td class="p-4">{{ item.Lat|default:"N/A" }}</td>
+                    <td class="p-4">{{ item.Log|default:"N/A" }}</td>
+                    <td class="p-4">{{ item.Ratings|default:"No ratings" }}</td>
+                    <td class="p-4">{{ item.Category|default:"Unknown" }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="7" class="p-4 text-center text-gray-500 italic">No data available</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
