@@ -88,6 +88,23 @@
             background-color: #2980b9;
         }
 
+        /* Button Style */
+        #find-services-btn {
+            display: block;
+            margin: 0 auto 20px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #3498db;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        #find-services-btn:hover {
+            background-color: #2980b9;
+        }
+
         /* Map Container */
         #map {
             height: 400px;
@@ -210,6 +227,9 @@
         <button type="submit">Search</button>
     </form>
 
+    <!-- "Find Services Near Me" Button -->
+    <button id="find-services-btn">Find Services Near Me</button>
+
     <!-- Optional: Loading Overlay -->
     <!-- Uncomment the following block if you implement a loading spinner with JavaScript -->
     <!--
@@ -287,18 +307,22 @@
     <script>
         // Parse JSON data from the script tag
         const items = JSON.parse(document.getElementById('items-data').textContent);
-
+    
         // Initialize map centered on New York City
-        const map = L.map('map').setView([40.7128, -74.0060], 12); // New York City coordinates with closer zoom
-
+        const map = L.map('map', { 
+            center: [40.7128, -74.0060], 
+            zoom: 12 
+        }); // New York City coordinates with closer zoom
+        let allMarkers = [];  // Array to store all markers for easy removal
+    
         // Add OpenStreetMap tiles
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
         }).addTo(map);
-
-        // Function to add markers to the map
-        function addMarkers(items) {
-            const markers = [];
+    
+        // Function to add all markers (used initially)
+        function addAllMarkers(items) {
+            let markers = [];
             items.forEach(item => {
                 if (item.Lat && item.Log && !isNaN(item.Lat) && !isNaN(item.Log)) {
                     const marker = L.marker([item.Lat, item.Log]).addTo(map)
@@ -308,18 +332,117 @@
                             Rating: ${item.Ratings}<br>
                             <a href="${item.MapLink}" target="_blank" class="map-link">Get Directions</a>
                         `);
-                    markers.push(marker);
+                    allMarkers.push(marker);  // Add marker to the array for later removal
+                    markers.push(marker);  // For map fitting bounds later
                 }
             });
-
+    
+            // Ensure the map fits all markers on the screen initially
             if (markers.length > 0) {
                 const group = L.featureGroup(markers);
                 map.fitBounds(group.getBounds().pad(0.2));
             }
         }
-
-        // Add markers to the map
-        addMarkers(items);
+    
+        // Add all markers initially
+        addAllMarkers(items);
+    
+        let currentLocationMarker;  // Declare a global variable to hold the reference to the current location marker
+        
+        document.getElementById('find-services-btn').addEventListener('click', () => {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        const userLat = position.coords.latitude;
+                        const userLng = position.coords.longitude;
+    
+                        // Center the map on the user's current location
+                        map.setView([userLat, userLng], 12);
+    
+                        // Add a marker for the user's current location
+                        const userLocationIcon = L.icon({
+                            iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+                            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                            iconSize: [25, 41],
+                            iconAnchor: [12, 41],
+                            popupAnchor: [1, -34],
+                            shadowSize: [41, 41]
+                        });
+    
+                        // Add the user's location marker
+                        if (currentLocationMarker) {
+                            map.removeLayer(currentLocationMarker); // Clear previous user marker if exists
+                        }
+    
+                        currentLocationMarker = L.marker([userLat, userLng], { icon: userLocationIcon }).addTo(map)
+                            .bindPopup("You are here")
+                            .openPopup();
+    
+                        // Filter locations by proximity to the user's location
+                        filterLocationsByDistance(userLat, userLng);
+                    },
+                    error => {
+                        console.error("Geolocation error:", error);
+                        alert("Unable to retrieve your location.");
+                    }
+                );
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        });
+    
+        // Function to clear all previous markers from the map
+        function clearAllMarkers() {
+            allMarkers.forEach(marker => {
+                map.removeLayer(marker);  // Remove each marker from the map
+            });
+            allMarkers = [];  // Reset the array
+        }
+    
+        // Optional: Filter locations based on the user's proximity
+        function filterLocationsByDistance(userLat, userLng) {
+            const radiusKm = 5; // Define radius in kilometers
+    
+            const filteredItems = items.filter(item => {
+                if (item.Lat && item.Log) {
+                    const distance = getDistance(userLat, userLng, item.Lat, item.Log);
+                    return distance <= radiusKm;
+                }
+                return false;
+            });
+    
+            console.log(filteredItems);
+    
+            // Clear previous markers before adding new ones
+            clearAllMarkers();
+    
+            // Add filtered markers to the map
+            addMarkersForLocation(filteredItems);
+        }
+    
+        // Utility function to calculate the distance between two latitude/longitude points
+        function getDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Earth's radius in kilometers
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c; // Distance in kilometers
+        }
+    
+        // Function to add filtered markers for the location
+        function addMarkersForLocation(filteredItems) {
+            filteredItems.forEach(item => {
+                const marker = L.marker([item.Lat, item.Log]).addTo(map)
+                    .bindPopup(`<b>${item.Name}</b><br>${item.Address}<br>Rating: ${item.Ratings}`);
+                
+                allMarkers.push(marker);  // Store marker in the array for easy removal later
+            });
+        }
+    
     </script>
+        
 </body>
 </html>
