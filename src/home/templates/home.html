@@ -5,121 +5,160 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NYC Public Service Finder</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    
+    <!-- Import Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    
+    <!-- Custom styles (optional) -->
     <link href="{% static 'css/styles.css' %}" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
 </head>
-<body>
-    <nav class="navbar">
-        <div class="container">
-            <span class="logo">NYC Public Service Finder</span>
-            <div class="nav-right">
-                {% if user.is_authenticated %}
-                    <form method="post" action="{% url 'logout' %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-logout">Logout</button>
-                    </form>
-                {% endif %}
+<body class="bg-gray-50"> <!-- Lightened background color -->
+    <!-- Navbar -->
+<!-- Navbar -->
+<nav class="bg-white text-gray-800 py-4 shadow-md">
+    <div class="container mx-auto flex justify-between items-center">
+        <!-- Branding Section -->
+        <div class="flex items-center space-x-3">
+            <!-- Circular logo with border -->
+            <img src="{% static 'images/logo-psf.png' %}" alt="Logo" class="h-10 w-10 rounded-full border border-gray-300 shadow-sm">
+            <span class="text-2xl font-extrabold tracking-wide text-blue-700">Public Service Finder</span>
+        </div>
+
+        <!-- Profile Section with Font Awesome Icons -->
+        <div class="relative">
+            <button id="profileButton" class="flex items-center space-x-2 focus:outline-none">
+                <!-- Example profile picture, replace with dynamic user profile image -->
+                <img src="{% static 'images/profile-placeholder.jpg' %}" alt="Profile" class="h-10 w-10 rounded-full border border-gray-300 shadow-sm">
+                <span class="text-gray-600">Profile</span>
+                <i class="fas fa-caret-down text-gray-500"></i> <!-- FontAwesome Dropdown Icon -->
+            </button>
+            <!-- Dropdown Menu -->
+            <div id="profileDropdown" class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 shadow-md rounded-md text-gray-700 z-20 hidden">
+                <a href="#" class="block px-4 py-2 hover:bg-gray-100 flex items-center space-x-2">
+                    <i class="fas fa-user-circle text-blue-500"></i> <!-- FontAwesome User Icon -->
+                    <span>View Profile</span>
+                </a>
+                <a href="#" class="block px-4 py-2 hover:bg-gray-100 flex items-center space-x-2">
+                    <i class="fas fa-cog text-blue-500"></i> <!-- FontAwesome Settings Icon -->
+                    <span>Settings</span>
+                </a>
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="block w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2">
+                        <i class="fas fa-sign-out-alt text-red-500"></i> <!-- FontAwesome Logout Icon -->
+                        <span>Logout</span>
+                    </button>
+                </form>
             </div>
         </div>
-    </nav>
+    </div>
+</nav>
 
-    <header class="hero">
-        <div class="container">
-            <form method="get" action="" class="search-form">
-                <input type="text" name="search" placeholder="Search by Name" value="{{ search_query }}">
-                <button type="submit" class="btn btn-primary">Search</button>
+    <!-- Hero Section with Form -->
+    <header class="bg-gradient-to-r from-sky-300 via-blue-200 to-indigo-200 py-10"> <!-- Light gradient background -->
+        <div class="container mx-auto text-center">
+            <h1 class="text-4xl font-bold text-gray-600 mb-6">Discover NYC's Best Services – Just a Search Away!</h1>
+            <form method="get" action="" class="flex flex-col sm:flex-row justify-center items-center gap-4 max-w-3xl mx-auto">
+                <input type="text" name="search" placeholder="Search by Name" value="{{ search_query|default:'' }}"
+                    class="p-3 text-lg border border-gray-300 rounded-md w-full sm:w-80 focus:outline-none focus:ring-4 focus:ring-blue-400 shadow-lg transition duration-200">
+                
+                <!-- Fix the dropdown styles -->
+                <select name="type" id="type-select" class="p-3 text-lg border border-gray-300 rounded-md bg-white w-full sm:w-44 focus:outline-none focus:ring-4 focus:ring-blue-400 shadow-lg transition duration-200">
+                    <option value="" {% if service_type_dropdown == '' %}selected{% endif %}>All Types</option>
+                    <option value="FOOD" {% if service_type_dropdown == 'FOOD' %}selected{% endif %}>Food</option>
+                    <option value="MENTAL" {% if service_type_dropdown == 'MENTAL' %}selected{% endif %}>Mental Health</option>
+                    <option value="SHELTER" {% if service_type_dropdown == 'SHELTER' %}selected{% endif %}>Shelter</option>
+                    <option value="RESTROOM" {% if service_type_dropdown == 'RESTROOM' %}selected{% endif %}>Restroom</option>
+                </select>
+                
+                <!-- Search Button -->
+             <!-- Search Button -->
+            <button type="submit" class="p-3 bg-blue-500 text-white font-bold rounded-md shadow-md sm:px-6 w-full sm:w-auto hover:bg-blue-600 transform hover:scale-105 transition duration-300 ease-in-out">
+                Search
+            </button>
+
             </form>
         </div>
     </header>
 
-    <main class="container">
-        <div id="map" class="map-container"></div>
+    <!-- Main Content -->
+    <main class="container mx-auto py-10">
+        <!-- Map Section -->
+        <div id="map" class="h-96 mb-10 rounded-lg shadow-lg"></div>
 
-        <div class="table-container">
-            <table>
+        <!-- Table Section -->
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <table class="w-full table-auto border-collapse">
                 <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Name</th>
-                        <th>Address</th>
-                        <th>Latitude</th>
-                        <th>Longitude</th>
-                        <th>Ratings</th>
-                        <th>Type</th>
+                    <tr class="bg-blue-400 text-white"> <!-- Lighter table header -->
+                        <th class="p-4 text-left">#</th>
+                        <th class="p-4 text-left">Name</th>
+                        <th class="p-4 text-left">Address</th>
+                        <th class="p-4 text-left">Latitude</th>
+                        <th class="p-4 text-left">Longitude</th>
+                        <th class="p-4 text-left">Ratings</th>
+                        <th class="p-4 text-left">Type</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="text-gray-700">
                     {% for item in page_obj %}
-                        <tr>
-                            <td>{{ forloop.counter0|add:base_index|add:1 }}</td>
-                            <td>{{ item.Name|default:"No Name" }}</td>
-                            <td><a href="{{ item.MapLink }}" target="_blank" rel="noopener noreferrer">Get Directions</a></td>
-                            <td>{{ item.Lat|default:"N/A" }}</td>
-                            <td>{{ item.Log|default:"N/A" }}</td>
-                            <td>{{ item.Ratings|default:"No ratings" }}</td>
-                            <td>{{ item.Category|default:"Unknown" }}</td>
+                        <tr class="border-b hover:bg-gray-50 transition"> <!-- Lighter hover effect -->
+                            <td class="p-4">{{ forloop.counter0|add:base_index|add:1 }}</td>
+                            <td class="p-4">{{ item.Name|default:"No Name" }}</td>
+                            <td class="p-4"><a href="{{ item.MapLink }}" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:underline">Get Directions</a></td>
+                            <td class="p-4">{{ item.Lat|default:"N/A" }}</td>
+                            <td class="p-4">{{ item.Log|default:"N/A" }}</td>
+                            <td class="p-4">{{ item.Ratings|default:"No ratings" }}</td>
+                            <td class="p-4">{{ item.Category|default:"Unknown" }}</td>
                         </tr>
                     {% empty %}
                         <tr>
-                            <td colspan="7" class="no-data">No data available</td>
+                            <td colspan="7" class="p-4 text-center text-gray-500 italic">No data available</td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
 
-        <div class="pagination">
+        <!-- Pagination Section -->
+        <div class="mt-6 flex justify-center space-x-2">
             {% if page_obj.has_previous %}
-                <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}" class="btn">First</a>
-                <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" class="btn">Previous</a>
+                <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}" class="px-4 py-2 bg-blue-400 text-white rounded-md hover:bg-blue-500">First</a>
+                <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" class="px-4 py-2 bg-blue-400 text-white rounded-md hover:bg-blue-500">Previous</a>
             {% endif %}
             
             {% for num in page_obj.paginator.page_range %}
                 {% if num == page_obj.number %}
-                    <span class="btn btn-active">{{ num }}</span>
+                    <span class="px-4 py-2 bg-blue-500 text-white rounded-md">{{ num }}</span>
                 {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                    <a href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}" class="btn">{{ num }}</a>
+                    <a href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}" class="px-4 py-2 bg-blue-400 text-white rounded-md hover:bg-blue-500">{{ num }}</a>
                 {% endif %}
             {% endfor %}
 
             {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" class="btn">Next</a>
-                <a href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}" class="btn">Last</a>
+                <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" class="px-4 py-2 bg-blue-400 text-white rounded-md hover:bg-blue-500">Next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}" class="px-4 py-2 bg-blue-400 text-white rounded-md hover:bg-blue-500">Last</a>
             {% endif %}
         </div>
     </main>
 
-    <footer class="footer">
-        <div class="container">
+    <!-- Footer -->
+    <footer class="bg-white text-gray-700 py-6 border-t"> <!-- Light footer with border -->
+        <div class="container mx-auto text-center">
             <p>&copy; 2023 NYC Public Service Finder. All rights reserved.</p>
         </div>
     </footer>
 
+    <!-- Leaflet Map Script -->
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script>
-        const itemsData = {{ serialized_items|safe }};
-        const map = L.map('map').setView([40.7128, -74.0060], 12);
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
-        }).addTo(map);
-
-        const markers = [];
-        itemsData.forEach(item => {
-            if (item.Lat && item.Log) {
-                const marker = L.marker([item.Lat, item.Log])
-                    .addTo(map)
-                    .bindPopup(`<b>${item.Name}</b><br>${item.Address}<br>Rating: ${item.Ratings}`);
-                markers.push(marker);
-            }
-        });
-
-        if (markers.length > 0) {
-            const group = L.featureGroup(markers);
-            map.fitBounds(group.getBounds());
-        } else {
-            map.setView([40.7128, -74.0060], 10);
-        }
+        window.itemsData = {{ serialized_items|safe }};
     </script>
+    <!-- External map script -->
+    <script src="{% static 'apps/home/js/map.js' %}"></script>
+    <script src="{% static 'js/nav.js' %}"></script>
 </body>
 </html>
