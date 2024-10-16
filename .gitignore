@@ -3,7 +3,6 @@
 *.pot
 *.pyc
 __pycache__
-db.sqlite3
 media
 
 # Backup files # 
@@ -143,3 +142,4 @@ GitHub.sublime-settings
 !.vscode/extensions.json 
 .history
 .env
+ps_env
