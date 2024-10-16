@@ -1,0 +1,58 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Public Service Finder{% endblock %}</title>
+    
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+    <!-- Custom styles -->
+    <link href="{% static 'css/styles.css' %}" rel="stylesheet">
+    
+    <!-- FontAwesome for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
+    <!-- Leaflet CSS for map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+    {% block head %}{% endblock %}
+</head>
+<body class="bg-gray-50">
+    {% load static %}
+    <!-- Navbar (included as a partial) -->
+    {% include 'partials/_navbar.html' %}
+
+    <!-- Main Content -->
+    <main class="container mx-auto py-10">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer (included as a partial) -->
+    {% include 'partials/_footer.html' %}
+
+    <!-- Leaflet Map JS -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+    <!-- JavaScript files -->
+    <script src="{% static 'js/nav.js' %}"></script>
+
+    {% comment %} URL/APP specific JS files{% endcomment %}
+    {% if request.path == "/home/" %}
+        <script> 
+            window.itemsData = {{ serialized_items|safe }}; 
+        </script>
+        <script src="{% static 'apps/home/js/map.js' %}"></script>
+    {% endif %}
+
+    
+    
+    <!-- Additional scripts, if needed by extending templates -->
+    {% block scripts %}{% endblock %}
+
+
+</body>
+</html>
