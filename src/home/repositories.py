@@ -15,7 +15,7 @@ class HomeRepository:
         if search_query and category_filter:
             filter_expression = And(
                 Attr("Name").contains(search_query),
-                Attr("Category").contains(category_filter)
+                Attr("Category").contains(category_filter),
             )
         elif search_query:
             filter_expression = Attr("Name").contains(search_query)
