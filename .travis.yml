@@ -6,16 +6,16 @@ python:
 dist: focal
 
 install:
-  - pip install -r requirements.txt
+  - pip install -r src/requirements.txt
 
 before_script:
-  - python manage.py makemigrations
-  - python manage.py migrate
+  - python src/manage.py makemigrations
+  - python src/manage.py migrate
 
 script:
-  - black . --check
-  - flake8 .
-  - coverage run --source=home,accounts,public_service_finder manage.py test
+  - black ./src/ --check
+  - flake8 ./src/
+  - coverage run --source=src/home,src/accounts,src/public_service_finder src/manage.py test
 
 after_script:
   - coveralls
