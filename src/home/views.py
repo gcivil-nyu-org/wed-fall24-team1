@@ -5,7 +5,6 @@ from .repositories import (
     HomeRepository,
 )  # Adjust this import based on your project structure
 
-
 def home_view(request):
     # Initialize the repository
     repo = HomeRepository()
@@ -21,9 +20,7 @@ def home_view(request):
 
     # Paginate the items (10 items per page)
     paginator = Paginator(processed_items, 10)  # Show 10 items per page
-    page_number = request.GET.get(
-        "page", 1
-    )  # Get the page number from the request (default to 1)
+    page_number = request.GET.get("page", 1)  # Get the page number from the request
     page_obj = paginator.get_page(page_number)
 
     # Calculate the base index for the current page
@@ -37,18 +34,20 @@ def home_view(request):
             "Lat": float(item.get("Lat")) if item.get("Lat") else None,
             "Log": float(item.get("Log")) if item.get("Log") else None,
             "Ratings": (
-                str(item.get("Ratings")) if item.get("Ratings") else "No ratings"
+                "N/A" if item.get("Ratings") in [0, "0", None] else str(item.get("Ratings"))
             ),
+            "RatingCount": str(item.get("rating_count", 0)),  # Add the rating_count field
             "Category": str(item.get("Category")),
             "MapLink": item.get("MapLink"),
         }
         for item in page_obj
     ]
+    print(serialized_items[0])
 
     return render(
         request,
         "home.html",
-        {   
+        {
             "search_query": search_query,
             "service_type_dropdown": service_type_dropdown,
             "page_obj": page_obj,
