@@ -10,7 +10,7 @@ def home_view(request):
     # Initialize the repository
     repo = HomeRepository()
 
-    search_query = request.GET.get("search", "")
+    search_query = request.GET.get("search", "").strip()
 
     # Get search query from request
     service_type_dropdown = request.GET.get("type", "")
@@ -48,7 +48,8 @@ def home_view(request):
     return render(
         request,
         "home.html",
-        {
+        {   
+            "search_query": search_query,
             "service_type_dropdown": service_type_dropdown,
             "page_obj": page_obj,
             "base_index": base_index,

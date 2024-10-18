@@ -1,32 +1,40 @@
-<div class="bg-white p-6 rounded-lg shadow-lg">
-    <table class="w-full table-auto border-collapse">
-        <thead>
-            <tr class="bg-blue-400 text-white">
-                <th class="p-4 text-left">#</th>
-                <th class="p-4 text-left">Name</th>
-                <th class="p-4 text-left">Address</th>
-                <th class="p-4 text-left">Latitude</th>
-                <th class="p-4 text-left">Longitude</th>
-                <th class="p-4 text-left">Ratings</th>
-                <th class="p-4 text-left">Type</th>
-            </tr>
-        </thead>
-        <tbody class="text-gray-700">
-            {% for item in page_obj %}
-                <tr class="border-b hover:bg-gray-50 transition">
-                    <td class="p-4">{{ forloop.counter0|add:base_index|add:1 }}</td>
-                    <td class="p-4">{{ item.Name|default:"No Name" }}</td>
-                    <td class="p-4"><a href="{{ item.MapLink }}" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:underline">Get Directions</a></td>
-                    <td class="p-4">{{ item.Lat|default:"N/A" }}</td>
-                    <td class="p-4">{{ item.Log|default:"N/A" }}</td>
-                    <td class="p-4">{{ item.Ratings|default:"No ratings" }}</td>
-                    <td class="p-4">{{ item.Category|default:"Unknown" }}</td>
-                </tr>
-            {% empty %}
-                <tr>
-                    <td colspan="7" class="p-4 text-center text-gray-500 italic">No data available</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<!-- _table.html -->
+<div class="">
+    <!-- Detailed View Component -->
+    <div id="serviceDetails" class="bg-white rounded-lg shadow-md p-4 mb-8 hidden"> <!-- Added 'hidden' class -->
+        <div class="flex justify-between items-start mb-4">
+            <h2 id="serviceName" class="text-lg font-semibold">Service Name</h2>
+            <button id="closeDetails" class="text-gray-500 hover:text-gray-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <div class="space-y-1 mb-4">
+            <p class="text-sm"><strong>Address:</strong> <span id="serviceAddress">123 Main St</span></p>
+            <p class="text-sm"><strong>Type:</strong> <span id="serviceType">Homeless</span></p>
+            <p class="text-sm"><strong>Rating:</strong> <span id="serviceRating">4.5</span></p>
+            <p class="text-sm"><strong>Distance:</strong> <span id="serviceDistance">1.2 miles</span></p>
+            <p class="text-sm mt-2" id="serviceDescription">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+            <a id="getDirections" href="#" target="_blank" rel="noopener noreferrer" class="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-2">Get Directions</a>
+        </div>
+
+        <h3 class="text-lg font-semibold mb-2">Leave a Review</h3>
+        <div class="space-y-2 mb-4">
+            <select id="reviewRating" class="w-full p-2 border rounded">
+                <option>Select a rating</option>
+                <option>1 Star</option>
+                <option>2 Stars</option>
+                <option>3 Stars</option>
+                <option>4 Stars</option>
+                <option>5 Stars</option>
+            </select>
+            <textarea id="reviewText" class="w-full p-2 border rounded" placeholder="Write your review here..."></textarea>
+            <button id="submitReview" class="bg-blue-500 text-white px-4 py-2 rounded">Submit Review</button>
+        </div>
+
+        <!-- Add Reviews Container -->
+        <div id="reviewsContainer"></div> <!-- Added 'reviewsContainer' div -->
+    </div>
 </div>
