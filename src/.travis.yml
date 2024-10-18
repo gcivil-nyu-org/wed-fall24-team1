@@ -1,0 +1,46 @@
+language: python
+
+python:
+  - '3.11'
+
+dist: focal
+
+install:
+  - pip install -r requirements.txt
+
+before_script:
+  - python manage.py makemigrations
+  - python manage.py migrate
+
+script:
+  - black . --check
+  - flake8 .
+  - coverage run --source=home,accounts,public_service_finder manage.py test
+
+after_script:
+  - coveralls
+
+deploy:
+  - provider: elasticbeanstalk
+    access_key_id: $AWS_ACCESS_KEY_ID
+    secret_access_key: $AWS_SECRET_ACCESS_KEY
+    region: us-east-1
+    app: public-service-finder-dev
+    env: public-service-finder-dev-env
+    bucket_name: public-service-finder-dev-s3
+    on:
+      repo: gcivil-nyu-org/wed-fall24-team1
+      branch: develop
+    skip_cleanup: 'true'
+
+  - provider: elasticbeanstalk
+    access_key_id: $AWS_ACCESS_KEY_ID
+    secret_access_key: $AWS_SECRET_ACCESS_KEY
+    region: us-east-1
+    app: public-service-finder-prod
+    env: public-service-finder-prod-env
+    bucket_name: public-service-finder-prod-s3
+    on:
+      repo: gcivil-nyu-org/wed-fall24-team1
+      branch: main
+    skip_cleanup: 'true'
