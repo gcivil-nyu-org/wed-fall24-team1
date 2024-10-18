@@ -1,21 +1,53 @@
-<header class="bg-gradient-to-r from-sky-300 via-blue-200 to-indigo-200 py-10">
-    <div class="container mx-auto text-center">
-        <h1 class="text-4xl font-bold text-gray-600 mb-6">Discover NYC's Best Services – Just a Search Away!</h1>
-        <form method="get" action="" class="flex flex-col sm:flex-row justify-center items-center gap-4 max-w-3xl mx-auto">
-            <input type="text" name="search" placeholder="Search by Name" value="{{ search_query|default:'' }}"
-                class="p-3 text-lg border border-gray-300 rounded-md w-full sm:w-80 focus:outline-none focus:ring-4 focus:ring-blue-400 shadow-lg transition duration-200">
-            <!-- Dropdown for filtering -->
-            <select name="type" class="p-3 text-lg border border-gray-300 rounded-md bg-white w-full sm:w-44 focus:outline-none focus:ring-4 focus:ring-blue-400 shadow-lg transition duration-200">
-                <option value="" {% if service_type_dropdown == '' %}selected{% endif %}>All Types</option>
-                <option value="FOOD" {% if service_type_dropdown == 'FOOD' %}selected{% endif %}>Food</option>
-                <option value="MENTAL" {% if service_type_dropdown == 'MENTAL' %}selected{% endif %}>Mental Health</option>
-                <option value="SHELTER" {% if service_type_dropdown == 'SHELTER' %}selected{% endif %}>Shelter</option>
-                <option value="RESTROOM" {% if service_type_dropdown == 'RESTROOM' %}selected{% endif %}>Restroom</option>
-            </select>
+<header class="mb-4 mt-2 bg-blue-10 text-white p-6">
+    <div class="container mx-auto px-4">
+        <form method="get" action="" class="flex flex-wrap items-start gap-6">
+            <!-- Search by Name -->
+            <div class="flex flex-col w-full sm:w-auto flex-grow">
+                <label for="search" class="mb-1 text-sm font-medium">Search by Name</label>
+                <input type="text" id="search" name="search" placeholder="Search by Name" value="{{ search_query }}" 
+                       class="w-full p-2 rounded bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-300 h-12 border border-gray-300">
+            </div>
 
-            <button type="submit" class="p-3 bg-blue-500 text-white font-bold rounded-md shadow-md sm:px-6 w-full sm:w-auto hover:bg-blue-600 transform hover:scale-105 transition duration-300 ease-in-out">
-                Search
-            </button>
+            <!-- Location Input is DISABLED-->
+            <div class="flex flex-col w-full sm:w-auto">
+                <label for="location" class="mb-1 text-sm font-medium">Location</label>
+                <input type="text" id="location" name="location" placeholder="Enter Location" disabled
+                       class="w-full p-2 rounded bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-300 h-12 border border-gray-300">
+            </div>
+
+            <!-- Category Selection -->
+            <div class="flex flex-col w-full sm:w-auto">
+                <label for="type" class="mb-1 text-sm font-medium">Category</label>
+                <select id="type" name="type" 
+                        class="w-full p-2 rounded bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-300 h-12 border border-gray-300">
+                    <option value="" {% if service_type_dropdown == '' %}selected{% endif %}>All Types</option>
+                    <option value="FOOD" {% if service_type_dropdown == 'FOOD' %}selected{% endif %}>Food</option>
+                    <option value="MENTAL" {% if service_type_dropdown == 'MENTAL' %}selected{% endif %}>Mental Health</option>
+                    <option value="SHELTER" {% if service_type_dropdown == 'SHELTER' %}selected{% endif %}>Shelter</option>
+                    <option value="RESTROOM" {% if service_type_dropdown == 'RESTROOM' %}selected{% endif %}>Restroom</option>
+                </select>
+            </div>
+
+            <!-- Radius Slider is DISABLED-->
+            <div class="flex flex-col w-full sm:w-auto">
+                <label for="radius" class="mb-1 text-sm font-medium">Radius</label>
+                <div class="flex items-center bg-white p-2 rounded h-12 border border-gray-300">
+                    <span class="text-gray-800 mr-2">Radius:</span>
+                    <input type="range" id="radius" name="radius" min="1"max="20"value="5"
+                        class="flex-grow slider bg-gray-300 rounded-lg">
+                    <span id="radiusValue" class="ml-2 text-gray-800 w-20 text-right">5 miles</span>
+                </div>
+            </div>
+
+
+            <!-- Apply Filters Button -->
+            <div class="flex flex-col w-full sm:w-auto">
+                <label class="mb-1 text-sm font-medium invisible">Apply</label> <!-- Invisible label for alignment -->
+                <button type="submit" 
+                        class="w-full sm:w-auto bg-white text-blue-500 px-4 py-2 rounded hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-300 h-12 border border-gray-300">
+                    Apply Filters
+                </button>
+            </div>
         </form>
     </div>
 </header>
