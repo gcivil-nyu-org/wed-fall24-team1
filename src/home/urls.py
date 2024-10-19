@@ -6,4 +6,6 @@ from . import views
 
 urlpatterns = [
     path("", login_required(views.home_view), name="home"),
+    path("submit_review/", login_required(views.submit_review), name="submit_review"),  # New URL
+
 ]

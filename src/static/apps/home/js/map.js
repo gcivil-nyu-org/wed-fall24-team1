@@ -48,7 +48,7 @@ function showServiceDetails(index) {
         console.error(`Service with index ${index} not found.`);
         return;
     }
-
+    document.getElementById('serviceId').textContent = service.Id || 'No id';
     document.getElementById('serviceName').textContent = service.Name || 'No Name';
     document.getElementById('serviceAddress').textContent = service.Address || 'N/A';
     document.getElementById('serviceType').textContent = service.Category || 'Unknown';
@@ -66,94 +66,94 @@ function showServiceDetails(index) {
         getDirectionsBtn.style.display = 'none'; // Hide the button if no MapLink
     }
 
-    // Populate reviews
-    const reviewsContainer = document.getElementById('reviewsContainer');
-    if (reviewsContainer) {
-        reviewsContainer.innerHTML = ''; // Clear existing reviews
-        if (service.Reviews && service.Reviews.length > 0) {
-            service.Reviews.forEach(review => {
-                const reviewDiv = document.createElement('div');
-                reviewDiv.classList.add('bg-white', 'rounded-lg', 'shadow', 'p-2', 'mb-2');
+    // // Populate reviews
+    // const reviewsContainer = document.getElementById('reviewsContainer');
+    // if (reviewsContainer) {
+    //     reviewsContainer.innerHTML = ''; // Clear existing reviews
+    //     if (service.Reviews && service.Reviews.length > 0) {
+    //         service.Reviews.forEach(review => {
+    //             const reviewDiv = document.createElement('div');
+    //             reviewDiv.classList.add('bg-white', 'rounded-lg', 'shadow', 'p-2', 'mb-2');
 
-                // Review Content
-                const contentDiv = document.createElement('div');
-                contentDiv.classList.add('flex', 'justify-between', 'items-start');
+    //             // Review Content
+    //             const contentDiv = document.createElement('div');
+    //             contentDiv.classList.add('flex', 'justify-between', 'items-start');
 
-                // Review Text and Rating
-                const textDiv = document.createElement('div');
-                const starsDiv = document.createElement('div');
-                starsDiv.classList.add('flex', 'items-center');
+    //             // Review Text and Rating
+    //             const textDiv = document.createElement('div');
+    //             const starsDiv = document.createElement('div');
+    //             starsDiv.classList.add('flex', 'items-center');
 
-                for(let i=0; i < review.rating; i++) {
-                    const star = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-                    star.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-                    star.setAttribute("class", "h-4 w-4 text-yellow-400");
-                    star.setAttribute("viewBox", "0 0 20 20");
-                    star.setAttribute("fill", "currentColor");
-                    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                    path.setAttribute("d", "M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z");
-                    star.appendChild(path);
-                    starsDiv.appendChild(star);
-                }
+    //             for(let i=0; i < review.rating; i++) {
+    //                 const star = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    //                 star.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    //                 star.setAttribute("class", "h-4 w-4 text-yellow-400");
+    //                 star.setAttribute("viewBox", "0 0 20 20");
+    //                 star.setAttribute("fill", "currentColor");
+    //                 const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    //                 path.setAttribute("d", "M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z");
+    //                 star.appendChild(path);
+    //                 starsDiv.appendChild(star);
+    //             }
 
-                const reviewText = document.createElement('p');
-                reviewText.classList.add('text-sm');
-                reviewText.textContent = review.text || 'No review text provided.';
+    //             const reviewText = document.createElement('p');
+    //             reviewText.classList.add('text-sm');
+    //             reviewText.textContent = review.text || 'No review text provided.';
 
-                textDiv.appendChild(starsDiv);
-                textDiv.appendChild(reviewText);
+    //             textDiv.appendChild(starsDiv);
+    //             textDiv.appendChild(reviewText);
 
-                // Review Meta
-                const metaDiv = document.createElement('div');
-                metaDiv.classList.add('text-right', 'text-sm', 'text-gray-500');
+    //             // Review Meta
+    //             const metaDiv = document.createElement('div');
+    //             metaDiv.classList.add('text-right', 'text-sm', 'text-gray-500');
 
-                const dateDiv = document.createElement('div');
-                dateDiv.classList.add('flex', 'items-center');
-                const dateIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-                dateIcon.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-                dateIcon.setAttribute("class", "h-4 w-4 mr-1");
-                dateIcon.setAttribute("fill", "none");
-                dateIcon.setAttribute("viewBox", "0 0 24 24");
-                dateIcon.setAttribute("stroke", "currentColor");
-                const datePath = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                datePath.setAttribute("stroke-linecap", "round");
-                datePath.setAttribute("stroke-linejoin", "round");
-                datePath.setAttribute("stroke-width", "2");
-                datePath.setAttribute("d", "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z");
-                dateIcon.appendChild(datePath);
-                dateDiv.appendChild(dateIcon);
-                dateDiv.appendChild(document.createTextNode(review.date || 'N/A'));
+    //             const dateDiv = document.createElement('div');
+    //             dateDiv.classList.add('flex', 'items-center');
+    //             const dateIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    //             dateIcon.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    //             dateIcon.setAttribute("class", "h-4 w-4 mr-1");
+    //             dateIcon.setAttribute("fill", "none");
+    //             dateIcon.setAttribute("viewBox", "0 0 24 24");
+    //             dateIcon.setAttribute("stroke", "currentColor");
+    //             const datePath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    //             datePath.setAttribute("stroke-linecap", "round");
+    //             datePath.setAttribute("stroke-linejoin", "round");
+    //             datePath.setAttribute("stroke-width", "2");
+    //             datePath.setAttribute("d", "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z");
+    //             dateIcon.appendChild(datePath);
+    //             dateDiv.appendChild(dateIcon);
+    //             dateDiv.appendChild(document.createTextNode(review.date || 'N/A'));
 
-                const likesDiv = document.createElement('div');
-                likesDiv.classList.add('flex', 'items-center');
-                const likeIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-                likeIcon.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-                likeIcon.setAttribute("class", "h-4 w-4 mr-1");
-                likeIcon.setAttribute("fill", "none");
-                likeIcon.setAttribute("viewBox", "0 0 24 24");
-                likeIcon.setAttribute("stroke", "currentColor");
-                const likePath = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                likePath.setAttribute("stroke-linecap", "round");
-                likePath.setAttribute("stroke-linejoin", "round");
-                likePath.setAttribute("stroke-width", "2");
-                likePath.setAttribute("d", "M9 5l7 7-7 7");
-                likeIcon.appendChild(likePath);
-                likesDiv.appendChild(likeIcon);
-                likesDiv.appendChild(document.createTextNode(review.likes || '0'));
+    //             const likesDiv = document.createElement('div');
+    //             likesDiv.classList.add('flex', 'items-center');
+    //             const likeIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    //             likeIcon.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    //             likeIcon.setAttribute("class", "h-4 w-4 mr-1");
+    //             likeIcon.setAttribute("fill", "none");
+    //             likeIcon.setAttribute("viewBox", "0 0 24 24");
+    //             likeIcon.setAttribute("stroke", "currentColor");
+    //             const likePath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    //             likePath.setAttribute("stroke-linecap", "round");
+    //             likePath.setAttribute("stroke-linejoin", "round");
+    //             likePath.setAttribute("stroke-width", "2");
+    //             likePath.setAttribute("d", "M9 5l7 7-7 7");
+    //             likeIcon.appendChild(likePath);
+    //             likesDiv.appendChild(likeIcon);
+    //             likesDiv.appendChild(document.createTextNode(review.likes || '0'));
 
-                metaDiv.appendChild(dateDiv);
-                metaDiv.appendChild(likesDiv);
+    //             metaDiv.appendChild(dateDiv);
+    //             metaDiv.appendChild(likesDiv);
 
-                contentDiv.appendChild(textDiv);
-                contentDiv.appendChild(metaDiv);
+    //             contentDiv.appendChild(textDiv);
+    //             contentDiv.appendChild(metaDiv);
 
-                reviewDiv.appendChild(contentDiv);
-                reviewsContainer.appendChild(reviewDiv);
-            });
-        } else {
-            reviewsContainer.innerHTML = '<p class="text-sm text-gray-500">No reviews yet.</p>';
-        }
-    }
+    //             reviewDiv.appendChild(contentDiv);
+    //             reviewsContainer.appendChild(reviewDiv);
+    //         });
+    //     } else {
+    //         reviewsContainer.innerHTML = '<p class="text-sm text-gray-500">No reviews yet.</p>';
+    //     }
+    // }
 
     // Show the detailed view by removing 'hidden' class
     const serviceDetailsDiv = document.getElementById('serviceDetails');

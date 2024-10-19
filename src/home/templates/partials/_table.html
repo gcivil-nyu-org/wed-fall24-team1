@@ -1,8 +1,8 @@
-<!-- _table.html -->
-<div class="">
+<div>
     <!-- Detailed View Component -->
-    <div id="serviceDetails" class="bg-white rounded-lg shadow-md p-4 mb-8 hidden"> <!-- Added 'hidden' class -->
+    <div id="serviceDetails" class="bg-white rounded-lg shadow-md p-4 mb-8 hidden">
         <div class="flex justify-between items-start mb-4">
+            <h2 id="serviceId" class="text-lg font-semibold" style="display: none;">Id</h2>
             <h2 id="serviceName" class="text-lg font-semibold">Service Name</h2>
             <button id="closeDetails" class="text-gray-500 hover:text-gray-700">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -23,18 +23,70 @@
         <h3 class="text-lg font-semibold mb-2">Leave a Review</h3>
         <div class="space-y-2 mb-4">
             <select id="reviewRating" class="w-full p-2 border rounded">
-                <option>Select a rating</option>
-                <option>1 Star</option>
-                <option>2 Stars</option>
-                <option>3 Stars</option>
-                <option>4 Stars</option>
-                <option>5 Stars</option>
+                <option value="">Select a rating</option>
+                <option value="1">1 Star</option>
+                <option value="2">2 Stars</option>
+                <option value="3">3 Stars</option>
+                <option value="4">4 Stars</option>
+                <option value="5">5 Stars</option>
             </select>
             <textarea id="reviewText" class="w-full p-2 border rounded" placeholder="Write your review here..."></textarea>
             <button id="submitReview" class="bg-blue-500 text-white px-4 py-2 rounded">Submit Review</button>
         </div>
 
         <!-- Add Reviews Container -->
-        <div id="reviewsContainer"></div> <!-- Added 'reviewsContainer' div -->
+        <div id="reviewsContainer"></div>
     </div>
+
+    <script>
+        document.getElementById("submitReview").addEventListener("click", async function () {
+            const rating = document.getElementById("reviewRating").value;
+            const message = document.getElementById("reviewText").value;
+            const serviceId = document.getElementById("serviceId").textContent.trim();
+            console.log(serviceId)
+
+            if (rating === "" || message.trim() === "") {
+                alert("Please provide both a rating and a message.");
+                return;
+            }
+
+            const reviewData = {
+                service_id: serviceId,
+                rating: parseInt(rating),
+                message: message,
+            };
+
+            try {
+                const response = await fetch("/home/submit_review/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": getCsrfToken(),
+                    },
+                    body: JSON.stringify(reviewData),
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    alert(result.message || "Review submitted successfully!");
+                    location.reload();  // Reload to show updated reviews
+                } else {
+                    const error = await response.json();
+                    alert(error.error || "Failed to submit review.");
+                }
+            } catch (error) {
+                console.error("Error submitting review:", error);
+                alert("An error occurred. Please try again.");
+            }
+        });
+
+        function getCsrfToken() {
+            const cookies = document.cookie.split('; ');
+            for (const cookie of cookies) {
+                const [name, value] = cookie.split('=');
+                if (name === 'csrftoken') return value;
+            }
+            return '';
+        }
+    </script>
 </div>

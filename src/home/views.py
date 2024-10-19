@@ -5,6 +5,56 @@ from .repositories import (
     HomeRepository,
 )  # Adjust this import based on your project structure
 
+from django.http import JsonResponse
+import uuid  # For generating unique Review IDs
+from django.views.decorators.http import require_POST
+
+@require_POST
+def submit_review(request):
+    try:
+        data = json.loads(request.body)
+        service_id = data.get('service_id')
+        rating = data.get('rating')
+        message = data.get('message')
+        user = request.user
+
+        if not service_id or not rating or not message:
+            return JsonResponse({'error': 'Invalid data.'}, status=400)
+
+        repo = HomeRepository()
+
+        # Generate a unique Review ID
+        review_id = str(uuid.uuid4())
+
+        # Add the review to the reviews table
+        repo.add_review(
+            review_id=review_id,
+            service_id=service_id,
+            user_id=str(user.id),  # Assuming user ID is a string
+            rating_stars=rating,
+            rating_message=message,
+            username=user.username,  # To display in frontend
+        )
+
+        # Update the service's rating and rating count
+        repo.update_service_rating(service_id=service_id, new_rating=rating)
+
+        return JsonResponse({
+            'success': True,
+            'review_id': review_id,
+            'service_id': service_id,
+            'user_id': user.id,
+            'rating': rating,
+            'message': message,
+            'username': user.username,
+        }, status=200)
+
+    except Exception as e:
+        print(f"Error in submit_review: {e}")
+        return JsonResponse({'error': 'An error occurred while submitting the review.'}, status=500)
+
+
+
 def home_view(request):
     # Initialize the repository
     repo = HomeRepository()
@@ -29,6 +79,7 @@ def home_view(request):
     # Serialize current page's items to JSON for the map
     serialized_items = [
         {
+            "Id": item.get("Id"),
             "Name": item.get("Name", "No Name"),
             "Address": item.get("Address", "N/A"),
             "Lat": float(item.get("Lat")) if item.get("Lat") else None,
@@ -42,7 +93,6 @@ def home_view(request):
         }
         for item in page_obj
     ]
-    print(serialized_items[0])
 
     return render(
         request,
