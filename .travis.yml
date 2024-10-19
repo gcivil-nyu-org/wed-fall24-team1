@@ -16,6 +16,9 @@ script:
 after_script:
   - coveralls
 
+before_deploy:
+  cd src
+
 deploy:
   - provider: elasticbeanstalk
     access_key_id: $AWS_ACCESS_KEY_ID
@@ -27,7 +30,7 @@ deploy:
     on:
       repo: gcivil-nyu-org/wed-fall24-team1
       branch: develop
-    skip_cleanup: 'true'
+    cleanup: false
 
   - provider: elasticbeanstalk
     access_key_id: $AWS_ACCESS_KEY_ID
