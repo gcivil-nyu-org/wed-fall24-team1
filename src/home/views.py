@@ -1,9 +1,7 @@
 from django.shortcuts import render
 from django.core.paginator import Paginator
 import json
-from .repositories import (
-    HomeRepository,
-)
+from .repositories import HomeRepository
 
 
 def home_view(request):
@@ -53,7 +51,7 @@ def home_view(request):
     return render(
         request,
         "home.html",
-        {   
+        {
             "search_query": search_query,
             "service_type_dropdown": service_type_dropdown,
             "radius": radius if radius else "",

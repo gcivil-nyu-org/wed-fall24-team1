@@ -9,8 +9,8 @@ install:
   - pip install -r src/requirements.txt
 
 script:
-  - black ./src/ --check
-  - flake8 ./src/
+  - black . --check
+  - flake8 .
   - coverage run --source=src/home,src/accounts,src/public_service_finder src/manage.py test
 
 after_script:
