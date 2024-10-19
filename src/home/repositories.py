@@ -1,8 +1,9 @@
 # home/repositories.py
+from datetime import datetime
 from decimal import Decimal
 import boto3
 from urllib.parse import quote
-from boto3.dynamodb.conditions import Attr, And
+from boto3.dynamodb.conditions import Attr, And, Key
 from django.conf import settings
 from botocore.exceptions import ClientError
 
@@ -69,6 +70,9 @@ class HomeRepository:
 
     def add_review(self, review_id, service_id, user_id, rating_stars, rating_message, username):
         try:
+            # Generate current timestamp in ISO 8601 format
+            timestamp = datetime.utcnow().isoformat()
+
             self.reviews_table.put_item(
                 Item={
                     'ReviewId': review_id,
@@ -77,12 +81,13 @@ class HomeRepository:
                     'Username': username,  # Optional: to display the user's name
                     'RatingStars': rating_stars,
                     'RatingMessage': rating_message,
+                    'Timestamp': timestamp  # New timestamp field
                 }
             )
         except ClientError as e:
             print(f"Failed to add review: {e.response['Error']['Message']}")
             raise e
-
+        
     def update_service_rating(self, service_id, new_rating):
         try:
             # Retrieve the current ratings and rating count
@@ -110,3 +115,19 @@ class HomeRepository:
         except ClientError as e:
             print(f"Failed to update service rating: {e.response['Error']['Message']}")
             raise e
+
+    def fetch_reviews_for_service(self, service_id):
+        try:
+            # Query to get all reviews with matching ServiceId
+            response = self.reviews_table.scan(
+                FilterExpression=Key('ServiceId').eq(service_id)
+            )
+            reviews = response.get('Items', [])
+
+            # Sort reviews by Timestamp in descending order (latest first)
+            reviews.sort(key=lambda x: x['Timestamp'], reverse=True)
+
+            return reviews
+        except ClientError as e:
+            print(f"Error fetching reviews: {e.response['Error']['Message']}")
+            return []

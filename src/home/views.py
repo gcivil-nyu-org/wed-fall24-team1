@@ -111,3 +111,30 @@ def home_view(request):
             "serialized_items": json.dumps(serialized_items),  # Pass serialized data
         },
     )
+
+def get_reviews(request, service_id):
+    try:
+        page = int(request.GET.get('page', 1))  # Default to page 1
+        repo = HomeRepository()
+
+        # Fetch all reviews for the given service ID
+        reviews = repo.fetch_reviews_for_service(service_id)
+
+        # Paginate the reviews (5 reviews per page)
+        paginator = Paginator(reviews, 5)  # 5 reviews per page
+        page_obj = paginator.get_page(page)
+
+        # Prepare the response
+        response_data = {
+            'reviews': list(page_obj.object_list),
+            'has_next': page_obj.has_next(),
+            'has_previous': page_obj.has_previous(),
+            'current_page': page_obj.number,
+        }
+
+        return JsonResponse(response_data, status=200)
+
+    except Exception as e:
+        print(f"Error fetching reviews: {e}")
+        return JsonResponse({'error': 'Failed to fetch reviews.'}, status=500)
+    

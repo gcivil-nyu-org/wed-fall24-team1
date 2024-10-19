@@ -10,13 +10,13 @@ def create_reviews_table(dynamodb, table_name):
             TableName=table_name,
             KeySchema=[
                 {
-                    "AttributeName": "ServiceId",  # Partition key
-                    "KeyType": "HASH"
+                    "AttributeName": "ReviewId",  # Primary key
+                    "KeyType": "HASH"  # Partition key
                 }
             ],
             AttributeDefinitions=[
                 {
-                    "AttributeName": "ServiceId",
+                    "AttributeName": "ReviewId",
                     "AttributeType": "S"  # 'S' for string
                 }
             ],
@@ -36,7 +36,6 @@ def create_reviews_table(dynamodb, table_name):
         sys.exit(1)
 
 def main():
-
     dynamodb = boto3.resource('dynamodb', region_name='us-east-1')  # Replace with your region
     create_reviews_table(dynamodb, "reviews")
 

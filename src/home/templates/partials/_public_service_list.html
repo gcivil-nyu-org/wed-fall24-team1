@@ -20,7 +20,7 @@
                         <span> {% if item.Ratings == 0 %}
                             N/A
                         {% else %}
-                            {{ item.Ratings }}
+                        {{ item.Ratings|floatformat:2 }}
                         {% endif %}</span>
                     </div>
                 </div>
