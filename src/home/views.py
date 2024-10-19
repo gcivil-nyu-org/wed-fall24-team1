@@ -3,7 +3,7 @@ from django.core.paginator import Paginator
 import json
 from .repositories import (
     HomeRepository,
-)  # Adjust this import based on your project structure
+)
 
 from django.http import JsonResponse
 import uuid  # For generating unique Review IDs
@@ -61,12 +61,17 @@ def home_view(request):
 
     search_query = request.GET.get("search", "").strip()
 
+    radius = request.GET.get("radius")
+    ulat, ulon = request.GET.get("user_lat"), request.GET.get("user_lon")
+
     # Get search query from request
     service_type_dropdown = request.GET.get("type", "")
 
     # Fetch and process items using the repository
-    items = repo.fetch_items_with_filter(search_query, service_type_dropdown)
-    processed_items = repo.process_items(items)
+    items = repo.fetch_items_with_filter(
+        search_query, service_type_dropdown, radius, ulat, ulon
+    )
+    processed_items = HomeRepository.process_items(items)
 
     # Paginate the items (10 items per page)
     paginator = Paginator(processed_items, 10)  # Show 10 items per page
@@ -100,6 +105,7 @@ def home_view(request):
         {
             "search_query": search_query,
             "service_type_dropdown": service_type_dropdown,
+            "radius": radius if radius else "",
             "page_obj": page_obj,
             "base_index": base_index,
             "serialized_items": json.dumps(serialized_items),  # Pass serialized data
