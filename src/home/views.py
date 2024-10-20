@@ -1,9 +1,7 @@
 from django.shortcuts import render
 from django.core.paginator import Paginator
 import json
-from .repositories import (
-    HomeRepository,
-)
+from .repositories import HomeRepository
 
 from django.http import JsonResponse
 import uuid  # For generating unique Review IDs
