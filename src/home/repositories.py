@@ -66,6 +66,7 @@ class HomeRepository:
             processed_item = {
                 key: value for key, value in item.items() if key != "Description"
             }
+            processed_item["Description"] = item.get("Description", {})
             processed_item["MapLink"] = map_link
             processed_items.append(processed_item)
         return processed_items
