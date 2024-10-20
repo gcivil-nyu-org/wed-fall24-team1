@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     {% load static %}
+    {% load socialaccount %}
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -36,6 +37,13 @@
                     <p class="text-sm">Don't have an account? <a href="{% url 'register' %}" class="text-blue-500 hover:text-blue-600">Create User Account</a></p>
                     <p class="text-sm mt-2"><a href="{% url 'service_provider_login' %}" class="text-blue-500 hover:text-blue-600">Login as Service Provider</a></p>
                 </div>
+                <div class="text-center">
+                    <p class="text-sm">Or login with:</p>
+                    <a href="{% provider_login_url 'google' %}" class="text-blue-500 hover:text-blue-600">
+                        Login with Google
+                    </a>
+                </div>
+                
             </div>
         </div>
     </div>

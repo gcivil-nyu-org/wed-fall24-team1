@@ -1,6 +1,6 @@
 # accounts/urls.py
 
-from django.urls import path
+from django.urls import path, include
 from django.contrib.auth import views as auth_views
 from .views import UserLoginView, ServiceProviderLoginView, register
 
@@ -13,4 +13,6 @@ urlpatterns = [
         name="service_provider_login",
     ),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),  # Logout URL
+    path("", include("allauth.urls")),  # This allows allauth URLs under /accounts/
+
 ]
