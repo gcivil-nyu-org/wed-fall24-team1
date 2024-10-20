@@ -29,7 +29,7 @@ SECRET_KEY = "vst4p$jpg3_bxmz2aqlm8$*a947z$4vpdg4stkz&qmv+i^h@=v"
 
 
 AWS_REGION = "us-east-1"
-DYNAMODB_TABLE_SERVICES = "ServiceTable"
+DYNAMODB_TABLE_SERVICES = "services"
 DYNAMODB_TABLE_REVIEWS = "reviews"
 
 
