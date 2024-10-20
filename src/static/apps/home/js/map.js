@@ -101,7 +101,6 @@ function getZoomLevelForRadius(radiusInMiles) {
     }
 }
 
-// Function to show service details
 async function showServiceDetails(index) {
     const service = itemsData[index];
     if (!service) {
@@ -109,14 +108,55 @@ async function showServiceDetails(index) {
         return;
     }
 
-    // Populate service details
-    document.getElementById('serviceId').textContent = service.Id || 'No id';
+    // Populate basic service details
+    document.getElementById('serviceId').textContent = service.Id || 'No ID';
     document.getElementById('serviceName').textContent = service.Name || 'No Name';
     document.getElementById('serviceAddress').textContent = service.Address || 'N/A';
     document.getElementById('serviceType').textContent = service.Category || 'Unknown';
-    document.getElementById('serviceRating').textContent = parseFloat(service.Ratings).toFixed(2) || 'N/A';
+    document.getElementById('serviceRating').textContent = service.Ratings && service.Ratings !== 0 ? parseFloat(service.Ratings).toFixed(2) : 'N/A';
     document.getElementById('serviceDistance').textContent = service.Distance ? service.Distance + ' miles' : 'N/A';
-    document.getElementById('serviceDescription').textContent = service.Description || 'No description available.';
+    
+    // Clear previous descriptions
+    const descriptionElement = document.getElementById('serviceDescription');
+    descriptionElement.innerHTML = '';  // Clear previous content
+
+    const heading = document.createElement('h3');
+    heading.textContent = 'Additional Descriptive Details:';
+    heading.style.marginBottom = '10px'; // Add some space below the heading
+    heading.style.fontSize = '1.1em'; // Adjust font size as needed
+    heading.style.fontWeight = 'bold'; // Make the heading bold
+    descriptionElement.appendChild(heading);
+
+    // Check if Description exists and is an object
+    if (service.Description && typeof service.Description === 'object') {
+        let hasDescription = false;
+        const table = document.createElement('table');
+
+        for (const [key, value] of Object.entries(service.Description)) {
+            if (value !== null && value !== '') {
+                hasDescription = true;
+                const tr = document.createElement('tr');
+
+                const th = document.createElement('th');
+                th.textContent = `${key.replace(/_/g, ' ')}:`;
+
+                const td = document.createElement('td');
+                td.innerHTML = value.replace(/\n/g, '<br>'); // Replace \n with <br>
+
+                tr.appendChild(th);
+                tr.appendChild(td);
+                table.appendChild(tr);
+            }
+        }
+
+        if (hasDescription) {
+            descriptionElement.appendChild(table);
+        } else {
+            descriptionElement.textContent = 'No description available.';
+        }
+    } else {
+        descriptionElement.textContent = 'No description available.';
+    }
 
     const getDirectionsBtn = document.getElementById('getDirections');
     
@@ -132,8 +172,8 @@ async function showServiceDetails(index) {
 
     const serviceDetailsDiv = document.getElementById('serviceDetails');
     if (serviceDetailsDiv) {
-    serviceDetailsDiv.classList.remove('hidden');
-    serviceDetailsDiv.classList.add('block');
+        serviceDetailsDiv.classList.remove('hidden');
+        serviceDetailsDiv.classList.add('block');
     }
 }
 
