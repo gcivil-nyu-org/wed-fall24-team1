@@ -1,5 +1,6 @@
 from django import forms
 
+
 class ServiceProviderForm(forms.Form):
     business_name = forms.CharField(max_length=255)
     business_address = forms.CharField(max_length=255)

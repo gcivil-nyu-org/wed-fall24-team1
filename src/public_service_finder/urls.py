@@ -9,5 +9,5 @@ urlpatterns = [
     path("accounts/", include("accounts.urls")),
     path("home/", include("home.urls")),
     path("", root_redirect_view, name="root_redirect"),  # Use the custom redirect view
-    path('profile/', include("profileapp.urls") ),
+    path("profile/", include("profileapp.urls")),
 ]
