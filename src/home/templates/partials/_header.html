@@ -8,17 +8,31 @@
                        class="w-full p-2 rounded bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-300 h-12 border border-gray-300">
             </div>
 
-            <!-- Location Input is DISABLED-->
+            <!-- Location Input is DISABLED -->
             <div class="flex flex-col w-full sm:w-auto">
                 <label for="location" class="mb-1 text-sm font-medium">Location</label>
                 <input type="text" id="location" name="location" placeholder="Enter Location" disabled
                        class="w-full p-2 rounded bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-300 h-12 border border-gray-300">
             </div>
 
+            <!-- Use Current Location Icon Button -->
+            <div class="flex flex-col w-full sm:w-auto">
+                <label class="mb-1 text-sm font-medium invisible">Use Location</label> <!-- Invisible label for alignment -->
+                <button type="button" id="current-location"
+                        class="w-full sm:w-auto bg-white text-blue-500 px-4 py-2 rounded hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-300 h-12 border border-gray-300 flex items-center justify-center"
+                        onclick="getCurrentLocation()">
+                    <!-- Location Icon SVG -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 2C8.134 2 5 5.134 5 9c0 4.568 7 13 7 13s7-8.432 7-13c0-3.866-3.134-7-7-7z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 11.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z" />
+                    </svg>
+                </button>
+            </div>
+
             <!-- Category Selection -->
             <div class="flex flex-col w-full sm:w-auto">
                 <label for="type" class="mb-1 text-sm font-medium">Category</label>
-                <select id="type" name="type" 
+                <select id="type" name="type"
                         class="w-full p-2 rounded bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-300 h-12 border border-gray-300">
                     <option value="" {% if service_type_dropdown == '' %}selected{% endif %}>All Types</option>
                     <option value="FOOD" {% if service_type_dropdown == 'FOOD' %}selected{% endif %}>Food</option>
@@ -28,6 +42,7 @@
                 </select>
             </div>
 
+            <!-- Radius Slider -->
             <div class="flex flex-col w-full sm:w-auto">
                 <label for="radius" class="mb-1 text-sm font-medium">Radius</label>
                 <div class="flex items-center bg-white p-2 rounded h-12 border border-gray-300">
@@ -37,13 +52,14 @@
                     <span id="radiusValue" class="ml-2 text-gray-800 w-5 text-right">{% if radius == '' %}5{% else %}{{ radius }}{% endif %}</span>
                     <span class="ml-2 text-gray-800 text-right">miles</span>
                 </div>
-            </div>>
+            </div>
             <input type="hidden" id="user-lat" name="user_lat">
             <input type="hidden" id="user-lon" name="user_lon">
+
             <!-- Apply Filters Button -->
             <div class="flex flex-col w-full sm:w-auto">
                 <label class="mb-1 text-sm font-medium invisible">Apply</label> <!-- Invisible label for alignment -->
-                <button type="submit" 
+                <button type="submit"
                         class="w-full sm:w-auto bg-white text-blue-500 px-4 py-2 rounded hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-300 h-12 border border-gray-300">
                     Apply Filters
                 </button>

@@ -1,17 +1,47 @@
-// map.js
-
 // Initialize the map
-const map = L.map('map').setView([40.7128, -74.0060], 12);
+let BaseLat = 40.7128; //40.7128
+let BaseLong = -74.0060; //-74.0060
+
+const map = L.map('map').setView([BaseLat, BaseLong], 12);
+let currentLocationMarker = null;  // Declare a global variable to hold the reference to the current location marker
+
+let userLat = localStorage.getItem('userLat');
+let userLng = localStorage.getItem('userLong');
+
+const userLocationIcon = L.icon({
+    iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+});
 
 // Add OpenStreetMap tiles
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
 }).addTo(map);
 
+if(userLat != null && userLng != null) {
+    currentLocationMarker = L.marker([userLat, userLng], { icon: userLocationIcon }).addTo(map);
+}
+
+function setUserLocation(lat, lon) {
+    if (currentLocationMarker) {
+        map.removeLayer(currentLocationMarker);  // Remove existing marker if any
+    }
+    currentLocationMarker = L.marker([lat, lon], { icon: userLocationIcon }).addTo(map);
+    map.setView([lat, lon], 12);  // Center the map on the user's location
+
+    // Store the user's coordinates in localStorage
+    localStorage.setItem('userLat', lat);
+    localStorage.setItem('userLong', lon);
+}
+
 // Initialize markers array
 const markers = [];
 
-// Iterate over itemsData to create markers
+// Add markers from itemsData
 itemsData.forEach((item, index) => {
     if (item.Lat && item.Log) {
         const marker = L.marker([item.Lat, item.Log])
@@ -19,7 +49,7 @@ itemsData.forEach((item, index) => {
             .bindPopup(`<b>${item.Name}</b><br>${item.Address}<br>Rating: ${item.Ratings}`)
             .on('click', () => {
                 showServiceDetails(index); // Use index as identifier
-            }); 
+            });
         markers.push(marker);
     }
 });
@@ -29,16 +59,46 @@ if (markers.length > 0) {
     const group = L.featureGroup(markers);
     map.fitBounds(group.getBounds());
 } else {
-    map.setView([40.7128, -74.0060], 10);
+    // If no markers, default to BaseLat and BaseLong
+    map.setView([BaseLat, BaseLong], 10);
 }
 
 // Update radius value display (if applicable)
+// Update radius value display and adjust map view based on the radius input
 const radiusInput = document.getElementById('radius');
 const radiusValue = document.getElementById('radiusValue');
 if (radiusInput && radiusValue) {
-    radiusInput.addEventListener('input', function() {
-        radiusValue.textContent = this.value + ' miles';
+    radiusInput.addEventListener('input', function () {
+        const radiusInMiles = this.value;
+        radiusValue.textContent = radiusInMiles + ' miles';
+
+        // Calculate the zoom level based on the radius in miles (simple approximation)
+        const zoomLevel = getZoomLevelForRadius(radiusInMiles);
+
+        // Update the map view with the new radius, centered on the current user's location or base location
+        if (userLat && userLong) {
+            map.setView([userLat, userLong], zoomLevel);
+        } else {
+            map.setView([BaseLat, BaseLong], zoomLevel);
+        }
     });
+}
+
+// Function to approximate the zoom level based on the radius in miles
+function getZoomLevelForRadius(radiusInMiles) {
+    if (radiusInMiles <= 1) {
+        return 13;  // Zoom in for a small area (city blocks)
+    } else if (radiusInMiles <= 5) {
+        return 13;  // Zoom for neighborhoods
+    } else if (radiusInMiles <= 10) {
+        return 12;  // Zoom for citywide view
+    } else if (radiusInMiles <= 20) {
+        return 11;  // Zoom for larger areas
+    } else if (radiusInMiles <= 50) {
+        return 10;  // Zoom for broader area
+    } else {
+        return 8;   // Zoom out for regional view
+    }
 }
 
 // Function to show service details
@@ -84,7 +144,7 @@ function showServiceDetails(index) {
                 const starsDiv = document.createElement('div');
                 starsDiv.classList.add('flex', 'items-center');
 
-                for(let i=0; i < review.rating; i++) {
+                for (let i = 0; i < review.rating; i++) {
                     const star = document.createElementNS("http://www.w3.org/2000/svg", "svg");
                     star.setAttribute("xmlns", "http://www.w3.org/2000/svg");
                     star.setAttribute("class", "h-4 w-4 text-yellow-400");
@@ -185,20 +245,42 @@ serviceButtons.forEach(button => {
     });
 });
 
-// Handle Review Submission (Example)
-document.getElementById('submitReview').addEventListener('click', () => {
-    const rating = document.getElementById('reviewRating').value;
-    const reviewText = document.getElementById('reviewText').value;
+function getCurrentLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            position => {
+                // If the location is successfully retrieved
+                userLat = position.coords.latitude;
+                userLng = position.coords.longitude;
 
-    if (rating === 'Select a rating' || reviewText.trim() === '') {
-        alert('Please provide a rating and review text.');
-        return;
+                // Update BaseLat and BaseLong with user's current location
+                BaseLat = userLat;
+                BaseLong = userLng;
+
+                setUserLocation(BaseLat, BaseLong);
+                console.log(`User's location: ${BaseLat}, ${BaseLong}`);
+            },
+            error => {
+                // Handle geolocation errors
+                switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                        alert("Location access has been denied. Please enable location permissions in your browser settings.");
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        alert("Location information is unavailable. Please check your device's location settings.");
+                        break;
+                    case error.TIMEOUT:
+                        alert("The request to get your location timed out. Please try again.");
+                        break;
+                    case error.UNKNOWN_ERROR:
+                        alert("An unknown error occurred while retrieving your location.");
+                        break;
+                }
+                console.error("Geolocation error:", error);
+            }
+        );
+    } else {
+        // If the browser doesn't support Geolocation API
+        alert("Geolocation is not supported by this browser.");
     }
-
-    // TODO: Implement AJAX request to submit the review to the server
-    alert('Review submitted successfully!');
-
-    // Reset the review form
-    document.getElementById('reviewRating').value = 'Select a rating';
-    document.getElementById('reviewText').value = '';
-});
+}
