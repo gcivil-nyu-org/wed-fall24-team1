@@ -13,7 +13,7 @@ script:
   - flake8 .
   - coverage run --source=src/home,src/accounts,src/public_service_finder src/manage.py test
 
-after_script:
+after_success:
   - coveralls
 
 before_deploy:
