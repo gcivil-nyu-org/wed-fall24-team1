@@ -2,22 +2,22 @@ from django.shortcuts import render
 from django.core.paginator import Paginator
 import json
 from .repositories import HomeRepository
-
 from django.http import JsonResponse
 import uuid  # For generating unique Review IDs
 from django.views.decorators.http import require_POST
+
 
 @require_POST
 def submit_review(request):
     try:
         data = json.loads(request.body)
-        service_id = data.get('service_id')
-        rating = data.get('rating')
-        message = data.get('message')
+        service_id = data.get("service_id")
+        rating = data.get("rating")
+        message = data.get("message")
         user = request.user
 
         if not service_id or not rating or not message:
-            return JsonResponse({'error': 'Invalid data.'}, status=400)
+            return JsonResponse({"error": "Invalid data."}, status=400)
 
         repo = HomeRepository()
 
@@ -37,20 +37,24 @@ def submit_review(request):
         # Update the service's rating and rating count
         repo.update_service_rating(service_id=service_id, new_rating=rating)
 
-        return JsonResponse({
-            'success': True,
-            'review_id': review_id,
-            'service_id': service_id,
-            'user_id': user.id,
-            'rating': rating,
-            'message': message,
-            'username': user.username,
-        }, status=200)
+        return JsonResponse(
+            {
+                "success": True,
+                "review_id": review_id,
+                "service_id": service_id,
+                "user_id": user.id,
+                "rating": rating,
+                "message": message,
+                "username": user.username,
+            },
+            status=200,
+        )
 
     except Exception as e:
         print(f"Error in submit_review: {e}")
-        return JsonResponse({'error': 'An error occurred while submitting the review.'}, status=500)
-
+        return JsonResponse(
+            {"error": "An error occurred while submitting the review."}, status=500
+        )
 
 
 def home_view(request):
@@ -88,9 +92,13 @@ def home_view(request):
             "Lat": float(item.get("Lat")) if item.get("Lat") else None,
             "Log": float(item.get("Log")) if item.get("Log") else None,
             "Ratings": (
-                "N/A" if item.get("Ratings") in [0, "0", None] else str(item.get("Ratings"))
+                "N/A"
+                if item.get("Ratings") in [0, "0", None]
+                else str(item.get("Ratings"))
             ),
-            "RatingCount": str(item.get("rating_count", 0)),  # Add the rating_count field
+            "RatingCount": str(
+                item.get("rating_count", 0)
+            ),  # Add the rating_count field
             "Category": str(item.get("Category")),
             "MapLink": item.get("MapLink"),
         }
@@ -110,9 +118,10 @@ def home_view(request):
         },
     )
 
+
 def get_reviews(request, service_id):
     try:
-        page = int(request.GET.get('page', 1))  # Default to page 1
+        page = int(request.GET.get("page", 1))  # Default to page 1
         repo = HomeRepository()
 
         # Fetch all reviews for the given service ID
@@ -124,15 +133,14 @@ def get_reviews(request, service_id):
 
         # Prepare the response
         response_data = {
-            'reviews': list(page_obj.object_list),
-            'has_next': page_obj.has_next(),
-            'has_previous': page_obj.has_previous(),
-            'current_page': page_obj.number,
+            "reviews": list(page_obj.object_list),
+            "has_next": page_obj.has_next(),
+            "has_previous": page_obj.has_previous(),
+            "current_page": page_obj.number,
         }
 
         return JsonResponse(response_data, status=200)
 
     except Exception as e:
         print(f"Error fetching reviews: {e}")
-        return JsonResponse({'error': 'Failed to fetch reviews.'}, status=500)
-    
+        return JsonResponse({"error": "Failed to fetch reviews."}, status=500)
