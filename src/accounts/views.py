@@ -3,6 +3,8 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from django.contrib.auth.views import LoginView
+
+from profileapp.models.service_seeker_model import ServiceSeeker
 from .forms import UserRegisterForm, UserLoginForm, ServiceProviderLoginForm
 
 
@@ -16,6 +18,7 @@ def register(request):
             if user.user_type == "service_provider":
                 return redirect("service_provider_dashboard")
             else:
+                ServiceSeeker.objects.create(user=user)
                 return redirect("home")
     else:
         form = UserRegisterForm()

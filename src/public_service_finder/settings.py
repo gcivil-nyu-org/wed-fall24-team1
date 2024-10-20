@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     "home",
     "services",
     "accounts",
+    "profileapp",
+    'widget_tweaks'
 ]
 
 AUTH_USER_MODEL = "accounts.CustomUser"

@@ -8,15 +8,16 @@
 
         <!-- Profile Section with Font Awesome Icons -->
         <div class="relative">
-            <button id="profileButton" class="flex items-center space-x-2 focus:outline-none hover:bg-gray-100 p-2 rounded-md">
-                <img src="{% static 'images/profile-placeholder.jpg' %}" alt="Profile" class="h-10 w-10 rounded-full border border-gray-300 shadow-sm">
-                <span class="text-gray-600">Profile</span>
-                <i class="fas fa-caret-down text-gray-500"></i>
-            </button>
+         
+                <button id="profileButton" class="flex items-center space-x-2 focus:outline-none hover:bg-gray-100 p-2 rounded-md">
+                    <img src="{% static 'images/profile-placeholder.jpg' %}" alt="Profile" class="h-10 w-10 rounded-full border border-gray-300 shadow-sm">
+                    <span class="text-gray-600">Profile</span>
+                    <i class="fas fa-caret-down text-gray-500"></i>
+                </button>       
 
             <!-- Dropdown Menu -->
             <div id="profileDropdown" class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 shadow-md rounded-md text-gray-700 z-20 hidden">
-                <a href="#" class="block px-4 py-2 hover:bg-gray-100 flex items-center space-x-2">
+                <a href="{% url 'profile_view' %}" class="block px-4 py-2 hover:bg-gray-100 flex items-center space-x-2">
                     <i class="fas fa-user-circle text-blue-500"></i>
                     <span>View Profile</span>
                 </a>
