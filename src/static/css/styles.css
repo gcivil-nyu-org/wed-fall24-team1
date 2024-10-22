@@ -311,6 +311,7 @@ tr:hover {
     padding: 5px;
     vertical-align: top;
     font-weight: bold;
+    background-color: #3B82F6;
 }
 
 #serviceDescription td {
