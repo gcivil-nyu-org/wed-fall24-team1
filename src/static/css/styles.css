@@ -295,4 +295,38 @@ tr:hover {
     th, td {
         padding: 0.75rem;
     }
+
+    
+}
+
+/* Styles for the description table */
+#serviceDescription table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#serviceDescription th {
+    text-align: left;
+    width: 150px; /* Adjust based on the longest key */
+    padding: 5px;
+    vertical-align: top;
+    font-weight: bold;
+    background-color: #3B82F6;
+}
+
+#serviceDescription td {
+    padding: 5px;
+    vertical-align: top;
+}
+
+/* Optional: Add borders for clarity */
+#serviceDescription th, #serviceDescription td {
+    border-bottom: 1px solid #ddd;
+}
+
+/* Optional: Responsive adjustments */
+@media (max-width: 600px) {
+    #serviceDescription th {
+        width: 100px; /* Reduce width on smaller screens */
+    }
 }

@@ -101,6 +101,7 @@ def home_view(request):
             ),  # Add the rating_count field
             "Category": str(item.get("Category")),
             "MapLink": item.get("MapLink"),
+            "Description": item.get("Description", {}),
         }
         for item in page_obj
     ]

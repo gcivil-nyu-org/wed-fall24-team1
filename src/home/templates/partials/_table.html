@@ -1,3 +1,8 @@
+<head>
+    {% load static %}
+    <link href="{% static 'css/styles.css' %}" rel="stylesheet">
+</head>
+
 <div id="serviceDetails" class="bg-white rounded-lg shadow-md p-4 mb-8 hidden">
     <div class="flex justify-between items-start mb-4">
         <h2 id="serviceId" class="text-lg font-semibold" style="display: none;">Id</h2>
@@ -14,8 +19,10 @@
         <p class="text-sm"><strong>Type:</strong> <span id="serviceType">Homeless</span></p>
         <p class="text-sm"><strong>Rating:</strong> <span id="serviceRating">4.5</span></p>
         <p class="text-sm"><strong>Distance:</strong> <span id="serviceDistance">1.2 miles</span></p>
-        <p class="text-sm mt-2" id="serviceDescription">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
         <a id="getDirections" href="#" target="_blank" rel="noopener noreferrer" class="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-2">Get Directions</a>
+        <div class="space-y-1 mb-4">
+            <div id="serviceDescription" class="text-sm mt-2"></div>
+        </div>
     </div>
 
     <h3 class="text-lg font-semibold mb-2">Leave a Review</h3>
