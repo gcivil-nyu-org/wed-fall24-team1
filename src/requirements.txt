@@ -1,6 +1,5 @@
 asgiref==3.8.1
 asttokens==2.4.1
-awsebcli==3.21.0
 black==24.10.0
 blessed==1.20.0
 boto3==1.35.34
@@ -40,7 +39,7 @@ openpyxl==3.1.5
 packaging==24.1
 pandas==2.2.3
 parso==0.8.4
-# pathspec==0.12.1
+pathspec==0.12.1
 pexpect==4.9.0
 platformdirs==4.3.6
 prompt_toolkit==3.0.48
