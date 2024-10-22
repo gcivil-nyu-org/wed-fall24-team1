@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-"django.contrib.sites",  # Required for django-allauth
+    "django.contrib.sites",  # Required for django-allauth
     "allauth",
     "allauth.account",
     "allauth.socialaccount",  # Ensure this is included
@@ -56,13 +56,7 @@ INSTALLED_APPS = [
 
 
 SOCIALACCOUNT_PROVIDERS = {
-    "google": {
-        "SCOPE": [
-            "profile",
-            "email"
-        ],
-        "AUTH_PARAMS": {"access_type": "online"}
-    }
+    "google": {"SCOPE": ["profile", "email"], "AUTH_PARAMS": {"access_type": "online"}}
 }
 
 

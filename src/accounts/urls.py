@@ -14,5 +14,4 @@ urlpatterns = [
     ),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),  # Logout URL
     path("", include("allauth.urls")),  # This allows allauth URLs under /accounts/
-
 ]
