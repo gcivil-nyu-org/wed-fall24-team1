@@ -148,3 +148,39 @@ class ViewsTest(TestCase):
         )
 
         self.assertIn(response.status_code, [302, 403])
+
+    def test_home_view_invalid_page(self):
+        self.client.login(username="testuser", password="testpass123")
+
+        self.mock_repo.fetch_items_with_filter.return_value = [self.sample_service]
+        self.MockHomeRepository.process_items.return_value = [self.sample_service]
+
+        response = self.client.get(reverse("home"), {"page": "invalid"})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["page_obj"].number, 1)
+
+    def test_get_reviews_no_reviews(self):
+        self.mock_repo.fetch_reviews_for_service.return_value = []
+
+        response = self.client.get(
+            reverse("get_reviews", kwargs={"service_id": "123"}), {"page": "1"}
+        )
+
+        self.assertEqual(response.status_code, 200)
+        response_data = json.loads(response.content)
+        self.assertEqual(len(response_data["reviews"]), 0)
+        self.assertFalse(response_data["has_next"])
+        self.assertFalse(response_data["has_previous"])
+
+    def test_submit_review_invalid_json(self):
+        self.client.login(username="testuser", password="testpass123")
+
+        response = self.client.post(
+            reverse("submit_review"),
+            data="invalid json",
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 500)
+        response_data = json.loads(response.content)
+        self.assertIn("error", response_data)
