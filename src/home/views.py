@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.core.paginator import Paginator
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import json
 from .repositories import HomeRepository
 from django.http import JsonResponse
@@ -58,32 +58,30 @@ def submit_review(request):
 
 
 def home_view(request):
-    # Initialize the repository
     repo = HomeRepository()
 
+    # Get search filters from the request
     search_query = request.GET.get("search", "").strip()
-
-    radius = request.GET.get("radius")
+    radius = request.GET.get("radius", "")
     ulat, ulon = request.GET.get("user_lat"), request.GET.get("user_lon")
+    service_type = request.GET.get("type", "")
 
-    # Get search query from request
-    service_type_dropdown = request.GET.get("type", "")
-
-    # Fetch and process items using the repository
-    items = repo.fetch_items_with_filter(
-        search_query, service_type_dropdown, radius, ulat, ulon
-    )
+    # Fetch items using the repository with filters
+    items = repo.fetch_items_with_filter(search_query, service_type, radius, ulat, ulon)
     processed_items = HomeRepository.process_items(items)
 
-    # Paginate the items (10 items per page)
-    paginator = Paginator(processed_items, 10)  # Show 10 items per page
-    page_number = request.GET.get("page", 1)  # Get the page number from the request
-    page_obj = paginator.get_page(page_number)
+    # Paginate the results, showing 10 items per page
+    paginator = Paginator(processed_items, 10)
+    page_number = request.GET.get("page", 1)
 
-    # Calculate the base index for the current page
-    base_index = paginator.per_page * (page_obj.number - 1)
+    try:
+        page_obj = paginator.get_page(page_number)
+    except (PageNotAnInteger, EmptyPage):
+        page_obj = paginator.get_page(1)
 
-    # Serialize current page's items to JSON for the map
+    base_index = (page_obj.number - 1) * paginator.per_page
+
+    # Prepare data to be serialized for use in JavaScript (e.g., maps)
     serialized_items = [
         {
             "Id": item.get("Id"),
@@ -96,26 +94,25 @@ def home_view(request):
                 if item.get("Ratings") in [0, "0", None]
                 else str(item.get("Ratings"))
             ),
-            "RatingCount": str(
-                item.get("rating_count", 0)
-            ),  # Add the rating_count field
-            "Category": str(item.get("Category")),
+            "RatingCount": str(item.get("rating_count", 0)),
+            "Category": item.get("Category", "N/A"),
             "MapLink": item.get("MapLink"),
             "Description": item.get("Description", {}),
         }
         for item in page_obj
     ]
 
+    # Render the home page with context data
     return render(
         request,
         "home.html",
         {
             "search_query": search_query,
-            "service_type_dropdown": service_type_dropdown,
+            "service_type_dropdown": service_type,
             "radius": radius if radius else "",
             "page_obj": page_obj,
             "base_index": base_index,
-            "serialized_items": json.dumps(serialized_items),  # Pass serialized data
+            "serialized_items": json.dumps(serialized_items),
         },
     )
 
