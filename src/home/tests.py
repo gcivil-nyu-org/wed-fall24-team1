@@ -5,6 +5,8 @@ import json
 
 from accounts.models import CustomUser
 
+from home.utils import calculate_distance
+
 
 class ViewsTest(TestCase):
     def setUp(self):
@@ -184,3 +186,22 @@ class ViewsTest(TestCase):
         self.assertEqual(response.status_code, 500)
         response_data = json.loads(response.content)
         self.assertIn("error", response_data)
+
+
+class UtilsTest(TestCase):
+    def test_calculate_distance(self):
+        # Test known distances
+        self.assertAlmostEqual(
+            calculate_distance(40.7128, -74.0060, 40.7128, -74.0060), 0, places=2
+        )
+        self.assertAlmostEqual(
+            calculate_distance(40.7128, -74.0060, 34.0522, -118.2437),
+            2445.7101,
+            places=2,
+        )
+
+    def test_calculate_distance_edge_cases(self):
+        # Test antipodes
+        self.assertAlmostEqual(calculate_distance(0, 0, 0, 180), 12437.5653, places=2)
+        # Test poles
+        self.assertAlmostEqual(calculate_distance(90, 0, -90, 0), 12437.5653, places=2)
