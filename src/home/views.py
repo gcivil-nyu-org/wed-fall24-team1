@@ -67,9 +67,7 @@ def home_view(request):
     service_type = request.GET.get("type", "")
 
     # Fetch items using the repository with filters
-    items = repo.fetch_items_with_filter(
-        search_query, service_type, radius, ulat, ulon
-    )
+    items = repo.fetch_items_with_filter(search_query, service_type, radius, ulat, ulon)
     processed_items = HomeRepository.process_items(items)
 
     # Paginate the results, showing 10 items per page
@@ -91,7 +89,11 @@ def home_view(request):
             "Address": item.get("Address", "N/A"),
             "Lat": float(item.get("Lat")) if item.get("Lat") else None,
             "Log": float(item.get("Log")) if item.get("Log") else None,
-            "Ratings": "N/A" if item.get("Ratings") in [0, "0", None] else str(item.get("Ratings")),
+            "Ratings": (
+                "N/A"
+                if item.get("Ratings") in [0, "0", None]
+                else str(item.get("Ratings"))
+            ),
             "RatingCount": str(item.get("rating_count", 0)),
             "Category": item.get("Category", "N/A"),
             "MapLink": item.get("MapLink"),

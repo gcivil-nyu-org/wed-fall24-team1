@@ -1,7 +1,7 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 from accounts.models import CustomUser
-from accounts.forms import UserLoginForm, UserRegisterForm
+from accounts.forms import UserRegisterForm
 from unittest.mock import patch
 
 
@@ -12,14 +12,13 @@ class CustomUserModelTest(TestCase):
             username="testuser",
             email="testuser@example.com",
             password="testpassword",
-            user_type="user"
+            user_type="user",
         )
 
     def test_user_creation(self):
         self.assertEqual(self.user.username, "testuser")
         self.assertTrue(self.user.check_password("testpassword"))
         self.assertEqual(self.user.user_type, "user")
-
 
     def test_string_representation(self):
         """Test if the string representation of the user is correct."""
@@ -55,19 +54,19 @@ class UserRegisterFormTest(TestCase):
 
 # ---------- View Tests ----------
 class RegisterViewTest(TestCase):
-    def test_register_view_post_valid_data(self):
-        response = self.client.post(
-            reverse("register"),
-            {
-                "username": "testuser",
-                "email": "testuser@example.com",
-                "password1": "Testpassword123!",
-                "password2": "Testpassword123!",
-                "user_type": "user",
-            },
-        )
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse("home"))
+    # def test_register_view_post_valid_data(self):
+    #     response = self.client.post(
+    #         reverse("register"),
+    #         {
+    #             "username": "testuser",
+    #             "email": "testuser@example.com",
+    #             "password1": "Testpassword123!",
+    #             "password2": "Testpassword123!",
+    #             "user_type": "user",
+    #         },
+    #     )
+    #     self.assertEqual(response.status_code, 302)
+    #     self.assertRedirects(response, reverse("home"))
 
     def test_register_view_post_valid_data(self):
         """Test POST request with valid data to the registration page."""
@@ -110,7 +109,7 @@ class UserLoginViewTest(TestCase):
             username="testuser",
             email="testuser@example.com",
             password="Testpassword123!",
-            user_type="user"
+            user_type="user",
         )
 
     @patch("home.repositories.HomeRepository.fetch_items_with_filter")
@@ -120,11 +119,10 @@ class UserLoginViewTest(TestCase):
 
         response = self.client.post(
             reverse("user_login"),
-            {"username": "testuser", "password": "Testpassword123!"}
+            {"username": "testuser", "password": "Testpassword123!"},
         )
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse("home"))
-
 
     # def test_login_view_get(self):
     #     """Test the login page loads correctly with a GET request."""
@@ -145,12 +143,15 @@ class ServiceProviderLoginViewTest(TestCase):
 
     def test_service_provider_login_invalid(self):
         """Test an invalid service provider login attempt."""
-        response = self.client.post(reverse("service_provider_login"), {
-            "email": "wrong@example.com",
-            "password": "wrongpassword",
-        })
+        response = self.client.post(
+            reverse("service_provider_login"),
+            {
+                "email": "wrong@example.com",
+                "password": "wrongpassword",
+            },
+        )
         self.assertEqual(response.status_code, 200)  # Form reloads on failure
-        #self.assertContains(response, "Invalid email or password")
+        # self.assertContains(response, "Invalid email or password")
 
 
 class LogoutViewTest(TestCase):
@@ -159,7 +160,7 @@ class LogoutViewTest(TestCase):
             username="testuser",
             email="testuser@example.com",
             password="Testpassword123!",
-            user_type="user"
+            user_type="user",
         )
 
     def test_logout(self):
@@ -167,7 +168,7 @@ class LogoutViewTest(TestCase):
         self.client.login(username="testuser", password="Testpassword123!")
         response = self.client.post(reverse("logout"))
         self.assertEqual(response.status_code, 302)
-        #self.assertRedirects(response, reverse("user_login"))
+        # self.assertRedirects(response, reverse("user_login"))
 
 
 class RegisterDuplicateUsernameTest(TestCase):
@@ -219,7 +220,7 @@ class UserTypeRedirectTest(TestCase):
         )
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse("home"))
-        
+
     # def test_service_provider_redirects_to_dashboard(self):
     #     """Test if a service provider is redirected to the dashboard after registration."""
     #     response = self.client.post(reverse("register"), {
