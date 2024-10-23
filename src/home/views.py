@@ -109,7 +109,7 @@ def home_view(request):
         {
             "search_query": search_query,
             "service_type_dropdown": service_type,
-            "radius": radius,
+            "radius": radius if radius else "",
             "page_obj": page_obj,
             "base_index": base_index,
             "serialized_items": json.dumps(serialized_items),
