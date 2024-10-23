@@ -19,14 +19,42 @@
                 <div class="p-6">
                     <form method="post" class="space-y-4">
                         {% csrf_token %}
+
+                        <!-- Display Non-Field Errors -->
+                        {% if form.non_field_errors %}
+                            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                                {% for error in form.non_field_errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <!-- Email Field -->
                         <div>
                             {{ form.email.label_tag }}
                             {{ form.email }}
+                            {% if form.email.errors %}
+                                <div class="text-red-500 text-sm mt-1">
+                                    {% for error in form.email.errors %}
+                                        <p>{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
                         </div>
+
+                        <!-- Password Field -->
                         <div>
                             {{ form.password.label_tag }}
                             {{ form.password }}
+                            {% if form.password.errors %}
+                                <div class="text-red-500 text-sm mt-1">
+                                    {% for error in form.password.errors %}
+                                        <p>{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
                         </div>
+
                         <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300">
                             Login
                         </button>

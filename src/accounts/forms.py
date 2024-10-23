@@ -2,6 +2,7 @@
 
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth import authenticate
 from .models import CustomUser
 
 
@@ -13,37 +14,77 @@ class UserRegisterForm(UserCreationForm):
 
 class UserLoginForm(AuthenticationForm):
     username = forms.CharField(
-        label="Username", widget=forms.TextInput(attrs={"class": "form-control"})
+        label="Username or Email",
+        widget=forms.TextInput(attrs={"class": "form-control"}),
+        required=True,
     )
     password = forms.CharField(
-        label="Password", widget=forms.PasswordInput(attrs={"class": "form-control"})
+        label="Password",
+        widget=forms.PasswordInput(attrs={"class": "form-control"}),
+        required=True,
     )
+
+    def clean(self):
+        username = self.cleaned_data.get("username")
+        password = self.cleaned_data.get("password")
+
+        if username and password:
+            # Allow users to log in with either username or email
+            user = authenticate(self.request, username=username, password=password)
+            if user is None:
+                # Try authenticating with email
+                user = authenticate(self.request, email=username, password=password)
+            if user is None:
+                raise forms.ValidationError("Invalid username/email or password.")
+            else:
+                self.confirm_login_allowed(user)
+                self.user_cache = user
+        else:
+            raise forms.ValidationError(
+                "Please enter both username/email and password."
+            )
+        return self.cleaned_data
+
+    def get_user(self):
+        return self.user_cache
 
 
 class ServiceProviderLoginForm(AuthenticationForm):
     email = forms.EmailField(
-        label="Email", widget=forms.EmailInput(attrs={"class": "form-control"})
+        label="Email",
+        widget=forms.EmailInput(attrs={"class": "form-control"}),
+        required=True,
     )
     password = forms.CharField(
-        label="Password", widget=forms.PasswordInput(attrs={"class": "form-control"})
+        label="Password",
+        widget=forms.PasswordInput(attrs={"class": "form-control"}),
+        required=True,
     )
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields.pop("username")
+    def __init__(self, request=None, *args, **kwargs):
+        super().__init__(request, *args, **kwargs)
+        self.fields.pop("username")  # Remove the username field
 
     def clean(self):
-        cleaned_data = super().clean()
-        email = cleaned_data.get("email")
-        password = cleaned_data.get("password")
+        email = self.cleaned_data.get("email")
+        password = self.cleaned_data.get("password")
 
-        UserModel = CustomUser
-        try:
-            user = UserModel.objects.get(email=email)
-            if not user.check_password(password):
-                raise forms.ValidationError("Invalid email or password")
-            if user.user_type != "service_provider":
-                raise forms.ValidationError("This page is for service providers only.")
-        except UserModel.DoesNotExist:
-            raise forms.ValidationError("Invalid email or password")
-        return cleaned_data
+        if email and password:
+            self.user_cache = authenticate(self.request, email=email, password=password)
+            if self.user_cache is None:
+                raise forms.ValidationError("Invalid email or password.")
+            else:
+                if self.user_cache.user_type != "service_provider":
+                    raise forms.ValidationError(
+                        "This page is for service providers only."
+                    )
+                self.confirm_login_allowed(self.user_cache)
+        else:
+            raise forms.ValidationError("Please enter both email and password.")
+        return self.cleaned_data
+
+    def get_user(self):
+        return self.user_cache
+
+    def get_invalid_login_error(self):
+        return forms.ValidationError("Invalid email or password.")
