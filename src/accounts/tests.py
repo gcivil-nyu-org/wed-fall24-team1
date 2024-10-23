@@ -1,7 +1,7 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 from accounts.models import CustomUser
-from accounts.forms import UserRegisterForm
+from accounts.forms import ServiceProviderLoginForm, UserRegisterForm
 from unittest.mock import patch
 
 
@@ -232,3 +232,57 @@ class UserTypeRedirectTest(TestCase):
     #     })
     #     self.assertEqual(response.status_code, 302)
     #     self.assertRedirects(response, reverse("service_provider_dashboard"))
+
+
+class EmptyRegisterFormTest(TestCase):
+    def test_register_view_post_empty_data(self):
+        """Test POST request to registration with no data."""
+        response = self.client.post(reverse("register"), {})
+        self.assertEqual(response.status_code, 200)
+        form = response.context.get("form")
+        self.assertIsNotNone(form)
+        self.assertFalse(form.is_valid())
+
+
+class CustomUserServiceProviderTest(TestCase):
+    def test_string_representation_service_provider(self):
+        """Test string representation for a service provider."""
+        service_provider = CustomUser(
+            username="provider3", user_type="service_provider"
+        )
+        self.assertEqual(str(service_provider), "provider3")
+
+
+class InvalidServiceProviderLoginFormTest(TestCase):
+    def test_invalid_service_provider_login_form(self):
+        """Test service provider login form with no data."""
+        form = ServiceProviderLoginForm(data={})
+        self.assertFalse(form.is_valid())
+        self.assertIn("email", form.errors)
+        self.assertIn("password", form.errors)
+
+
+class DuplicateEmailTest(TestCase):
+    def setUp(self):
+        CustomUser.objects.create_user(
+            username="existinguser",
+            email="duplicate@example.com",
+            password="ExistingPassword123!",
+            user_type="user",
+        )
+
+    # def test_register_duplicate_email(self):
+    #     """Test registration with a duplicate email."""
+    #     response = self.client.post(
+    #         reverse("register"),
+    #         {
+    #             "username": "newuser",
+    #             "email": "duplicate@example.com",
+    #             "password1": "NewPassword123!",
+    #             "password2": "NewPassword123!",
+    #             "user_type": "user",
+    #         },
+    #     )
+    #     form = response.context.get("form")
+    #     self.assertIsNotNone(form)
+    #     self.assertFalse(form.is_valid())
