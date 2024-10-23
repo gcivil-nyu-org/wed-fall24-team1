@@ -82,6 +82,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # django-axes configurations
+SESSION_ENGINE = "django.contrib.sessions.backends.db"  # Default setting
 AXES_USERNAME_CALLABLE = "accounts.utils.get_axes_username"
 
 AXES_ENABLED = True
@@ -90,15 +91,15 @@ AXES_COOLOFF_TIME = timedelta(minutes=5)
 AXES_LOCKOUT_PARAMETERS = ["username"]
 AXES_RESET_ON_SUCCESS = False
 AXES_HANDLER = "axes.handlers.database.AxesDatabaseHandler"
-AXES_USERNAME_FORM_FIELD = "username"  # Adjust if your form uses 'email' instead
+AXES_USERNAME_FORM_FIELD = "username"
 AXES_LOCKOUT_TEMPLATE = "lockout.html"
-AXES_LOCKOUT_URL = None  # Disable default URL redirection
+AXES_LOCKOUT_URL = None
 AXES_RAISE_PERMISSION_DENIED = True
-AXES_LOG_USING_SESSIONS = False
+AXES_LOG_USING_SESSIONS = True  # Updated to True
 AXES_RAISE_ACCESS_EXCEPTIONS = False
-AXES_RESET_COOL_OFF_ON_FAILURE = False  # Do not reset cooldown on failure
-AXES_VERBOSE = True  # Enable verbose logging
-AXES_USE_PROXY = False  # Disable proxy handling
+AXES_RESET_COOL_OFF_ON_FAILURE = False
+AXES_VERBOSE = True
+AXES_USE_PROXY = False
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
