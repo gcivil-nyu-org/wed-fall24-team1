@@ -94,6 +94,7 @@ AXES_USERNAME_FORM_FIELD = "username"  # Adjust if your form uses 'email' instea
 AXES_LOCKOUT_TEMPLATE = "lockout.html"
 AXES_LOCKOUT_URL = None  # Disable default URL redirection
 AXES_RAISE_PERMISSION_DENIED = True
+AXES_LOG_USING_SESSIONS = False
 AXES_RAISE_ACCESS_EXCEPTIONS = False
 AXES_RESET_COOL_OFF_ON_FAILURE = False  # Do not reset cooldown on failure
 AXES_VERBOSE = True  # Enable verbose logging
