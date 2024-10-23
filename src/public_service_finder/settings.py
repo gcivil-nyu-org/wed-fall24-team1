@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 
-# import boto3
 import os
 
 # from decouple import config
@@ -30,7 +29,9 @@ SECRET_KEY = "vst4p$jpg3_bxmz2aqlm8$*a947z$4vpdg4stkz&qmv+i^h@=v"
 
 AWS_REGION = "us-east-1"
 DYNAMODB_TABLE_SERVICES = "services"
+DYNAMODB_TABLE_REVIEWS = "reviews"
 
+SITE_ID = 2  # Make sure this is set
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".elasticbeanstalk.com"]
 # Application definition
@@ -42,10 +43,21 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sites",  # Required for django-allauth
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",  # Ensure this is included
+    "allauth.socialaccount.providers.google",  # For Google OAuth
     "home",
     "services",
     "accounts",
 ]
+
+
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {"SCOPE": ["profile", "email"], "AUTH_PARAMS": {"access_type": "online"}}
+}
+
 
 AUTH_USER_MODEL = "accounts.CustomUser"
 LOGIN_URL = "user_login"
@@ -61,12 +73,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
-
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -146,3 +158,8 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+AUTHENTICATION_BACKENDS = (
+    "django.contrib.auth.backends.ModelBackend",  # Default
+    "allauth.account.auth_backends.AuthenticationBackend",  # For allauth
+)
