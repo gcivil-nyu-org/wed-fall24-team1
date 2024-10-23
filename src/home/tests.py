@@ -1,7 +1,6 @@
-from botocore.exceptions import ClientError
 from django.test import TestCase, Client
 from django.urls import reverse
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 import json
 
 from accounts.models import CustomUser
