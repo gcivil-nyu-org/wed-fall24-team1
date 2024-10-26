@@ -7,6 +7,7 @@ import uuid  # For generating unique Review IDs
 from django.views.decorators.http import require_POST
 from decimal import Decimal
 
+
 def convert_decimals(obj):
     if isinstance(obj, list):
         return [convert_decimals(item) for item in obj]
@@ -108,7 +109,9 @@ def home_view(request):
             "RatingCount": str(item.get("rating_count", 0)),
             "Category": item.get("Category", "N/A"),
             "MapLink": item.get("MapLink"),
-            "Description": convert_decimals(item.get("Description", {})),  # Convert Decimals here
+            "Description": convert_decimals(
+                item.get("Description", {})
+            ),  # Convert Decimals here
         }
         for item in page_obj
     ]
