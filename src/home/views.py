@@ -13,7 +13,7 @@ def convert_decimals(obj):
     elif isinstance(obj, dict):
         return {k: convert_decimals(v) for k, v in obj.items()}
     elif isinstance(obj, Decimal):
-        return str(obj)  # or str(obj) if you prefer
+        return str(obj)
     else:
         return obj
 
@@ -123,7 +123,7 @@ def home_view(request):
             "radius": radius if radius else "",
             "page_obj": page_obj,
             "base_index": base_index,
-            "serialized_items": json.dumps(serialized_items),  # Now safe to serialize
+            "serialized_items": json.dumps(serialized_items),
         },
     )
 
