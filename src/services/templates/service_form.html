@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto mt-8">
+    <div class="max-w-2xl mx-auto">
+        <h1 class="text-2xl font-bold mb-6">{{ action }} Service</h1>
+
+        {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+            <div class="p-4 {% if message.tags == 'success' %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %} rounded">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post" class="bg-white shadow-md rounded-lg p-6">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="mb-4">
+                <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                    {{ field.label }}
+                </label>
+                {% if field.name == 'category' %}
+                <select name="{{ field.name }}" id="{{ field.id_for_label }}" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    {% for value, label in field.field.choices %}
+                    <option value="{{ value }}" {% if field.value == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                {% else %}
+                {{ field }}
+                {% endif %}
+                {% if field.errors %}
+                <div class="text-red-500 text-sm mt-1">
+                    {{ field.errors }}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <h2 class="text-xl font-bold mb-4">Description</h2>
+            {{ description_formset.management_form }}
+            <div id="description-formset">
+                {% for form in description_formset %}
+                <div class="description-form mb-4">
+                    <div class="flex space-x-4">
+                        <div class="flex-1">
+                            <label for="{{ form.key.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Key</label>
+                            {{ form.key }}
+                        </div>
+                        <div class="flex-1">
+                            <label for="{{ form.value.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Value</label>
+                            {{ form.value }}
+                        </div>
+                    </div>
+                    {% if form.errors %}
+                    <div class="text-red-500 text-sm mt-1">
+                        {{ form.errors }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            <button type="button" id="add-description" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 mt-2">
+                Add Description Item
+            </button>
+
+            <div class="flex justify-end mt-6">
+                <a href="{% url 'services:list' %}" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 mr-2">
+                    Cancel
+                </a>
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    {{ action }} Service
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const addButton = document.getElementById('add-description');
+        const formset = document.getElementById('description-formset');
+        let formCount = {{ description_formset.total_form_count }};
+
+        addButton.addEventListener('click', function() {
+            const newForm = formset.children[0].cloneNode(true);
+            const regex = new RegExp('description-' + (formCount-1), 'g');
+            newForm.innerHTML = newForm.innerHTML.replace(regex, 'description-' + formCount);
+
+            // Clear input values
+            newForm.querySelectorAll('input, textarea').forEach(input => {
+                input.value = '';
+            });
+
+            formset.appendChild(newForm);
+            formCount++;
+            document.getElementById('id_description-TOTAL_FORMS').value = formCount;
+        });
+    });
+</script>
+{% endblock %}

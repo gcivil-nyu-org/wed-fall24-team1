@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto mt-8">
+    <div class="max-w-md mx-auto bg-white shadow-md rounded-lg p-6">
+        <h1 class="text-2xl font-bold mb-4">Delete Service</h1>
+        <p class="mb-6">Delete the service "{{ service.Name }}"?</p>
+        <p class="text-sm text-gray-500">
+            This cannot be undone.
+        </p>
+        <form method="post">
+            {% csrf_token %}
+            <div class="flex justify-end">
+                <a href="{% url 'services:list' %}" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 mr-2">
+                    Cancel
+                </a>
+                <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                    Delete
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -14,16 +14,15 @@ from pathlib import Path
 import os
 from datetime import timedelta
 
-# from decouple import config
-
-# from .configs import GlobalConfig
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 DEBUG = True
-SECRET_KEY = "vst4p$jpg3_bxmz2aqlm8$*a947z$4vpdg4stkz&qmv+i^h@=v"
+SECRET_KEY = config("DJANGO_SECRET_KEY")
+GEOCODING_API_KEY = config("GEOCODING_API_KEY")
 
 
 AWS_REGION = "us-east-1"
@@ -73,13 +72,6 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
-
-# Authentication backends
-AUTHENTICATION_BACKENDS = [
-    "axes.backends.AxesBackend",
-    "accounts.backends.EmailOrUsernameBackend",
-    "django.contrib.auth.backends.ModelBackend",
-]
 
 # django-axes configurations
 SESSION_ENGINE = "django.contrib.sessions.backends.db"  # Default setting

@@ -100,7 +100,7 @@ class HomeRepository:
                 Key={"Id": service_id}, ProjectionExpression="Ratings, rating_count"
             )
             item = response.get("Item", {})
-            current_ratings = Decimal(item.get("Ratings", 0))
+            current_ratings = float(item.get("Ratings", 0))
             rating_count = int(item.get("rating_count", 0))
 
             # Calculate the new ratings
@@ -114,7 +114,7 @@ class HomeRepository:
                 Key={"Id": service_id},
                 UpdateExpression="SET Ratings = :r, rating_count = :c",
                 ExpressionAttributeValues={
-                    ":r": updated_ratings,
+                    ":r": Decimal(updated_ratings),
                     ":c": updated_rating_count,
                 },
             )
