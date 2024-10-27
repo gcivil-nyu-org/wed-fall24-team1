@@ -5,6 +5,18 @@ from .repositories import HomeRepository
 from django.http import JsonResponse
 import uuid  # For generating unique Review IDs
 from django.views.decorators.http import require_POST
+from decimal import Decimal
+
+
+def convert_decimals(obj):
+    if isinstance(obj, list):
+        return [convert_decimals(item) for item in obj]
+    elif isinstance(obj, dict):
+        return {k: convert_decimals(v) for k, v in obj.items()}
+    elif isinstance(obj, Decimal):
+        return str(obj)
+    else:
+        return obj
 
 
 @require_POST
@@ -97,7 +109,9 @@ def home_view(request):
             "RatingCount": str(item.get("rating_count", 0)),
             "Category": item.get("Category", "N/A"),
             "MapLink": item.get("MapLink"),
-            "Description": item.get("Description", {}),
+            "Description": convert_decimals(
+                item.get("Description", {})
+            ),  # Convert Decimals here
         }
         for item in page_obj
     ]
