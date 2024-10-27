@@ -69,3 +69,4 @@ tzdata==2024.2
 urllib3==2.2.3
 wcwidth==0.2.13
 wheel==0.44.0
+django-widget-tweaks==1.5.0
