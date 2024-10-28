@@ -26,21 +26,26 @@ class ServiceForm(forms.Form):
         if address:
             # Perform forward geocoding
             api_key = settings.GEOCODING_API_KEY  # Replace with your actual API key
-            url = f"https://geocode.maps.co/search?q={address}&api_key={api_key}"
+            url = f"https://api.positionstack.com/v1/forward?access_key={api_key}&query={address}"
 
             response = requests.get(url)
             if response.status_code == 200:
-                data = response.json()
+                data = response.json()["data"]
                 if data:
                     # Use the first result
                     result = data[0]
-                    cleaned_data["latitude"] = Decimal(result["lat"])
-                    cleaned_data["longitude"] = Decimal(result["lon"])
+                    cleaned_data["latitude"] = Decimal(str(result["latitude"]))
+                    cleaned_data["longitude"] = Decimal(str(result["longitude"]))
                 else:
-                    raise forms.ValidationError("Unable to geocode the given address.")
+                    # Add error to the address field
+                    self.add_error(
+                        "address",
+                        "Unable to geocode the given address. Please check if the address is correct.",
+                    )
             else:
-                raise forms.ValidationError(
-                    "Error occurred while geocoding the address."
+                self.add_error(
+                    "address",
+                    "Error occurred while geocoding the address. Please try again later.",
                 )
 
         # Translate category to backend value

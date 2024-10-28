@@ -44,7 +44,7 @@ class ServiceDTO:
             "Address": self.address,
             "Lat": self.latitude,
             "Log": self.longitude,
-            "Ratings": self.ratings or "NoRatings",
+            "Ratings": self.ratings or Decimal("0"),
             "Description": self.description,
             "Category": self.category,
             "ProviderId": self.provider_id,

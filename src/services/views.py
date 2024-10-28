@@ -11,7 +11,7 @@ from django.http import Http404, JsonResponse
 # services/views.py
 from django.shortcuts import render, redirect
 
-from src.home.repositories import HomeRepository
+from home.repositories import HomeRepository
 from .forms import ServiceForm, DescriptionFormSet
 from .models import ServiceDTO
 from .repositories import ServiceRepository
