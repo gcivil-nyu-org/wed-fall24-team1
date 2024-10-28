@@ -17,11 +17,7 @@ class EmailOrUsernameBackend(ModelBackend):
             # Try to get the user by username
             user = UserModel.objects.get(username=username)
         except UserModel.DoesNotExist:
-            # If not found, try to get the user by email
-            try:
-                user = UserModel.objects.get(email=username)
-            except UserModel.DoesNotExist:
-                return None
+            return None
         # Use user_can_authenticate method from ModelBackend
         if user.check_password(password) and self.user_can_authenticate(user):
             return user
