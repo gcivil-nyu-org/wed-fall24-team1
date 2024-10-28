@@ -191,5 +191,5 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTHENTICATION_BACKENDS = (
     "django.contrib.auth.backends.ModelBackend",  # Default
     "allauth.account.auth_backends.AuthenticationBackend",  # For allauth
-    "axes.backends.AxesStandaloneBackend", # axes
+    "axes.backends.AxesStandaloneBackend",  # axes
 )
