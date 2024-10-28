@@ -3,8 +3,8 @@ from django.urls import reverse
 from unittest.mock import patch
 import json
 
-from accounts.models.custom_user_model import CustomUser
 
+from accounts.models import CustomUser
 from home.utils import calculate_distance
 
 
