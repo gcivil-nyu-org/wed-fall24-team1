@@ -1,6 +1,6 @@
 from axes.models import AccessAttempt
 from django.conf import settings
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login
 from django.contrib.auth.views import LoginView
 from django.core.exceptions import PermissionDenied
 from django.db import models
@@ -17,21 +17,11 @@ def register(request):
         form = UserRegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
-
-            # Authenticate the user to set the backend
-            authenticated_user = authenticate(
-                request, username=user.username, password=form.cleaned_data["password1"]
-            )
-
-            if authenticated_user is not None:
-                login(request, authenticated_user)  # Backend is automatically set
-
-                if user.user_type == "service_provider":
-                    return redirect("services:list")
-                else:
-                    return redirect("home")
+            login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+            if user.user_type == "service_provider":
+                return redirect("services:list")
             else:
-                form.add_error(None, "Authentication failed. Please try again.")
+                return redirect("home")
     else:
         form = UserRegisterForm()
     return render(request, "register.html", {"form": form})
@@ -121,15 +111,6 @@ class UserLoginView(CustomLoginView):
 class ServiceProviderLoginView(CustomLoginView):
     form_class = ServiceProviderLoginForm
     template_name = "service_provider_login.html"
-
-    def form_valid(self, form):
-        username = form.cleaned_data.get("username")
-        password = form.cleaned_data.get("password")
-        user = authenticate(self.request, username=username, password=password)
-        if user is not None:
-            login(self.request, user)
-            return super().form_valid(form)
-        return self.form_invalid(form)
 
     def get_success_url(self):
         if self.request.user.user_type == "service_provider":

@@ -1,15 +1,18 @@
 document.addEventListener('DOMContentLoaded', function() {
     const deleteModal = document.getElementById('deleteModal');
     const deleteButtons = document.querySelectorAll('.delete-service');
+    const deleteForm = document.getElementById('deleteForm');
     const confirmDeleteButton = document.getElementById('confirmDelete');
     const cancelDeleteButton = document.getElementById('cancelDelete');
     const serviceNameSpan = document.getElementById('serviceName');
-    let currentServiceId = null;
 
     deleteButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            currentServiceId = this.dataset.serviceId;
-            serviceNameSpan.textContent = this.dataset.serviceName;
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const serviceId = this.dataset.serviceId;
+            const serviceName = this.dataset.serviceName;
+            serviceNameSpan.textContent = serviceName;
+            deleteForm.action = `/services/${serviceId}/delete/`;
             deleteModal.classList.remove('hidden');
         });
     });
@@ -18,9 +21,5 @@ document.addEventListener('DOMContentLoaded', function() {
         deleteModal.classList.add('hidden');
     });
 
-    confirmDeleteButton.addEventListener('click', function() {
-        if (currentServiceId) {
-            window.location.href = `/services/${currentServiceId}/delete/`;
-        }
-    });
+    // No need for confirmDeleteButton event listener as the form will handle submission
 });

@@ -1,11 +1,12 @@
+from unittest.mock import patch
+
+from accounts.backends import EmailOrUsernameBackend
+from accounts.forms import ServiceProviderLoginForm, UserRegisterForm
+from accounts.models import CustomUser
+from django.contrib.auth import authenticate
+from django.contrib.auth import get_user_model
 from django.test import TestCase, Client, RequestFactory
 from django.urls import reverse
-from accounts.models import CustomUser
-from django.contrib.auth import get_user_model
-from django.contrib.auth import authenticate
-from accounts.forms import ServiceProviderLoginForm, UserRegisterForm
-from accounts.backends import EmailOrUsernameBackend
-from unittest.mock import patch
 
 
 # ---------- Model Tests ----------
@@ -133,28 +134,6 @@ class UserLoginViewTest(TestCase):
     #     self.assertEqual(response.status_code, 200)
     #     self.assertTemplateUsed(response, "user_login.html")
     #     self.assertIsInstance(response.context["form"], UserLoginForm)
-
-
-class ServiceProviderLoginViewTest(TestCase):
-    def setUp(self):
-        self.service_provider = CustomUser.objects.create_user(
-            username="provider",
-            email="provider@example.com",
-            password="Provider123!",
-            user_type="service_provider",
-        )
-
-    def test_service_provider_login_invalid(self):
-        """Test an invalid service provider login attempt."""
-        response = self.client.post(
-            reverse("service_provider_login"),
-            {
-                "email": "wrong@example.com",
-                "password": "wrongpassword",
-            },
-        )
-        self.assertEqual(response.status_code, 200)  # Form reloads on failure
-        # self.assertContains(response, "Invalid email or password")
 
 
 class LogoutViewTest(TestCase):

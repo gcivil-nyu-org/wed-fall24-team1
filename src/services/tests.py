@@ -203,9 +203,8 @@ class ServiceViewsTestCase(TestCase):
                 category="MENTAL",
                 provider_id=str(self.service_provider.id),
             )
-            response = self.client.get(reverse("services:delete", args=[service_id]))
-            self.assertEqual(response.status_code, 200)
-            self.assertTemplateUsed(response, "service_confirm_delete.html")
+            response = self.client.post(reverse("services:delete", args=[service_id]))
+            self.assertEqual(response.status_code, 302)
 
     def test_service_delete_view_post(self):
         self.client.login(username="provider", password="testpass123")

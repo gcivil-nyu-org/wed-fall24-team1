@@ -5,7 +5,7 @@ from decimal import Decimal
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.http import Http404, JsonResponse
+from django.http import Http404, JsonResponse, HttpResponseNotAllowed
 
 # Create your views here.
 # services/views.py
@@ -227,5 +227,5 @@ def service_delete(request, service_id):
             messages.error(request, "Error deleting service.")
         return redirect("services:list")
 
-    # For GET request, show confirmation page
-    return render(request, "service_confirm_delete.html", {"service": service})
+    # If it's not a POST request, return a 405 Method Not Allowed
+    return HttpResponseNotAllowed(["POST"])
