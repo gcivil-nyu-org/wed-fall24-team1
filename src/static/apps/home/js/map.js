@@ -36,6 +36,9 @@ function setUserLocation(lat, lon) {
     // Store the user's coordinates in localStorage
     localStorage.setItem('userLat', lat);
     localStorage.setItem('userLong', lon);
+
+    document.getElementById('user-lat').value = lat;
+    document.getElementById('user-lon').value = lon;
 }
 
 // Initialize markers array
