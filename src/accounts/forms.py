@@ -3,6 +3,7 @@
 from django import forms
 from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.core.exceptions import ObjectDoesNotExist
 
 from .models import CustomUser
 
@@ -69,18 +70,21 @@ class ServiceProviderLoginForm(AuthenticationForm):
 
         if email and password:
             UserModel = get_user_model()
-            user = UserModel.objects.get(email=email)
-            self.user_cache = authenticate(
-                self.request, username=user.username, password=password
-            )
-            if self.user_cache is None:
+            try:
+                user = UserModel.objects.get(email=email)
+                self.user_cache = authenticate(
+                    self.request, username=user.username, password=password
+                )
+                if self.user_cache is None:
+                    raise forms.ValidationError("Invalid email or password.")
+                else:
+                    if self.user_cache.user_type != "service_provider":
+                        raise forms.ValidationError(
+                            "This page is for service providers only."
+                        )
+                    self.confirm_login_allowed(self.user_cache)
+            except ObjectDoesNotExist:
                 raise forms.ValidationError("Invalid email or password.")
-            else:
-                if self.user_cache.user_type != "service_provider":
-                    raise forms.ValidationError(
-                        "This page is for service providers only."
-                    )
-                self.confirm_login_allowed(self.user_cache)
         else:
             raise forms.ValidationError("Please enter both email and password.")
         return self.cleaned_data
