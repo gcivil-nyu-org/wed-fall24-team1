@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     "services",
     "accounts",
     "axes",
+    "widget_tweaks",
 ]
 
 

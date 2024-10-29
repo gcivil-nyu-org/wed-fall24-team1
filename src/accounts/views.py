@@ -4,12 +4,19 @@ from django.contrib.auth import login
 from django.contrib.auth.views import LoginView
 from django.core.exceptions import PermissionDenied
 from django.db import models
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from .forms import UserRegisterForm, UserLoginForm, ServiceProviderLoginForm
+from accounts.models import ServiceSeeker
+
+from .forms import (
+    ServiceSeekerForm,
+    UserRegisterForm,
+    UserLoginForm,
+    ServiceProviderLoginForm,
+)
 
 
 def register(request):
@@ -21,10 +28,60 @@ def register(request):
             if user.user_type == "service_provider":
                 return redirect("services:list")
             else:
+                ServiceSeeker.objects.create(
+                    user=user, username=user.username, email=user.email
+                )
                 return redirect("home")
     else:
         form = UserRegisterForm()
     return render(request, "register.html", {"form": form})
+
+
+def profile_view(request):
+    user = request.user
+    if user.user_type == "service_provider":
+        service_provider = ""
+        service_provider = get_object_or_404(service_provider, user=user)
+        # TODO: Service Provider
+        form = None
+
+        # If it's a POST request, we're updating the profile
+        # if request.method == "POST":
+        #     form = ServiceProviderForm(request.POST, instance=service_provider)
+        #     if form.is_valid():
+        #         form.save()
+        #         return redirect("profile_view")  # Redirect to avoid resubmission
+        # else:
+        #     form = ServiceProviderForm(instance=service_provider)
+
+        return render(
+            request,
+            "profile_service_provider.html",
+            {
+                "profile": service_provider,
+                "form": form,  # Pass the form to the template
+            },
+        )
+    elif user.user_type == "user":
+        service_seeker = get_object_or_404(ServiceSeeker, user=user)
+
+        # If it's a POST request, we're updating the profile
+        if request.method == "POST":
+            form = ServiceSeekerForm(request.POST, instance=service_seeker)
+            if form.is_valid():
+                form.save()
+                return redirect("profile_view")
+        else:
+            form = ServiceSeekerForm(instance=service_seeker)
+
+        return render(
+            request,
+            "profile_base.html",
+            {
+                "profile": service_seeker,
+                "form": form,  # Pass the form to the template
+            },
+        )
 
 
 # Custom Login View to handle AxesLockedOut exception

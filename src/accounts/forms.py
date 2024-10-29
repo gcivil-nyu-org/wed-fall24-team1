@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.core.exceptions import ObjectDoesNotExist
 
-from .models import CustomUser
+from .models import CustomUser, ServiceSeeker
 
 
 class UserRegisterForm(UserCreationForm):
@@ -94,3 +94,33 @@ class ServiceProviderLoginForm(AuthenticationForm):
 
     def get_invalid_login_error(self):
         return forms.ValidationError("Invalid email or password.")
+
+
+class ServiceSeekerForm(forms.ModelForm):
+    class Meta:
+        model = ServiceSeeker
+        fields = ["username", "email", "location_preference", "bookmarked_services"]
+        widgets = {
+            "username": forms.TextInput(
+                attrs={
+                    "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
+                    "readonly": "readonly",  # Make username non-editable
+                }
+            ),
+            "email": forms.EmailInput(
+                attrs={
+                    "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
+                    "readonly": "readonly",  # Make email non-editable
+                }
+            ),
+            "location_preference": forms.TextInput(
+                attrs={
+                    "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
+                }
+            ),
+            "bookmarked_services": forms.SelectMultiple(
+                attrs={
+                    "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
+                }
+            ),
+        }
