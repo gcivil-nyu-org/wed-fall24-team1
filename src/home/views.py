@@ -119,9 +119,7 @@ def home_view(request):
             "RatingCount": str(item.get("rating_count", 0)),
             "Category": item.get("Category", "N/A"),
             "MapLink": item.get("MapLink"),
-            "Description": convert_decimals(
-                item.get("Description", {})
-            ),
+            "Description": convert_decimals(item.get("Description", {})),
         }
         for item in page_obj
     ]
@@ -142,6 +140,7 @@ def home_view(request):
             "location_value": location_value,
         },
     )
+
 
 def get_reviews(request, service_id):
     try:
