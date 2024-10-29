@@ -1,8 +1,10 @@
 # accounts/forms.py
 
 from django import forms
+from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from django.contrib.auth import authenticate
+from django.core.exceptions import ObjectDoesNotExist
+
 from .models import CustomUser
 
 
@@ -14,7 +16,7 @@ class UserRegisterForm(UserCreationForm):
 
 class UserLoginForm(AuthenticationForm):
     username = forms.CharField(
-        label="Username or Email",
+        label="Username",
         widget=forms.TextInput(attrs={"class": "form-control"}),
         required=True,
     )
@@ -45,9 +47,6 @@ class UserLoginForm(AuthenticationForm):
             )
         return self.cleaned_data
 
-    def get_user(self):
-        return self.user_cache
-
 
 class ServiceProviderLoginForm(AuthenticationForm):
     email = forms.EmailField(
@@ -70,15 +69,22 @@ class ServiceProviderLoginForm(AuthenticationForm):
         password = self.cleaned_data.get("password")
 
         if email and password:
-            self.user_cache = authenticate(self.request, email=email, password=password)
-            if self.user_cache is None:
+            UserModel = get_user_model()
+            try:
+                user = UserModel.objects.get(email=email)
+                self.user_cache = authenticate(
+                    self.request, username=user.username, password=password
+                )
+                if self.user_cache is None:
+                    raise forms.ValidationError("Invalid email or password.")
+                else:
+                    if self.user_cache.user_type != "service_provider":
+                        raise forms.ValidationError(
+                            "This page is for service providers only."
+                        )
+                    self.confirm_login_allowed(self.user_cache)
+            except ObjectDoesNotExist:
                 raise forms.ValidationError("Invalid email or password.")
-            else:
-                if self.user_cache.user_type != "service_provider":
-                    raise forms.ValidationError(
-                        "This page is for service providers only."
-                    )
-                self.confirm_login_allowed(self.user_cache)
         else:
             raise forms.ValidationError("Please enter both email and password.")
         return self.cleaned_data

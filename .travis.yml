@@ -11,7 +11,7 @@ install:
 script:
   - black . --check
   - flake8 .
-  - coverage run --source='src/accounts,src/home,src/public_service_finder' src/manage.py test accounts home public_service_finder
+  - PYTHONPATH=. coverage run --source='src/accounts,src/home,src/public_service_finder,src/services' src/manage.py test accounts home public_service_finder services
 
 after_success:
   - coveralls

@@ -14,16 +14,15 @@ from pathlib import Path
 import os
 from datetime import timedelta
 
-# from decouple import config
-
-# from .configs import GlobalConfig
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 DEBUG = True
-SECRET_KEY = "vst4p$jpg3_bxmz2aqlm8$*a947z$4vpdg4stkz&qmv+i^h@=v"
+SECRET_KEY = config("DJANGO_SECRET_KEY")
+GEOCODING_API_KEY = config("GEOCODING_API_KEY")
 
 
 AWS_REGION = "us-east-1"
@@ -74,13 +73,6 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 
-# Authentication backends
-AUTHENTICATION_BACKENDS = [
-    "axes.backends.AxesBackend",
-    "accounts.backends.EmailOrUsernameBackend",
-    "django.contrib.auth.backends.ModelBackend",
-]
-
 # django-axes configurations
 SESSION_ENGINE = "django.contrib.sessions.backends.db"  # Default setting
 AXES_USERNAME_CALLABLE = "accounts.utils.get_axes_username"
@@ -97,7 +89,7 @@ AXES_LOCKOUT_URL = None
 AXES_RAISE_PERMISSION_DENIED = True
 AXES_LOG_USING_SESSIONS = True  # Updated to True
 AXES_RAISE_ACCESS_EXCEPTIONS = False
-AXES_RESET_COOL_OFF_ON_FAILURE = False
+AXES_RESET_COOL_OFF_ON_FAILURE = True
 AXES_VERBOSE = True
 AXES_USE_PROXY = False
 

@@ -1,16 +1,17 @@
-from django.shortcuts import render, redirect
+from axes.models import AccessAttempt
+from django.conf import settings
 from django.contrib.auth import login
-from django.core.exceptions import PermissionDenied
-from .forms import UserRegisterForm, UserLoginForm, ServiceProviderLoginForm
 from django.contrib.auth.views import LoginView
+from django.core.exceptions import PermissionDenied
+from django.db import models
+from django.shortcuts import render, redirect
+from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from django.conf import settings
-from django.db import models
-from axes.models import AccessAttempt
+
+from .forms import UserRegisterForm, UserLoginForm, ServiceProviderLoginForm
 
 
-# User registration view
 def register(request):
     if request.method == "POST":
         form = UserRegisterForm(request.POST)
@@ -18,7 +19,7 @@ def register(request):
             user = form.save()
             login(request, user, backend="django.contrib.auth.backends.ModelBackend")
             if user.user_type == "service_provider":
-                return redirect("service_provider_dashboard")
+                return redirect("services:list")
             else:
                 return redirect("home")
     else:
@@ -110,6 +111,11 @@ class UserLoginView(CustomLoginView):
 class ServiceProviderLoginView(CustomLoginView):
     form_class = ServiceProviderLoginForm
     template_name = "service_provider_login.html"
+
+    def get_success_url(self):
+        if self.request.user.user_type == "service_provider":
+            return reverse_lazy("services:list")
+        return reverse_lazy("login")
 
 
 # Login selection page view
