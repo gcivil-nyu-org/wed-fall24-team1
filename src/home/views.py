@@ -79,8 +79,6 @@ def home_view(request):
     ulon = request.GET.get("user_lon")
     service_type = request.GET.get("type", "")
 
-    print(f"Received coordinates: user_lat = {ulat}, user_lon = {ulon}")
-
     # Validate the user location (latitude and longitude)
     if ulat and ulon:
         try:
