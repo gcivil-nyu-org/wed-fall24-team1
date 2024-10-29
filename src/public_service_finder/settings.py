@@ -34,7 +34,7 @@ SITE_ID = 2  # Make sure this is set
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".elasticbeanstalk.com"]
 
 if NON_DEV_ENV:
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
