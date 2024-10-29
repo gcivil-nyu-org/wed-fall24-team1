@@ -11,13 +11,12 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
-
 import os
+from datetime import timedelta
 
 # from decouple import config
 
 # from .configs import GlobalConfig
-
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -51,6 +50,7 @@ INSTALLED_APPS = [
     "home",
     "services",
     "accounts",
+    "axes",
 ]
 
 
@@ -73,6 +73,34 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
+
+# Authentication backends
+AUTHENTICATION_BACKENDS = [
+    "axes.backends.AxesBackend",
+    "accounts.backends.EmailOrUsernameBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+
+# django-axes configurations
+SESSION_ENGINE = "django.contrib.sessions.backends.db"  # Default setting
+AXES_USERNAME_CALLABLE = "accounts.utils.get_axes_username"
+
+AXES_ENABLED = True
+AXES_FAILURE_LIMIT = 3
+AXES_COOLOFF_TIME = timedelta(minutes=5)
+AXES_LOCKOUT_PARAMETERS = ["username"]
+AXES_RESET_ON_SUCCESS = False
+AXES_HANDLER = "axes.handlers.database.AxesDatabaseHandler"
+AXES_USERNAME_FORM_FIELD = "username"
+AXES_LOCKOUT_TEMPLATE = "lockout.html"
+AXES_LOCKOUT_URL = None
+AXES_RAISE_PERMISSION_DENIED = True
+AXES_LOG_USING_SESSIONS = True  # Updated to True
+AXES_RAISE_ACCESS_EXCEPTIONS = False
+AXES_RESET_COOL_OFF_ON_FAILURE = False
+AXES_VERBOSE = True
+AXES_USE_PROXY = False
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -80,6 +108,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "allauth.account.middleware.AccountMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "axes.middleware.AxesMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -162,4 +191,5 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTHENTICATION_BACKENDS = (
     "django.contrib.auth.backends.ModelBackend",  # Default
     "allauth.account.auth_backends.AuthenticationBackend",  # For allauth
+    "axes.backends.AxesStandaloneBackend",  # axes
 )

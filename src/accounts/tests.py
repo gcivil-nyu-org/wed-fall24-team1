@@ -1,7 +1,10 @@
-from django.test import TestCase, Client
+from django.test import TestCase, Client, RequestFactory
 from django.urls import reverse
 from accounts.models import CustomUser
+from django.contrib.auth import get_user_model
+from django.contrib.auth import authenticate
 from accounts.forms import ServiceProviderLoginForm, UserRegisterForm
+from accounts.backends import EmailOrUsernameBackend
 from unittest.mock import patch
 
 
@@ -286,3 +289,57 @@ class DuplicateEmailTest(TestCase):
     #     form = response.context.get("form")
     #     self.assertIsNotNone(form)
     #     self.assertFalse(form.is_valid())
+
+
+class EmailOrUsernameBackendTest(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+        self.backend = EmailOrUsernameBackend()
+        self.user_model = get_user_model()
+        self.request = self.factory.get("/")  # Simulate a GET request for testing
+
+        # Create a test user with both email and username
+        self.user = self.user_model.objects.create_user(
+            username="testuser", email="testuser@example.com", password="password123"
+        )
+
+    def test_authenticate_with_valid_username(self):
+        """Test user can authenticate using username"""
+        user = authenticate(
+            request=self.request, username="testuser", password="password123"
+        )
+        self.assertIsNotNone(user)
+        self.assertEqual(user.username, "testuser")
+
+    def test_authenticate_with_invalid_username(self):
+        """Test authentication fails with invalid username"""
+        user = authenticate(
+            request=self.request, username="wronguser", password="password123"
+        )
+        self.assertIsNone(user)
+
+    def test_authenticate_with_invalid_email(self):
+        """Test authentication fails with invalid email"""
+        user = authenticate(
+            request=self.request,
+            username="wrongemail@example.com",
+            password="password123",
+        )
+        self.assertIsNone(user)
+
+    def test_authenticate_with_wrong_password(self):
+        """Test authentication fails with correct username/email but wrong password"""
+        user = authenticate(
+            request=self.request, username="testuser", password="wrongpassword"
+        )
+        self.assertIsNone(user)
+
+    def test_get_user_valid(self):
+        """Test get_user returns a valid user"""
+        user = self.backend.get_user(self.user.pk)
+        self.assertEqual(user.username, "testuser")
+
+    def test_get_user_invalid(self):
+        """Test get_user returns None for invalid user_id"""
+        user = self.backend.get_user(9999)
+        self.assertIsNone(user)
