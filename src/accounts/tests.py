@@ -1,7 +1,6 @@
 from unittest.mock import patch
 from accounts.backends import EmailOrUsernameBackend
 from accounts.forms import ServiceProviderLoginForm, UserRegisterForm
-from accounts.models import ServiceSeeker
 from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
 from django.test import TestCase, Client, RequestFactory
@@ -25,7 +24,7 @@ class CustomUserModelTest(TestCase):
 
     def test_string_representation(self):
         """Test if the string representation of the user is correct."""
-        self.assertEqual(str(self.user), "testuser")
+        self.assertEqual(str(self.user.username), "testuser")
 
 
 # ---------- Form Tests ----------
@@ -231,7 +230,7 @@ class CustomUserServiceProviderTest(TestCase):
         service_provider = CustomUser(
             username="provider3", user_type="service_provider"
         )
-        self.assertEqual(str(service_provider), "provider3")
+        self.assertEqual(str(service_provider.username), "provider3")
 
 
 class InvalidServiceProviderLoginFormTest(TestCase):
@@ -341,9 +340,6 @@ class ProfileViewTest(TestCase):
             email="seeker@example.com",
             password="testpassword",
             user_type="user",
-        )
-        self.service_seeker = ServiceSeeker.objects.create(
-            user=self.service_seeker_user
         )
 
     def test_profile_view_service_provider(self):

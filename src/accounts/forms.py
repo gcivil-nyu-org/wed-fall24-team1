@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.core.exceptions import ObjectDoesNotExist
 
-from .models import CustomUser, ServiceSeeker
+from .models import CustomUser
 
 
 class UserRegisterForm(UserCreationForm):
@@ -98,8 +98,8 @@ class ServiceProviderLoginForm(AuthenticationForm):
 
 class ServiceSeekerForm(forms.ModelForm):
     class Meta:
-        model = ServiceSeeker
-        fields = ["username", "email", "location_preference", "bookmarked_services"]
+        model = CustomUser
+        fields = ["username", "email", "first_name", "last_name"]
         widgets = {
             "username": forms.TextInput(
                 attrs={
@@ -113,12 +113,12 @@ class ServiceSeekerForm(forms.ModelForm):
                     "readonly": "readonly",  # Make email non-editable
                 }
             ),
-            "location_preference": forms.TextInput(
+            "first_name": forms.TextInput(
                 attrs={
                     "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
                 }
             ),
-            "bookmarked_services": forms.SelectMultiple(
+            "last_name": forms.TextInput(
                 attrs={
                     "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
                 }

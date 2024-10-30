@@ -11,7 +11,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.decorators import login_required
 
-from accounts.models import ServiceSeeker
+from accounts.models import CustomUser
 
 from .forms import (
     ServiceSeekerForm,
@@ -30,9 +30,10 @@ def register(request):
             if user.user_type == "service_provider":
                 return redirect("services:list")
             else:
-                ServiceSeeker.objects.create(
-                    user=user, username=user.username, email=user.email
-                )
+                # CustomUser.objects.create(
+                #     username=user.username, email=user.email,
+                #     first_name="John", last_name="Doe"
+                # )
                 return redirect("home")
     else:
         form = UserRegisterForm()
@@ -47,7 +48,7 @@ def profile_view(request):
         print("user type is service_provider")
         return HttpResponseNotFound("Page not found")
     elif user.user_type == "user":
-        service_seeker = get_object_or_404(ServiceSeeker, user=user)
+        service_seeker = get_object_or_404(CustomUser, email=user.email)
 
         # If it's a POST request, we're updating the profile
         if request.method == "POST":
