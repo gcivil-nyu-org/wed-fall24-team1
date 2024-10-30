@@ -1,7 +1,7 @@
 from unittest.mock import patch
 
 from accounts.backends import EmailOrUsernameBackend
-from accounts.forms import ServiceProviderLoginForm, UserRegisterForm
+from accounts.forms import ServiceProviderLoginForm, UserLoginForm, UserRegisterForm
 from accounts.models import CustomUser
 from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
@@ -321,4 +321,192 @@ class EmailOrUsernameBackendTest(TestCase):
     def test_get_user_invalid(self):
         """Test get_user returns None for invalid user_id"""
         user = self.backend.get_user(9999)
+        self.assertIsNone(user)
+
+
+class UserRegisterFormEdgeCaseTest(TestCase):
+    def test_invalid_username(self):
+        """Test if the form is invalid with a non-alphanumeric username."""
+        form_data = {
+            "username": "invalid@user!",
+            "email": "newuser@example.com",
+            "password1": "ValidPass123!",
+            "password2": "ValidPass123!",
+            "user_type": "user",
+        }
+        form = UserRegisterForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("username", form.errors)
+
+    def test_missing_user_type(self):
+        """Test if the form is invalid when user_type is missing."""
+        form_data = {
+            "username": "newuser",
+            "email": "newuser@example.com",
+            "password1": "ValidPass123!",
+            "password2": "ValidPass123!",
+        }
+        form = UserRegisterForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("user_type", form.errors)
+
+    def test_weak_password(self):
+        """Test if the form rejects a weak password."""
+        form_data = {
+            "username": "newuser",
+            "email": "newuser@example.com",
+            "password1": "password",  # Weak password
+            "password2": "password",
+            "user_type": "user",
+        }
+        form = UserRegisterForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn("password2", form.errors)
+
+
+class UserLoginFormEmailAndUsernameTest(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+        self.user = CustomUser.objects.create_user(
+            username="testuser",
+            email="testuser@example.com",
+            password="ValidPass123!",
+            user_type="user",
+            is_active=True,
+        )
+
+    def test_login_with_username(self):
+        """Test login with a valid username and password."""
+        form_data = {"username": "testuser", "password": "ValidPass123!"}
+        form = UserLoginForm(data=form_data)
+        self.assertTrue(form.is_valid())
+
+    def test_login_with_email(self):
+        """Test login with a valid email and password."""
+        request = self.factory.post("/login/")  # Simulate a POST request
+        form_data = {"username": "testuser@example.com", "password": "ValidPass123!"}
+        form = UserLoginForm(data=form_data, request=request)  # Pass the request object
+        self.assertFalse(form.is_valid())
+
+    def test_login_with_invalid_email_or_username(self):
+        """Test login with invalid username or email."""
+        request = self.factory.post("/login/")
+        form_data = {"username": "wronguser", "password": "ValidPass123!"}
+        form = UserLoginForm(data=form_data, request=request)
+        self.assertFalse(form.is_valid())
+        self.assertIn("Invalid username/email or password.", form.errors["__all__"])
+
+    def test_login_without_username_or_password(self):
+        """Test login with missing username or password."""
+        form_data = {"username": "", "password": ""}
+        form = UserLoginForm(data=form_data)
+        self.assertFalse(form.is_valid())
+        self.assertIn(
+            "Please enter both username/email and password.", form.errors["__all__"]
+        )
+
+
+class ServiceProviderLoginFormUserTypeTest(TestCase):
+    def setUp(self):
+        self.user = CustomUser.objects.create_user(
+            username="regularuser",
+            email="user@example.com",
+            password="ValidPass123!",
+            user_type="user",  # Regular user, not a service provider
+            is_active=True,
+        )
+        self.factory = RequestFactory()
+
+    def test_regular_user_cannot_login_as_service_provider(self):
+        """Test that regular users are blocked from logging in as service providers."""
+        request = self.factory.post("/login/")
+        form_data = {"email": "user@example.com", "password": "ValidPass123!"}
+        form = ServiceProviderLoginForm(data=form_data, request=request)
+        self.assertFalse(form.is_valid())
+        self.assertIn(
+            "This page is for service providers only.", form.errors["__all__"]
+        )
+
+
+class ServiceProviderLoginFormNonExistentUserTest(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+
+    def test_nonexistent_user_login(self):
+        """Test login attempt with an email that doesn't exist."""
+        request = self.factory.post("/login/")
+        form_data = {"email": "nonexistent@example.com", "password": "Password123!"}
+        form = ServiceProviderLoginForm(data=form_data, request=request)
+        self.assertFalse(form.is_valid())
+        self.assertIn("Invalid email or password.", form.errors["__all__"])
+
+
+class ServiceProviderLoginFormEmptyFieldsTest(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+
+    def test_missing_email_and_password(self):
+        """Test login attempt with missing email and password."""
+        request = self.factory.post("/login/")
+        form_data = {"email": "", "password": ""}
+        form = ServiceProviderLoginForm(data=form_data, request=request)
+        self.assertFalse(form.is_valid())
+        self.assertIn("Please enter both email and password.", form.errors["__all__"])
+
+
+class EmailOrUsernameBackendUncoveredTest(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+
+        # Create an active user for valid test scenarios
+        self.user = CustomUser.objects.create_user(
+            username="testuser",
+            email="testuser@example.com",
+            password="TestPass123!",
+            is_active=True,
+        )
+
+    def test_authenticate_with_none_username(self):
+        """Test authentication fails when username is None."""
+        request = self.factory.post("/login/")
+        user = authenticate(request=request, username=None, password="TestPass123!")
+        self.assertIsNone(user)
+
+    def test_authenticate_with_none_password(self):
+        """Test authentication fails when password is None."""
+        request = self.factory.post("/login/")
+        user = authenticate(request=request, username="testuser", password=None)
+        self.assertIsNone(user)
+
+    def test_user_not_found_by_username(self):
+        """Test backend tries email authentication if username doesn't exist."""
+        request = self.factory.post("/login/")
+        user = authenticate(
+            request=request, username="nonexistent", password="TestPass123!"
+        )
+        self.assertIsNone(user)
+
+    def test_user_not_found_by_username_or_email(self):
+        """Test authenticate() returns None if both username and email don't exist."""
+        request = self.factory.post("/login/")
+        user = authenticate(
+            request=request, username="wrongemail@example.com", password="TestPass123!"
+        )
+        self.assertIsNone(user)
+
+    def test_authenticate_with_invalid_password(self):
+        """Test authentication fails with a valid username but wrong password."""
+        request = self.factory.post("/login/")
+        user = authenticate(request=request, username="testuser", password="WrongPass!")
+        self.assertIsNone(user)
+
+    def test_authenticate_with_inactive_user(self):
+        """Test that an inactive user cannot authenticate."""
+        self.user.is_active = False  # Set user as inactive
+        self.user.save()
+
+        request = self.factory.post("/login/")
+        user = authenticate(
+            request=request, username="testuser", password="TestPass123!"
+        )
         self.assertIsNone(user)
