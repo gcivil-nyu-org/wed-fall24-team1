@@ -111,6 +111,7 @@ def service_edit(request, service_id):
         raise PermissionDenied
 
     service = service_repo.get_service(service_id)
+    print(service)
     if not service or service.provider_id != str(request.user.id):
         raise PermissionDenied
 
