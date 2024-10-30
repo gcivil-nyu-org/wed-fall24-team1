@@ -23,7 +23,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DEBUG = True
 SECRET_KEY = config("DJANGO_SECRET_KEY")
 GEOCODING_API_KEY = config("GEOCODING_API_KEY")
-
+SUPABASE_DB_NAME = config("SUPABASE_DB_NAME")
+SUPABASE_DB_USER = config("SUPABASE_DB_USER")
+SUPABASE_DB_PASSWORD = config("SUPABASE_DB_PASSWORD")
+SUPABASE_DB_HOST = config("SUPABASE_DB_HOST")
+SUPABASE_DB_PORT = config("SUPABASE_DB_PORT")
 
 AWS_REGION = "us-east-1"
 DYNAMODB_TABLE_SERVICES = "services"
@@ -133,8 +137,12 @@ WSGI_APPLICATION = "public_service_finder.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": SUPABASE_DB_NAME,
+        "USER": SUPABASE_DB_USER,
+        "PASSWORD": SUPABASE_DB_PASSWORD,
+        "HOST": SUPABASE_DB_HOST,
+        "PORT": SUPABASE_DB_PORT
     }
 }
 
