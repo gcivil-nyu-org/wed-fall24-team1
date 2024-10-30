@@ -148,7 +148,7 @@ class ServiceViewsTestCase(TestCase):
                 category="FOOD",
                 ratings=Decimal("4.5"),
                 description={"hours": "9-5"},
-                address="Test address",
+                address="5 Metrotech Center, Brooklyn, NY",
                 latitude=Decimal(40.32),
                 longitude=Decimal(-74.001),
             )

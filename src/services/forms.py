@@ -1,10 +1,10 @@
 # services/forms.py
 from decimal import Decimal
 
-import requests
 from django import forms
-from django.conf import settings
 from django.forms import formset_factory
+from geopy import Nominatim
+from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 
 
 class ServiceForm(forms.Form):
@@ -24,25 +24,18 @@ class ServiceForm(forms.Form):
         address = cleaned_data.get("address")
 
         if address:
-            # Perform forward geocoding
-            api_key = settings.GEOCODING_API_KEY  # Replace with your actual API key
-            url = f"https://api.positionstack.com/v1/forward?access_key={api_key}&query={address}"
-
-            response = requests.get(url)
-            if response.status_code == 200:
-                data = response.json()["data"]
-                if data:
-                    # Use the first result
-                    result = data[0]
-                    cleaned_data["latitude"] = Decimal(str(result["latitude"]))
-                    cleaned_data["longitude"] = Decimal(str(result["longitude"]))
+            geolocator = Nominatim(user_agent="public_service_finder")
+            try:
+                location = geolocator.geocode(address)
+                if location:
+                    cleaned_data["latitude"] = Decimal(str(location.latitude))
+                    cleaned_data["longitude"] = Decimal(str(location.longitude))
                 else:
-                    # Add error to the address field
                     self.add_error(
                         "address",
                         "Unable to geocode the given address. Please check if the address is correct.",
                     )
-            else:
+            except (GeocoderTimedOut, GeocoderServiceError):
                 self.add_error(
                     "address",
                     "Error occurred while geocoding the address. Please try again later.",
