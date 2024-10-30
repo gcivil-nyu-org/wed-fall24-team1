@@ -94,3 +94,33 @@ class ServiceProviderLoginForm(AuthenticationForm):
 
     def get_invalid_login_error(self):
         return forms.ValidationError("Invalid email or password.")
+
+
+class ServiceSeekerForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ["username", "email", "first_name", "last_name"]
+        widgets = {
+            "username": forms.TextInput(
+                attrs={
+                    "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
+                    "readonly": "readonly",  # Make username non-editable
+                }
+            ),
+            "email": forms.EmailInput(
+                attrs={
+                    "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
+                    "readonly": "readonly",  # Make email non-editable
+                }
+            ),
+            "first_name": forms.TextInput(
+                attrs={
+                    "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
+                }
+            ),
+            "last_name": forms.TextInput(
+                attrs={
+                    "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
+                }
+            ),
+        }

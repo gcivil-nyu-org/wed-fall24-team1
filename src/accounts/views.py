@@ -4,12 +4,21 @@ from django.contrib.auth import login
 from django.contrib.auth.views import LoginView
 from django.core.exceptions import PermissionDenied
 from django.db import models
-from django.shortcuts import render, redirect
+from django.http import HttpResponseNotFound
+from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.decorators import login_required
 
-from .forms import UserRegisterForm, UserLoginForm, ServiceProviderLoginForm
+from accounts.models import CustomUser
+
+from .forms import (
+    ServiceSeekerForm,
+    UserRegisterForm,
+    UserLoginForm,
+    ServiceProviderLoginForm,
+)
 
 
 def register(request):
@@ -21,10 +30,43 @@ def register(request):
             if user.user_type == "service_provider":
                 return redirect("services:list")
             else:
+                # CustomUser.objects.create(
+                #     username=user.username, email=user.email,
+                #     first_name="John", last_name="Doe"
+                # )
                 return redirect("home")
     else:
         form = UserRegisterForm()
     return render(request, "register.html", {"form": form})
+
+
+@login_required
+def profile_view(request):
+    print("In profile view", request.GET)
+    user = request.user
+    if user.user_type == "service_provider":
+        print("user type is service_provider")
+        return HttpResponseNotFound("Page not found")
+    elif user.user_type == "user":
+        service_seeker = get_object_or_404(CustomUser, email=user.email)
+
+        # If it's a POST request, we're updating the profile
+        if request.method == "POST":
+            form = ServiceSeekerForm(request.POST, instance=service_seeker)
+            if form.is_valid():
+                form.save()
+                return redirect("profile_view")
+        else:
+            form = ServiceSeekerForm(instance=service_seeker)
+
+        return render(
+            request,
+            "profile_base.html",
+            {
+                "profile": service_seeker,
+                "form": form,  # Pass the form to the template
+            },
+        )
 
 
 # Custom Login View to handle AxesLockedOut exception

@@ -40,7 +40,7 @@ ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
     ".elasticbeanstalk.com",
-    "nycservicefinder.live",
+    "*nycservicefinder.live",
 ]
 # Application definition
 
@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     "services",
     "accounts",
     "axes",
+    "widget_tweaks",
 ]
 
 

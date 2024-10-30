@@ -1,0 +1,76 @@
+{% load widget_tweaks %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Seeker Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script>
+        function toggleEdit() {
+            var viewSection = document.getElementById('view-profile');
+            var editSection = document.getElementById('edit-profile');
+            viewSection.classList.toggle('hidden');
+            editSection.classList.toggle('hidden');
+        }
+    </script>
+</head>
+<body class="bg-gray-100">
+    <div class="max-w-4xl mx-auto mt-10">
+        <h1 class="text-3xl font-semibold text-center text-gray-800 mb-8">Service Seeker Profile</h1>
+
+        <!-- Profile View Section -->
+        <div id="view-profile" class="bg-white shadow-md rounded-lg p-6">
+            <h2 class="text-xl font-semibold text-gray-700">Username: {{ profile.username }}</h2>
+            <h2 class="text-xl font-semibold text-gray-700">Email: {{ profile.email }}</h2>
+            <h2 class="text-xl font-semibold text-gray-700">First Name: {{ profile.first_name }}</h2>
+            <h2 class="text-xl font-semibold text-gray-700">Last Name: {{ profile.last_name }}</h2>
+            <ul>
+                {% for service in profile.bookmarked_services.all %}
+                    <li>{{ service.title }} by {{ service.provider.business_name }}</li>
+                {% endfor %}
+            </ul>
+
+            <button onclick="toggleEdit()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mt-4 rounded focus:outline-none">
+                Edit Profile
+            </button>
+        </div>
+
+        <!-- Profile Edit Form Section (Initially Hidden) -->
+        <div id="edit-profile" class="bg-white shadow-md rounded-lg p-6 hidden">
+            <form method="POST">
+                {% csrf_token %}
+                
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Username</label>
+                    {{ form.username|add_class:"shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" }}
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Email</label>
+                    {{ form.email|add_class:"shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" }}
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">First Name</label>
+                    {{ form.first_name|add_class:"shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" }}
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Last Name</label>
+                    {{ form.last_name|add_class:"shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" }}
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none">
+                        Save Changes
+                    </button>
+                    <button type="button" onclick="toggleEdit()" class="text-gray-500 hover:text-gray-700">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
