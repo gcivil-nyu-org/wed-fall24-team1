@@ -83,7 +83,7 @@ class ViewsTest(TestCase):
         self.assertEqual(response.context["radius"], "10")
 
         self.mock_repo.fetch_items_with_filter.assert_called_once_with(
-            "test", "category", "10", "40.7128", "-74.0060"
+            "test", "category", "10", 40.7128, -74.0060
         )
         self.MockHomeRepository.process_items.assert_called_once()
 

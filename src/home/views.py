@@ -75,8 +75,17 @@ def home_view(request):
     # Get search filters from the request
     search_query = request.GET.get("search", "").strip()
     radius = request.GET.get("radius", "")
-    ulat, ulon = request.GET.get("user_lat"), request.GET.get("user_lon")
+    ulat = request.GET.get("user_lat")
+    ulon = request.GET.get("user_lon")
     service_type = request.GET.get("type", "")
+
+    # Validate the user location (latitude and longitude)
+    if ulat and ulon:
+        try:
+            ulat = float(ulat)
+            ulon = float(ulon)
+        except ValueError:
+            ulat, ulon = None, None  # Reset invalid lat/lon values
 
     # Fetch items using the repository with filters
     items = repo.fetch_items_with_filter(search_query, service_type, radius, ulat, ulon)
@@ -109,9 +118,7 @@ def home_view(request):
             "RatingCount": str(item.get("rating_count", 0)),
             "Category": item.get("Category", "N/A"),
             "MapLink": item.get("MapLink"),
-            "Description": convert_decimals(
-                item.get("Description", {})
-            ),  # Convert Decimals here
+            "Description": convert_decimals(item.get("Description", {})),
         }
         for item in page_obj
     ]
@@ -127,6 +134,8 @@ def home_view(request):
             "page_obj": page_obj,
             "base_index": base_index,
             "serialized_items": json.dumps(serialized_items),
+            "user_lat": ulat if ulat else "",
+            "user_lon": ulon if ulon else "",
         },
     )
 
