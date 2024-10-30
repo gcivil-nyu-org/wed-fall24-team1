@@ -59,11 +59,3 @@ class DescriptionItemForm(forms.Form):
 
 
 DescriptionFormSet = formset_factory(DescriptionItemForm, extra=1, can_delete=True)
-
-
-class DescriptionItemForm(forms.Form):
-    key = forms.CharField(max_length=100)
-    value = forms.CharField(widget=forms.Textarea(attrs={"rows": 3}))
-
-
-DescriptionFormSet = formset_factory(DescriptionItemForm, extra=1, can_delete=True)

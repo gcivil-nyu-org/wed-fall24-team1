@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+import sys
 from pathlib import Path
 import os
 from datetime import timedelta
@@ -23,7 +24,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DEBUG = True
 SECRET_KEY = config("DJANGO_SECRET_KEY")
 GEOCODING_API_KEY = config("GEOCODING_API_KEY")
-
+SUPABASE_DB_NAME = config("SUPABASE_DB_NAME")
+SUPABASE_DB_USER = config("SUPABASE_DB_USER")
+SUPABASE_DB_PASSWORD = config("SUPABASE_DB_PASSWORD")
+SUPABASE_DB_HOST = config("SUPABASE_DB_HOST")
+SUPABASE_DB_PORT = config("SUPABASE_DB_PORT")
 
 AWS_REGION = "us-east-1"
 DYNAMODB_TABLE_SERVICES = "services"
@@ -70,9 +75,8 @@ USE_I18N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
-STATIC_URL = "/static/"
+STATIC_URL = "static/"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
-
 # django-axes configurations
 SESSION_ENGINE = "django.contrib.sessions.backends.db"  # Default setting
 AXES_USERNAME_CALLABLE = "accounts.utils.get_axes_username"
@@ -131,13 +135,23 @@ WSGI_APPLICATION = "public_service_finder.wsgi.application"
 # db-prep
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": SUPABASE_DB_NAME,
+        "USER": SUPABASE_DB_USER,
+        "PASSWORD": SUPABASE_DB_PASSWORD,
+        "HOST": SUPABASE_DB_HOST,
+        "PORT": SUPABASE_DB_PORT,
     }
 }
 
+if "test" in sys.argv:
+    DATABASES["default"] = {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "test_db.sqlite3",
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -172,9 +186,6 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
-
-STATIC_URL = "static/"
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
