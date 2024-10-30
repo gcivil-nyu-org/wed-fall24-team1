@@ -36,7 +36,12 @@ DYNAMODB_TABLE_REVIEWS = "reviews"
 
 SITE_ID = 2  # Make sure this is set
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".elasticbeanstalk.com"]
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    ".elasticbeanstalk.com",
+    "nycservicefinder.live",
+]
 # Application definition
 
 INSTALLED_APPS = [
@@ -62,6 +67,8 @@ INSTALLED_APPS = [
 SOCIALACCOUNT_PROVIDERS = {
     "google": {"SCOPE": ["profile", "email"], "AUTH_PARAMS": {"access_type": "online"}}
 }
+
+SOCIALACCOUNT_LOGIN_ON_GET = True  # Skips the intermediate "Continue" page
 
 
 AUTH_USER_MODEL = "accounts.CustomUser"
