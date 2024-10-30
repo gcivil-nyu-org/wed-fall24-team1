@@ -101,3 +101,21 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    var serviceSearch = document.getElementById('serviceSearch');
+    var servicesGrid = document.getElementById('servicesGrid');
+    var serviceBoxes = servicesGrid.getElementsByClassName('service-box');
+
+    serviceSearch.addEventListener('input', function() {
+        var searchTerm = this.value.toLowerCase();
+        for (var i = 0; i < serviceBoxes.length; i++) {
+            var serviceName = serviceBoxes[i].querySelector('.service-name').textContent.toLowerCase();
+            if (serviceName.includes(searchTerm)) {
+                serviceBoxes[i].style.display = 'block';
+            } else {
+                serviceBoxes[i].style.display = 'none';
+            }
+        }
+    });
+});

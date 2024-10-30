@@ -1,0 +1,88 @@
+/* sp_dashboard.css */
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.service-card {
+    transition: all 0.3s ease;
+}
+
+.service-card:hover {
+    transform: translateY(-5px);
+}
+
+.modal-overlay {
+    backdrop-filter: blur(4px);
+}
+
+body {
+    min-height: 100vh;
+    background-color: rgb(249 250 251);
+}
+
+/* Centering adjustments */
+.centered-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.centered-text {
+    text-align: center;
+}
+
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    width: 100%;
+}
+
+@media (max-width: 640px) {
+    .services-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* New Styles for Increased Spacing and Layout */
+.container {
+    max-width: 7xl; /* Increased from max-w-4xl to max-w-7xl */
+}
+
+.header-section {
+    margin-bottom: 2rem; /* Added extra margin below the header */
+}
+
+.search-add-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2rem; /* Added extra margin below the search and add section */
+}
+
+.search-bar {
+    flex: 1; /* Allows the search bar to take up available space */
+}
+
+.add-service-button {
+    flex: none; /* Keeps the button size consistent */
+}
+
+@media (max-width: 640px) {
+    .search-add-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
+/* Additional Spacing Between Content and Header/Footer */
+.content-container {
+    padding-top: 4rem; /* Adjust as needed for desired spacing */
+    padding-bottom: 4rem; /* Adjust as needed for desired spacing */
+}
