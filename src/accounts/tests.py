@@ -363,6 +363,7 @@ class UserRegisterFormEdgeCaseTest(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("password2", form.errors)
 
+
 class UserLoginFormEmailAndUsernameTest(TestCase):
     def setUp(self):
         self.factory = RequestFactory()
@@ -404,6 +405,7 @@ class UserLoginFormEmailAndUsernameTest(TestCase):
             "Please enter both username/email and password.", form.errors["__all__"]
         )
 
+
 class ServiceProviderLoginFormUserTypeTest(TestCase):
     def setUp(self):
         self.user = CustomUser.objects.create_user(
@@ -424,6 +426,8 @@ class ServiceProviderLoginFormUserTypeTest(TestCase):
         self.assertIn(
             "This page is for service providers only.", form.errors["__all__"]
         )
+
+
 class ServiceProviderLoginFormNonExistentUserTest(TestCase):
     def setUp(self):
         self.factory = RequestFactory()
@@ -436,6 +440,7 @@ class ServiceProviderLoginFormNonExistentUserTest(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("Invalid email or password.", form.errors["__all__"])
 
+
 class ServiceProviderLoginFormEmptyFieldsTest(TestCase):
     def setUp(self):
         self.factory = RequestFactory()
@@ -446,9 +451,8 @@ class ServiceProviderLoginFormEmptyFieldsTest(TestCase):
         form_data = {"email": "", "password": ""}
         form = ServiceProviderLoginForm(data=form_data, request=request)
         self.assertFalse(form.is_valid())
-        self.assertIn(
-            "Please enter both email and password.", form.errors["__all__"]
-        )
+        self.assertIn("Please enter both email and password.", form.errors["__all__"])
+
 
 class EmailOrUsernameBackendUncoveredTest(TestCase):
     def setUp(self):
@@ -477,13 +481,17 @@ class EmailOrUsernameBackendUncoveredTest(TestCase):
     def test_user_not_found_by_username(self):
         """Test backend tries email authentication if username doesn't exist."""
         request = self.factory.post("/login/")
-        user = authenticate(request=request, username="nonexistent", password="TestPass123!")
+        user = authenticate(
+            request=request, username="nonexistent", password="TestPass123!"
+        )
         self.assertIsNone(user)
 
     def test_user_not_found_by_username_or_email(self):
         """Test authenticate() returns None if both username and email don't exist."""
         request = self.factory.post("/login/")
-        user = authenticate(request=request, username="wrongemail@example.com", password="TestPass123!")
+        user = authenticate(
+            request=request, username="wrongemail@example.com", password="TestPass123!"
+        )
         self.assertIsNone(user)
 
     def test_authenticate_with_invalid_password(self):
@@ -498,5 +506,7 @@ class EmailOrUsernameBackendUncoveredTest(TestCase):
         self.user.save()
 
         request = self.factory.post("/login/")
-        user = authenticate(request=request, username="testuser", password="TestPass123!")
+        user = authenticate(
+            request=request, username="testuser", password="TestPass123!"
+        )
         self.assertIsNone(user)
