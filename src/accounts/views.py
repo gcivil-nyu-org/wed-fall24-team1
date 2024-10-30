@@ -4,10 +4,12 @@ from django.contrib.auth import login
 from django.contrib.auth.views import LoginView
 from django.core.exceptions import PermissionDenied
 from django.db import models
+from django.http import HttpResponseNotFound
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.decorators import login_required
 
 from accounts.models import ServiceSeeker
 
@@ -37,31 +39,13 @@ def register(request):
     return render(request, "register.html", {"form": form})
 
 
+@login_required
 def profile_view(request):
+    print("In profile view", request.GET)
     user = request.user
     if user.user_type == "service_provider":
-        service_provider = ""
-        service_provider = get_object_or_404(service_provider, user=user)
-        # TODO: Service Provider
-        form = None
-
-        # If it's a POST request, we're updating the profile
-        # if request.method == "POST":
-        #     form = ServiceProviderForm(request.POST, instance=service_provider)
-        #     if form.is_valid():
-        #         form.save()
-        #         return redirect("profile_view")  # Redirect to avoid resubmission
-        # else:
-        #     form = ServiceProviderForm(instance=service_provider)
-
-        return render(
-            request,
-            "profile_service_provider.html",
-            {
-                "profile": service_provider,
-                "form": form,  # Pass the form to the template
-            },
-        )
+        print("user type is service_provider")
+        return HttpResponseNotFound("Page not found")
     elif user.user_type == "user":
         service_seeker = get_object_or_404(ServiceSeeker, user=user)
 

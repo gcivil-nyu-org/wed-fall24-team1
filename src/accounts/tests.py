@@ -1,8 +1,9 @@
+import json
 from unittest.mock import patch
 
 from accounts.backends import EmailOrUsernameBackend
 from accounts.forms import ServiceProviderLoginForm, UserRegisterForm
-from accounts.models import CustomUser
+from accounts.models import CustomUser, ServiceSeeker
 from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
 from django.test import TestCase, Client, RequestFactory
@@ -324,12 +325,71 @@ class EmailOrUsernameBackendTest(TestCase):
         self.assertIsNone(user)
 
 
-class ProfileViewTest(TestCase):    
-    def test_profile_view_404_with_invalid_user_type(self):
-        """Test that a 404 error is returned when accessing the profile view with an invalid user_type."""
-        response = self.client.get(reverse("profile_view"))
+CustomUser = get_user_model()
+
+class ProfileViewTest(TestCase):
+    def setUp(self):
+        # Create a user with type "service_provider"
+        self.service_provider_user = CustomUser.objects.create_user(
+            username="provider",
+            email="provider@example.com",
+            password="testpassword",
+            user_type="service_provider"
+        )
+        
+        # Create a user with type "user" and corresponding ServiceSeeker profile
+        self.service_seeker_user = CustomUser.objects.create_user(
+            username="seeker",
+            email="seeker@example.com",
+            password="testpassword",
+            user_type="user"
+        )
+        self.service_seeker = ServiceSeeker.objects.create(user=self.service_seeker_user)
+
+    def test_profile_view_service_provider(self):
+        """Test that 'hello' is returned for a service_provider user type."""
+        # Log in as service provider
+        self.client.login(username="provider", password="testpassword")
+        
+        response = self.client.get(reverse("accounts:profile_view"))
+        
         self.assertEqual(response.status_code, 404)
 
-        # Test with a valid user_type
-        response = self.client.get(reverse("profile_view"), {"user_type": "service_provider"})
+    def test_profile_view_service_seeker_get(self):
+        """Test that the profile view renders correctly for a user with type 'user'."""
+        # Log in as service seeker
+        self.client.login(username="seeker", password="testpassword")
+
+        response = self.client.get(reverse("accounts:profile_view"))
+
         self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "profile_base.html")
+
+
+    # def test_profile_view_service_seeker_post(self):
+    #     """Test that the profile view updates profile information on a POST request."""
+    #     # Log in as service seeker
+    #     self.client.login(username="seeker", password="testpassword")
+
+    #     # Define new data for the form submission
+    #     form_data = {
+    #         "location_preference": "New Location Value",  # Assuming these are IDs of bookmarked services
+    #     }
+    #     response = self.client.post(
+    #         reverse("accounts:profile_view"),
+    #         data=json.dumps(form_data),
+    #         content_type="application/json"  # Set JSON content type
+    #     )
+
+    #     # Reload the service seeker profile from the database
+    #     self.service_seeker.refresh_from_db()
+
+    #     # Assert redirection and form data update
+    #     self.assertEqual(response.status_code, 302)
+    #     # self.assertRedirects(response, reverse("accounts:profile_view"))
+    #     self.assertEqual(self.service_seeker.location_preference, "New Location Value")
+    #     self.assertQuerysetEqual(
+    #         self.service_seeker.bookmarked_services.all(),
+    #         [1, 2],  # Replace with actual objects or IDs you expect
+    #         transform=lambda x: x.id  # If you use IDs
+    #     )
