@@ -1,9 +1,7 @@
-import json
 from unittest.mock import patch
-
 from accounts.backends import EmailOrUsernameBackend
 from accounts.forms import ServiceProviderLoginForm, UserRegisterForm
-from accounts.models import CustomUser, ServiceSeeker
+from accounts.models import ServiceSeeker
 from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
 from django.test import TestCase, Client, RequestFactory
@@ -327,6 +325,7 @@ class EmailOrUsernameBackendTest(TestCase):
 
 CustomUser = get_user_model()
 
+
 class ProfileViewTest(TestCase):
     def setUp(self):
         # Create a user with type "service_provider"
@@ -334,25 +333,24 @@ class ProfileViewTest(TestCase):
             username="provider",
             email="provider@example.com",
             password="testpassword",
-            user_type="service_provider"
+            user_type="service_provider",
         )
-        
         # Create a user with type "user" and corresponding ServiceSeeker profile
         self.service_seeker_user = CustomUser.objects.create_user(
             username="seeker",
             email="seeker@example.com",
             password="testpassword",
-            user_type="user"
+            user_type="user",
         )
-        self.service_seeker = ServiceSeeker.objects.create(user=self.service_seeker_user)
+        self.service_seeker = ServiceSeeker.objects.create(
+            user=self.service_seeker_user
+        )
 
     def test_profile_view_service_provider(self):
         """Test that 'hello' is returned for a service_provider user type."""
         # Log in as service provider
         self.client.login(username="provider", password="testpassword")
-        
         response = self.client.get(reverse("accounts:profile_view"))
-        
         self.assertEqual(response.status_code, 404)
 
     def test_profile_view_service_seeker_get(self):
@@ -364,7 +362,6 @@ class ProfileViewTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "profile_base.html")
-
 
     # def test_profile_view_service_seeker_post(self):
     #     """Test that the profile view updates profile information on a POST request."""
