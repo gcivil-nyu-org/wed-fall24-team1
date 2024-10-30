@@ -57,6 +57,8 @@ SOCIALACCOUNT_PROVIDERS = {
     "google": {"SCOPE": ["profile", "email"], "AUTH_PARAMS": {"access_type": "online"}}
 }
 
+SOCIALACCOUNT_LOGIN_ON_GET = True  # Skips the intermediate "Continue" page
+
 
 AUTH_USER_MODEL = "accounts.CustomUser"
 LOGIN_URL = "user_login"
