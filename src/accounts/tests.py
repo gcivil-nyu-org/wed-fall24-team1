@@ -350,7 +350,7 @@ class ProfileViewTest(TestCase):
         """Test that 'hello' is returned for a service_provider user type."""
         # Log in as service provider
         self.client.login(username="provider", password="testpassword")
-        response = self.client.get(reverse("accounts:profile_view"))
+        response = self.client.get(reverse("profile_view"))
         self.assertEqual(response.status_code, 404)
 
     def test_profile_view_service_seeker_get(self):
@@ -358,7 +358,7 @@ class ProfileViewTest(TestCase):
         # Log in as service seeker
         self.client.login(username="seeker", password="testpassword")
 
-        response = self.client.get(reverse("accounts:profile_view"))
+        response = self.client.get(reverse("profile_view"))
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "profile_base.html")

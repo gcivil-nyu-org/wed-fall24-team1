@@ -7,7 +7,7 @@ from .views import UserLoginView, ServiceProviderLoginView, register
 from accounts import views
 
 
-app_name = "accounts"  # This line defines the 'accounts' namespace
+# app_name = "accounts"  # This line defines the 'accounts' namespace
 
 urlpatterns = [
     path("register/", register, name="register"),
