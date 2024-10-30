@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+import sys
 from pathlib import Path
 import os
 from datetime import timedelta
@@ -135,6 +135,7 @@ WSGI_APPLICATION = "public_service_finder.wsgi.application"
 # db-prep
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -146,6 +147,11 @@ DATABASES = {
     }
 }
 
+if 'test' in sys.argv:
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'test_db.sqlite3',
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
