@@ -36,7 +36,7 @@ DYNAMODB_TABLE_REVIEWS = "reviews"
 
 SITE_ID = 2  # Make sure this is set
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".elasticbeanstalk.com"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".elasticbeanstalk.com", "nycservicefinder.live"]
 # Application definition
 
 INSTALLED_APPS = [
