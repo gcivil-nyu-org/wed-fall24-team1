@@ -44,7 +44,7 @@ class HomeRepository:
             for item in items:
                 item_lat = item.get("Lat", "0")
                 item_lon = item.get("Log", "0")
-                if item_lat and item_lon:
+                if item_lat and item_lon and item_lat != "0" and item_lon != "0":
                     distance = utils.calculate_distance(
                         float(ulat), float(ulon), float(item_lat), float(item_lon)
                     )

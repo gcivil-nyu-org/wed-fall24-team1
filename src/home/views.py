@@ -78,7 +78,8 @@ def home_view(request):
     ulat = request.GET.get("user_lat")
     ulon = request.GET.get("user_lon")
     service_type = request.GET.get("type", "")
-    location_value = request.GET.get("location", "")  # Get the location input
+
+    print(f"Received coordinates: user_lat = {ulat}, user_lon = {ulon}")
 
     # Validate the user location (latitude and longitude)
     if ulat and ulon:
@@ -137,7 +138,6 @@ def home_view(request):
             "serialized_items": json.dumps(serialized_items),
             "user_lat": ulat if ulat else "",
             "user_lon": ulon if ulon else "",
-            "location_value": location_value,
         },
     )
 
