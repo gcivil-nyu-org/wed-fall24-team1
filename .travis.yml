@@ -8,7 +8,11 @@ dist: focal
 install:
   - pip install -r src/requirements.txt
 
+before_script:
+  - python src/manage.py migrate
+
 script:
+  - python src/manage.py makemigrations --check --dry-run
   - black . --check
   - flake8 .
   - PYTHONPATH=. coverage run --source='src/accounts,src/home,src/public_service_finder,src/services' src/manage.py test accounts home public_service_finder services
