@@ -61,24 +61,55 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Event listener for manual address input (on 'Enter' key)
     const locationInput = document.getElementById('location');
     const applyFiltersBtn = document.getElementById('apply-filters');
     if (locationInput && applyFiltersBtn) {
         locationInput.addEventListener('keydown', function (event) {
             if (event.key === 'Enter') {
                 event.preventDefault();
-                const address = this.value;
-                geocodeAddress(address).then(function() {
-                    // After geocoding and updating hidden inputs, simulate click on "Apply Filters" button
-                    applyFiltersBtn.click();
-                }).catch(function(error) {
-                    alert('Address not found. Please try a different address.');
-                });
+                const address = this.value.trim();
+                if (address !== '') {
+                    geocodeAddress(address).then(function() {
+                        // After geocoding and updating hidden inputs, simulate click on "Apply Filters" button
+                        applyFiltersBtn.click();
+                    }).catch(function(error) {
+                        alert('Address not found. Please try a different address.');
+                    });
+                } else {
+                    alert('Please enter an address.');
+                }
             }
         });
     } else {
         console.error('Element with ID "location" or "apply-filters" not found.');
+    }
+
+    // Add event listener to "Apply Filters" button
+    if (applyFiltersBtn) {
+        applyFiltersBtn.addEventListener('click', function(event) {
+            // Prevent the default form submission
+            event.preventDefault();
+
+            const locationInput = document.getElementById('location');
+            const address = locationInput ? locationInput.value.trim() : '';
+            const userLatInput = document.getElementById('user-lat');
+            const userLonInput = document.getElementById('user-lon');
+            const userLatValue = userLatInput ? userLatInput.value : '';
+            const userLonValue = userLonInput ? userLonInput.value : '';
+            console.log(address)
+            if (address !== '') {
+                // Location input has a value, geocode the address
+                geocodeAddress(address).then(function() {
+                    // After geocoding and updating hidden inputs, submit the form
+                    applyFiltersBtn.closest('form').submit();
+                }).catch(function(error) {
+                    alert('Address not found. Please try a different address.');
+                });
+            } else {
+                // No location entered, you can decide to use current location or alert the user
+                alert('Please enter a location or use the current location button.');
+        }
+        });
     }
 
     // Clear Filters button event listener
@@ -200,95 +231,38 @@ function geocodeAddress(address) {
         });
 }
 
-// Function to initialize service markers based on the updated location
-function initializeServiceMarkers() {
-    // Remove existing service markers
-    if (serviceMarkers.length > 0) {
-        serviceMarkers.forEach(marker => {
-            map.removeLayer(marker);
-        });
-        serviceMarkers = [];
-    }
-
-    // Make sure itemsData is defined and accessible
-    // itemsData should be an array of service objects with properties: Lat, Log, Name, Address, Ratings
-
-    if (!itemsData || !Array.isArray(itemsData)) {
-        console.error('itemsData is not defined or is not an array.');
-        return;
-    }
-
-    // Calculate distance to filter nearby services (e.g., within the specified radius)
-    const radiusInMiles = document.getElementById('radius').value || 5;
-
-    // Helper function to calculate distance between two lat/lon points
-    function calculateDistance(lat1, lon1, lat2, lon2) {
-        const R = 3958.8; // Earth's radius in miles
-        const dLat = (lat2 - lat1) * Math.PI / 180;
-        const dLon = (lon2 - lon1) * Math.PI / 180;
-        const a =
-            0.5 - Math.cos(dLat)/2 +
-            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-            (1 - Math.cos(dLon))/2;
-
-        return R * 2 * Math.asin(Math.sqrt(a));
-    }
-
-    // Filter services within the specified radius
-    const nearbyServices = itemsData.filter((item) => {
-        if (item.Lat && item.Log) {
-            const distance = calculateDistance(userLat, userLng, item.Lat, item.Log);
-            return distance <= radiusInMiles;
-        }
-        return false;
-    });
-
-    // Add markers for nearby services
-    nearbyServices.forEach((item, index) => {
-        const marker = L.marker([item.Lat, item.Log])
-            .addTo(map)
-            .bindPopup(`<b>${item.Name}</b><br>${item.Address}<br>Rating: ${item.Ratings}`)
-            .on('click', () => {
-                showServiceDetails(index); // Use index as identifier
-            });
-        serviceMarkers.push(marker);
-    });
-
-    // Adjust map view to include all markers
-    const allMarkers = [...serviceMarkers, currentLocationMarker];
-    if (allMarkers.length > 0) {
-        const group = L.featureGroup(allMarkers);
-        map.fitBounds(group.getBounds());
-    } else {
-        map.setView([userLat, userLng], 12);
-    }
-}
-
 // Function to get the user's current location
 function getCurrentLocation() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            position => {
-                const lat = position.coords.latitude;
-                const lon = position.coords.longitude;
+    return new Promise(function(resolve, reject) {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                position => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
 
-                // Update userLat and userLng
-                userLat = lat;
-                userLng = lon;
+                    // Update userLat and userLng
+                    userLat = lat;
+                    userLng = lon;
 
-                // Update the map and marker
-                setUserLocation(lat, lon, true);
-                console.log(`User's location: ${lat}, ${lon}`);
-            },
-            error => {
-                handleLocationError(error);
-            }
-        );
-    } else {
-        // If the browser doesn't support Geolocation API
-        alert("Geolocation is not supported by this browser.");
-        setFallbackLocation();
-    }
+                    // Update the map and marker
+                    setUserLocation(lat, lon, true);
+
+                    // Update hidden inputs
+                    document.getElementById('user-lat').value = lat;
+                    document.getElementById('user-lon').value = lon;
+
+                    resolve();
+                },
+                error => {
+                    handleLocationError(error);
+                    reject(error);
+                }
+            );
+        } else {
+            alert("Geolocation is not supported by this browser.");
+            reject(new Error("Geolocation not supported"));
+        }
+    });
 }
 
 // Function to handle geolocation errors

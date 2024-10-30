@@ -50,7 +50,6 @@ class HomeRepository:
                     )
                     if distance <= float(radius):
                         filtered_items.append(item)
-
             return filtered_items
 
         return items
