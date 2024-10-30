@@ -322,3 +322,14 @@ class EmailOrUsernameBackendTest(TestCase):
         """Test get_user returns None for invalid user_id"""
         user = self.backend.get_user(9999)
         self.assertIsNone(user)
+
+
+class ProfileViewTest(TestCase):
+    def test_profile_view_404_with_invalid_user_type(self):
+        """Test that a 404 error is returned when accessing the profile view with an invalid user_type."""
+        response = self.client.get(reverse("profile_view"))
+        self.assertEqual(response.status_code, 404)
+
+        # Test with a valid user_type
+        response = self.client.get(reverse("profile_view"), {"user_type": "service_provider"})
+        self.assertEqual(response.status_code, 200)
