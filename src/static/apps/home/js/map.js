@@ -398,6 +398,90 @@ function showServiceDetails(index) {
     }
 }
 
+// Function to initialize service markers based on the updated location
+function initializeServiceMarkers() {
+    // Remove existing service markers
+    if (serviceMarkers.length > 0) {
+        serviceMarkers.forEach(marker => {
+            map.removeLayer(marker);
+        });
+        serviceMarkers = [];
+    }
+
+    // Make sure itemsData is defined and accessible
+    if (!itemsData || !Array.isArray(itemsData)) {
+        console.error('itemsData is not defined or is not an array.');
+        return;
+    }
+
+    // Calculate distance to filter nearby services (e.g., within the specified radius)
+    const radiusInMiles = document.getElementById('radius').value || 5;
+
+    // Helper function to calculate distance between two lat/lon points
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 3958.8; // Earth's radius in miles
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a =
+            0.5 - Math.cos(dLat)/2 +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            (1 - Math.cos(dLon))/2;
+
+        return R * 2 * Math.asin(Math.sqrt(a));
+    }
+
+    // Filter services within the specified radius
+    const nearbyServices = itemsData.filter((item) => {
+        if (item.Lat && item.Log) {
+            const distance = calculateDistance(userLat, userLng, item.Lat, item.Log);
+            return distance <= radiusInMiles;
+        }
+        return false;
+    });
+
+    // Add markers for nearby services
+    nearbyServices.forEach((item, index) => {
+        const marker = L.marker([item.Lat, item.Log])
+            .addTo(map)
+            .bindPopup(`<b>${item.Name}</b><br>${item.Address}<br>Rating: ${item.Ratings}`)
+            .on('click', () => {
+                showServiceDetails(index); // Use index as identifier
+            });
+        serviceMarkers.push(marker);
+    });
+
+    // Adjust map view to include all markers
+    const allMarkers = [...serviceMarkers, currentLocationMarker];
+    if (allMarkers.length > 0) {
+        const group = L.featureGroup(allMarkers);
+        map.fitBounds(group.getBounds());
+    } else {
+        map.setView([userLat || defaultLat, userLng || defaultLng], 12);
+    }
+
+    // Re-attach event listeners to the service list items
+    const serviceButtons = document.querySelectorAll('.service-button, .service-row');
+    serviceButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const serviceId = parseInt(button.getAttribute('data-id'), 10);
+            if (!isNaN(serviceId)) {
+                showServiceDetails(serviceId);
+            } else {
+                console.error(`Invalid service ID: ${serviceId}`);
+            }
+        });
+    });
+}
+
+// Function to hide service details
+document.getElementById('closeDetails').addEventListener('click', () => {
+    const serviceDetailsDiv = document.getElementById('serviceDetails');
+    if (serviceDetailsDiv) {
+        serviceDetailsDiv.classList.add('hidden');
+        serviceDetailsDiv.classList.remove('block'); // Optionally remove 'block'
+    }
+});
+
 // Event listener for the radius input change
 const radiusInput = document.getElementById('radius');
 const radiusValue = document.getElementById('radiusValue');
