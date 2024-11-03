@@ -7,6 +7,10 @@ import uuid  # For generating unique Review IDs
 from django.views.decorators.http import require_POST
 from decimal import Decimal
 
+# TODO These constants are maintained in the JS frontend and here, we'll have to unify them
+DEFAULT_LAT, DEFAULT_LON = 40.7128, -74.0060
+DEFAULT_RADIUS = 5.0
+
 
 def convert_decimals(obj):
     if isinstance(obj, list):
@@ -74,9 +78,9 @@ def home_view(request):
 
     # Get search filters from the request
     search_query = request.GET.get("search", "").strip()
-    radius = request.GET.get("radius", "")
-    ulat = request.GET.get("user_lat")
-    ulon = request.GET.get("user_lon")
+    radius = request.GET.get("radius", DEFAULT_RADIUS)
+    ulat = request.GET.get("user_lat", DEFAULT_LAT)
+    ulon = request.GET.get("user_lon", DEFAULT_LON)
     service_type = request.GET.get("type", "")
 
     # Validate the user location (latitude and longitude)
@@ -118,6 +122,7 @@ def home_view(request):
             "RatingCount": str(item.get("rating_count", 0)),
             "Category": item.get("Category", "N/A"),
             "MapLink": item.get("MapLink"),
+            "Distance": item.get("Distance", "N/A"),
             "Description": convert_decimals(item.get("Description", {})),
         }
         for item in page_obj
