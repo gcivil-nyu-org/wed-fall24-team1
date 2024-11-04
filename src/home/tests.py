@@ -5,8 +5,6 @@ import json
 
 from accounts.models import CustomUser
 
-from home.utils import calculate_distance
-
 
 class ViewsTest(TestCase):
     def setUp(self):
@@ -187,21 +185,16 @@ class ViewsTest(TestCase):
         response_data = json.loads(response.content)
         self.assertIn("error", response_data)
 
+    def test_home_view_no_location(self):
+        self.client.login(username="testuser", password="testpass123")
 
-class UtilsTest(TestCase):
-    def test_calculate_distance(self):
-        # Test known distances
-        self.assertAlmostEqual(
-            calculate_distance(40.7128, -74.0060, 40.7128, -74.0060), 0, places=2
-        )
-        self.assertAlmostEqual(
-            calculate_distance(40.7128, -74.0060, 34.0522, -118.2437),
-            2445.7101,
-            places=2,
-        )
+        service_no_distance = self.sample_service.copy()
+        self.mock_repo.fetch_items_with_filter.return_value = [service_no_distance]
+        self.MockHomeRepository.process_items.return_value = [service_no_distance]
 
-    def test_calculate_distance_edge_cases(self):
-        # Test antipodes
-        self.assertAlmostEqual(calculate_distance(0, 0, 0, 180), 12437.5653, places=2)
-        # Test poles
-        self.assertAlmostEqual(calculate_distance(90, 0, -90, 0), 12437.5653, places=2)
+        response = self.client.get(reverse("home"))
+
+        self.assertEqual(response.status_code, 200)
+        items = json.loads(response.context["serialized_items"])
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0]["Distance"], "N/A")

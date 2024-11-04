@@ -6,7 +6,7 @@ from urllib.parse import quote
 from boto3.dynamodb.conditions import Attr, And, Key
 from django.conf import settings
 from botocore.exceptions import ClientError
-from . import utils
+from geopy import distance as dist
 
 
 class HomeRepository:
@@ -45,9 +45,8 @@ class HomeRepository:
                 item_lat = item.get("Lat", "0")
                 item_lon = item.get("Log", "0")
                 if item_lat and item_lon and item_lat != "0" and item_lon != "0":
-                    distance = utils.calculate_distance(
-                        float(ulat), float(ulon), float(item_lat), float(item_lon)
-                    )
+                    distance = dist.distance((item_lat, item_lon), (ulat, ulon)).miles
+                    item["Distance"] = distance
                     if distance <= float(radius):
                         filtered_items.append(item)
             return filtered_items
