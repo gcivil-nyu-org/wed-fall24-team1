@@ -10,4 +10,5 @@ urlpatterns = [
     path("home/", include("home.urls")),
     path("", root_redirect_view, name="root_redirect"),  # Use the custom redirect view
     path("services/", include("services.urls", namespace="services")),
+    path("forum/", include("forum.urls", namespace="forum")),
 ]
