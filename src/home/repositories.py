@@ -3,7 +3,7 @@ from datetime import datetime
 from decimal import Decimal
 import boto3
 from urllib.parse import quote
-from boto3.dynamodb.conditions import Attr, And, Key
+from boto3.dynamodb.conditions import Attr, And, Key, Or
 from django.conf import settings
 from botocore.exceptions import ClientError
 from geopy import distance as dist
@@ -22,6 +22,7 @@ class HomeRepository:
     ):
         filter_expression = None
 
+        # Create filter based on search query and category
         if search_query and category_filter:
             filter_expression = And(
                 Attr("Name").contains(search_query),
@@ -32,6 +33,23 @@ class HomeRepository:
         elif category_filter:
             filter_expression = Attr("Category").contains(category_filter)
 
+        # Add ServiceStatus filter (if exists, it should be "APPROVED")
+        service_status_filter = Or(
+            Attr(
+                "ServiceStatus"
+            ).not_exists(),  # Include items where ServiceStatus does not exist
+            Attr("ServiceStatus").eq(
+                "APPROVED"
+            ),  # Include items where ServiceStatus is "APPROVED"
+        )
+
+        # Combine the existing filter expression with the new ServiceStatus filter
+        if filter_expression:
+            filter_expression = And(filter_expression, service_status_filter)
+        else:
+            filter_expression = service_status_filter
+
+        # Scan with the combined filter expression
         scan_kwargs = {}
         if filter_expression:
             scan_kwargs["FilterExpression"] = filter_expression
@@ -39,6 +57,7 @@ class HomeRepository:
         response = self.services_table.scan(**scan_kwargs)
         items = response.get("Items", [])
 
+        # Filter items based on radius if provided
         if radius and ulat and ulon:
             filtered_items = []
             for item in items:
@@ -122,6 +141,7 @@ class HomeRepository:
 
     def fetch_reviews_for_service(self, service_id):
         try:
+
             # Query to get all reviews with matching ServiceId
             response = self.reviews_table.scan(
                 FilterExpression=Key("ServiceId").eq(service_id)
