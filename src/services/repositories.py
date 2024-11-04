@@ -2,9 +2,9 @@
 import logging
 
 import boto3
+from boto3.dynamodb.conditions import Attr
 from botocore.exceptions import ClientError
 from django.conf import settings
-
 from .models import ServiceDTO
 
 log = logging.getLogger(__name__)
@@ -66,4 +66,53 @@ class ServiceRepository:
             return True
         except ClientError as e:
             print(e.response["Error"]["Message"])
+            return False
+
+    def get_pending_approval_services(self) -> list[ServiceDTO]:
+        try:
+            response = self.table.scan(
+                FilterExpression=Attr("ServiceStatus").eq("PENDING_APPROVAL")
+            )
+            return [
+                ServiceDTO.from_dynamodb_item(item)
+                for item in response.get("Items", [])
+            ]
+        except ClientError as e:
+            log.error(
+                f"Error fetching pending approval services: {e.response['Error']['Message']}"
+            )
+            return []
+
+    def update_service_status(self, service_id: str, new_status: str) -> bool:
+        try:
+            # Update service status
+            service_id_str = str(service_id)
+            response = self.table.update_item(
+                Key={"Id": service_id_str},
+                UpdateExpression="SET ServiceStatus = :new_status",
+                ExpressionAttributeValues={":new_status": new_status},
+                ConditionExpression="attribute_exists(Id)",  # Ensure item exists
+                ReturnValues="UPDATED_NEW",
+            )
+            print("response: " + response)
+
+            # Logging successful update
+            log.info(
+                f"Updated ServiceStatus for service ID {service_id} to {new_status}"
+            )
+            return True
+        except ClientError as e:
+            if e.response["Error"]["Code"] == "ConditionalCheckFailedException":
+                log.error(f"Service ID {service_id} does not exist.")
+            else:
+                log.error(
+                    f"Error updating service status for ID {service_id}: {e.response['Error']['Message']}"
+                )
+
+            return False
+
+        except Exception as e:
+            log.error(
+                f"Unexpected error updating service status for ID {service_id}, exception: {e}"
+            )
             return False

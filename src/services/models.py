@@ -6,6 +6,8 @@ from decimal import Decimal
 from typing import Dict, Any
 import uuid
 
+from public_service_finder.utils.enums.service_status import ServiceStatus
+
 
 @dataclass
 class ServiceDTO:
@@ -20,10 +22,16 @@ class ServiceDTO:
     description: Dict[str, Any]
     category: str
     provider_id: str
+    service_status: str
+    service_created_timestamp: str
+    service_approved_timestamp: str
 
     @classmethod
     def from_dynamodb_item(cls, item: Dict[str, Any]) -> "ServiceDTO":
         """Create ServiceDTO from DynamoDB item"""
+        service_status = item.get("ServiceStatus", "PENDING_APPROVAL")
+        if service_status.startswith("ServiceStatus."):
+            service_status = service_status.split(".")[1]
         return cls(
             id=item["Id"],
             name=item["Name"],
@@ -34,6 +42,9 @@ class ServiceDTO:
             description=item["Description"],
             category=item["Category"],
             provider_id=item["ProviderId"],
+            service_status=ServiceStatus(service_status).value,
+            service_created_timestamp=item.get("CreatedTimestamp", "NONE"),
+            service_approved_timestamp=item.get("ApprovedTimestamp", "NONE"),
         )
 
     def to_dynamodb_item(self) -> Dict[str, Any]:
@@ -48,4 +59,7 @@ class ServiceDTO:
             "Description": self.description,
             "Category": self.category,
             "ProviderId": self.provider_id,
+            "ServiceStatus": self.service_status,
+            "CreatedTimestamp": self.service_created_timestamp,
+            "ApprovedTimestamp": self.service_approved_timestamp,
         }
