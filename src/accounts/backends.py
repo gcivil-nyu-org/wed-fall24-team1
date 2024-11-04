@@ -2,7 +2,8 @@
 
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth import get_user_model
-
+from django.contrib.auth.backends import BaseBackend
+from accounts.models import CustomUser
 
 class EmailOrUsernameBackend(ModelBackend):
     """
@@ -33,4 +34,29 @@ class EmailOrUsernameBackend(ModelBackend):
         try:
             return UserModel.objects.get(pk=user_id)
         except UserModel.DoesNotExist:
+            return None
+
+
+class ServiceProviderBackend(BaseBackend):
+    def authenticate(self, request, username=None, password=None, **kwargs):
+        """
+        Authenticate service providers using their email and password.
+        """
+        try:
+            # 'username' here is the email, as defined in the form
+            user = CustomUser.objects.get(email=username)
+            if user.user_type != 'service_provider':
+                return None  # Only authenticate service providers
+            if user.check_password(password):
+                return user
+        except CustomUser.DoesNotExist:
+            return None
+
+    def get_user(self, user_id):
+        """
+        Retrieve the user by ID.
+        """
+        try:
+            return CustomUser.objects.get(pk=user_id)
+        except CustomUser.DoesNotExist:
             return None

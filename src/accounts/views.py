@@ -10,7 +10,7 @@ from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.decorators import login_required
-
+from django.views.generic import FormView
 from accounts.models import CustomUser
 
 from .forms import (
@@ -150,14 +150,28 @@ class UserLoginView(CustomLoginView):
 
 
 # Service provider login view
-class ServiceProviderLoginView(CustomLoginView):
+class ServiceProviderLoginView(FormView):
     form_class = ServiceProviderLoginForm
     template_name = "service_provider_login.html"
 
+    def get_form_kwargs(self):
+        """
+        Pass the request object to the form.
+        """
+        kwargs = super().get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
+
+    def form_valid(self, form):
+        """
+        Log in the user and redirect to the success URL.
+        """
+        user = form.get_user()
+        login(self.request, user, backend='accounts.backends.ServiceProviderBackend')
+        return redirect(self.get_success_url())
+
     def get_success_url(self):
-        if self.request.user.user_type == "service_provider":
-            return reverse_lazy("services:list")
-        return reverse_lazy("login")
+        return reverse_lazy("services:list")
 
 
 # Login selection page view

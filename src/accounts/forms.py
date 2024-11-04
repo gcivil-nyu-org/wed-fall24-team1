@@ -3,8 +3,8 @@
 from django import forms
 from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from django.core.exceptions import ObjectDoesNotExist
-
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 from .models import CustomUser
 
 
@@ -49,51 +49,39 @@ class UserLoginForm(AuthenticationForm):
 
 
 class ServiceProviderLoginForm(AuthenticationForm):
-    email = forms.EmailField(
-        label="Email",
+    username = forms.EmailField(
+        label=_("Email"),
         widget=forms.EmailInput(attrs={"class": "form-control"}),
         required=True,
     )
     password = forms.CharField(
-        label="Password",
+        label=_("Password"),
+        strip=False,
         widget=forms.PasswordInput(attrs={"class": "form-control"}),
         required=True,
     )
 
     def __init__(self, request=None, *args, **kwargs):
-        super().__init__(request, *args, **kwargs)
-        self.fields.pop("username")  # Remove the username field
+        """
+        Override the default initialization to set autofocus and remove unnecessary fields.
+        """
+        super().__init__(request=request, *args, **kwargs)
+        self.fields['username'].widget.attrs.update({'autofocus': True})
 
-    def clean(self):
-        email = self.cleaned_data.get("email")
-        password = self.cleaned_data.get("password")
-
-        if email and password:
-            UserModel = get_user_model()
-            try:
-                user = UserModel.objects.get(email=email)
-                self.user_cache = authenticate(
-                    self.request, username=user.username, password=password
-                )
-                if self.user_cache is None:
-                    raise forms.ValidationError("Invalid email or password.")
-                else:
-                    if self.user_cache.user_type != "service_provider":
-                        raise forms.ValidationError(
-                            "This page is for service providers only."
-                        )
-                    self.confirm_login_allowed(self.user_cache)
-            except ObjectDoesNotExist:
-                raise forms.ValidationError("Invalid email or password.")
-        else:
-            raise forms.ValidationError("Please enter both email and password.")
-        return self.cleaned_data
-
-    def get_user(self):
-        return self.user_cache
-
-    def get_invalid_login_error(self):
-        return forms.ValidationError("Invalid email or password.")
+    def confirm_login_allowed(self, user):
+        """
+        Ensure that only active service providers can log in.
+        """
+        if not user.is_active:
+            raise ValidationError(
+                _("This account is inactive."),
+                code='inactive',
+            )
+        if user.user_type != "service_provider":
+            raise ValidationError(
+                _("This page is for service providers only."),
+                code='invalid_login',
+            )
 
 
 class ServiceSeekerForm(forms.ModelForm):
