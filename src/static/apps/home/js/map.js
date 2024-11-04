@@ -30,7 +30,7 @@ const defaultIcon = L.icon({
 });
 
 const selectedIcon = L.icon({
-    iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-yellow.png',
+    iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
     iconSize: [25, 41],
     iconAnchor: [12, 41],
@@ -524,7 +524,7 @@ function initializeServiceMarkers() {
         const roundedDistance = Number(item.Distance).toFixed(2);
         const roundedRating = !isNaN(item.Ratings) ? Number(item.Ratings).toFixed(2) : 'N/A';
 
-        // Create popup content with the new scroll button
+        // Create popup content with the scroll button
         const popupContent = document.createElement('div');
         popupContent.innerHTML = `
             <div>
@@ -533,7 +533,7 @@ function initializeServiceMarkers() {
                 Rating: ${roundedRating}<br>
                 Distance: ${roundedDistance} Miles<br>
                 <button class="scroll-to-details mt-2 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm">
-                    Scroll to Details Below
+                    View Details Below
                 </button>
             </div>
         `;
@@ -541,16 +541,25 @@ function initializeServiceMarkers() {
         // Add click event listener to the scroll button
         const scrollButton = popupContent.querySelector('.scroll-to-details');
         scrollButton.addEventListener('click', () => {
-            // Find the service list or details section
-            const serviceList = document.getElementById('serviceList');
-            if (serviceList) {
-                // Scroll to the service list with some offset for better visibility
-                const yOffset = 500; // Adjust this value to control the scroll position
-                const y = serviceList.getBoundingClientRect().top + window.pageYOffset + yOffset;
-                window.scrollTo({ top: y, behavior: 'smooth' });
-            }
-            // Trigger the service details display
+            // Show service details first
             showServiceDetails(item.Id);
+            
+            // Wait for the details to be rendered
+            setTimeout(() => {
+                const serviceDetails = document.getElementById('serviceDetails');
+                if (serviceDetails) {
+                    // Calculate position accounting for any fixed header if present
+                    const headerOffset = 20; // Adjust this value based on your header height
+                    const elementPosition = serviceDetails.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                    
+                    // Smooth scroll to the details section
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            }, 100); // Small delay to ensure DOM updates are complete
         });
 
         const marker = L.marker([item.Lat, item.Log], { icon: defaultIcon })
