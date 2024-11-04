@@ -159,7 +159,7 @@ class ServiceProviderLoginView(FormView):
         Pass the request object to the form.
         """
         kwargs = super().get_form_kwargs()
-        kwargs['request'] = self.request
+        kwargs["request"] = self.request
         return kwargs
 
     def form_valid(self, form):
@@ -167,7 +167,7 @@ class ServiceProviderLoginView(FormView):
         Log in the user and redirect to the success URL.
         """
         user = form.get_user()
-        login(self.request, user, backend='accounts.backends.ServiceProviderBackend')
+        login(self.request, user, backend="accounts.backends.ServiceProviderBackend")
         return redirect(self.get_success_url())
 
     def get_success_url(self):

@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import BaseBackend
 from accounts.models import CustomUser
 
+
 class EmailOrUsernameBackend(ModelBackend):
     """
     Custom authentication backend that allows users to log in using their email or username.
@@ -45,7 +46,7 @@ class ServiceProviderBackend(BaseBackend):
         try:
             # 'username' here is the email, as defined in the form
             user = CustomUser.objects.get(email=username)
-            if user.user_type != 'service_provider':
+            if user.user_type != "service_provider":
                 return None  # Only authenticate service providers
             if user.check_password(password):
                 return user

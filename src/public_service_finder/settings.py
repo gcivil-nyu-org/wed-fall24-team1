@@ -90,7 +90,7 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 SESSION_ENGINE = "django.contrib.sessions.backends.db"  # Default setting
 AXES_USERNAME_CALLABLE = "accounts.utils.get_axes_username"
 
-AXES_EXCLUDE_URLS = [r'^/accounts/login/service-provider/$']
+AXES_EXCLUDE_URLS = [r"^/accounts/login/service-provider/$"]
 
 AXES_ENABLED = True
 AXES_FAILURE_LIMIT = 3
@@ -98,7 +98,7 @@ AXES_COOLOFF_TIME = timedelta(minutes=5)
 AXES_LOCKOUT_PARAMETERS = ["username"]
 AXES_RESET_ON_SUCCESS = False
 AXES_HANDLER = "axes.handlers.database.AxesDatabaseHandler"
-AXES_LOCKOUT_CALLABLE = 'accounts.utils.axes_lockout_callable'
+AXES_LOCKOUT_CALLABLE = "accounts.utils.axes_lockout_callable"
 AXES_USERNAME_FORM_FIELD = "username"
 AXES_LOCKOUT_TEMPLATE = "lockout.html"
 AXES_LOCKOUT_URL = None
@@ -207,5 +207,5 @@ AUTHENTICATION_BACKENDS = (
     "django.contrib.auth.backends.ModelBackend",  # Default
     "allauth.account.auth_backends.AuthenticationBackend",  # For allauth
     "axes.backends.AxesBackend",
-    'accounts.backends.ServiceProviderBackend',  # For service providers
+    "accounts.backends.ServiceProviderBackend",  # For service providers
 )

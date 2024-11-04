@@ -1,7 +1,7 @@
 # accounts/forms.py
 
 from django import forms
-from django.contrib.auth import get_user_model, authenticate
+from django.contrib.auth import authenticate
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
@@ -66,7 +66,7 @@ class ServiceProviderLoginForm(AuthenticationForm):
         Override the default initialization to set autofocus and remove unnecessary fields.
         """
         super().__init__(request=request, *args, **kwargs)
-        self.fields['username'].widget.attrs.update({'autofocus': True})
+        self.fields["username"].widget.attrs.update({"autofocus": True})
 
     def confirm_login_allowed(self, user):
         """
@@ -75,12 +75,12 @@ class ServiceProviderLoginForm(AuthenticationForm):
         if not user.is_active:
             raise ValidationError(
                 _("This account is inactive."),
-                code='inactive',
+                code="inactive",
             )
         if user.user_type != "service_provider":
             raise ValidationError(
                 _("This page is for service providers only."),
-                code='invalid_login',
+                code="invalid_login",
             )
 
 
