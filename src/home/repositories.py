@@ -240,7 +240,7 @@ class HomeRepository:
             keys = [{"Id": service_id} for service_id in service_ids]
             # DynamoDB batch_get_item limit is 100 items per batch
             for i in range(0, len(keys), 100):
-                batch_keys = keys[i: i + 100]
+                batch_keys = keys[i : i + 100]
                 response = self.dynamodb.batch_get_item(
                     RequestItems={self.services_table.name: {"Keys": batch_keys}}
                 )
