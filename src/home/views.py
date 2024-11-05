@@ -86,7 +86,7 @@ def home_view(request):
     user_bookmarks = []
     if user:
         user_bookmarks_services = repo.get_user_bookmarks(str(user.id))
-        user_bookmarks = [service['Id'] for service in user_bookmarks_services]
+        user_bookmarks = [service["Id"] for service in user_bookmarks_services]
 
     # Validate the user location (latitude and longitude)
     if ulat and ulon:
@@ -130,7 +130,6 @@ def home_view(request):
             "Distance": item.get("Distance", "N/A"),
             "Description": convert_decimals(item.get("Description", {})),
             "IsBookmarked": item.get("Id") in user_bookmarks,
-
         }
         for item in page_obj
     ]
@@ -178,32 +177,35 @@ def get_reviews(request, service_id):
         print(f"Error fetching reviews: {e}")
         return JsonResponse({"error": "Failed to fetch reviews."}, status=500)
 
+
 @require_POST
 def toggle_bookmark(request):
     try:
         data = json.loads(request.body)
-        service_id = data.get('service_id')
-        action = data.get('action')  # 'add' or 'remove'
+        service_id = data.get("service_id")
+        action = data.get("action")  # 'add' or 'remove'
         user = request.user
 
         if not service_id or not action:
-            return JsonResponse({'error': 'Invalid data.'}, status=400)
+            return JsonResponse({"error": "Invalid data."}, status=400)
 
         user_id = str(user.id)
         repo = HomeRepository()
 
-        if action == 'add':
+        if action == "add":
             if not repo.is_bookmarked(user_id, service_id):
                 bookmark_id = str(uuid.uuid4())
                 repo.add_bookmark(bookmark_id, user_id, service_id)
-                return JsonResponse({'success': True, 'action': 'added'})
+                return JsonResponse({"success": True, "action": "added"})
             else:
-                return JsonResponse({'success': True, 'action': 'already_bookmarked'})
-        elif action == 'remove':
+                return JsonResponse({"success": True, "action": "already_bookmarked"})
+        elif action == "remove":
             repo.remove_bookmark(user_id, service_id)
-            return JsonResponse({'success': True, 'action': 'removed'})
+            return JsonResponse({"success": True, "action": "removed"})
         else:
-            return JsonResponse({'error': 'Invalid action.'}, status=400)
+            return JsonResponse({"error": "Invalid action."}, status=400)
     except Exception as e:
         print(f"Error in toggle_bookmark: {e}")
-        return JsonResponse({'error': 'An error occurred while toggling the bookmark.'}, status=500)
+        return JsonResponse(
+            {"error": "An error occurred while toggling the bookmark."}, status=500
+        )

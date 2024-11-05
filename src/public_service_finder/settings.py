@@ -33,7 +33,7 @@ SUPABASE_DB_PORT = config("SUPABASE_DB_PORT")
 AWS_REGION = "us-east-1"
 DYNAMODB_TABLE_SERVICES = "services"
 DYNAMODB_TABLE_REVIEWS = "reviews"
-DYNAMODB_TABLE_BOOKMARKS = 'bookmark'
+DYNAMODB_TABLE_BOOKMARKS = "bookmark"
 
 
 SITE_ID = 2  # Make sure this is set
