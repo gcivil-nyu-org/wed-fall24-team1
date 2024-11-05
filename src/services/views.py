@@ -5,12 +5,16 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import Http404, JsonResponse, HttpResponseNotAllowed
+from django.shortcuts import render, redirect
 from django.shortcuts import render, redirect, get_object_or_404
 
 from home.repositories import HomeRepository
 from public_service_finder.utils.enums.service_status import ServiceStatus
 from .forms import ServiceForm, DescriptionFormSet, ReviewResponseForm
 from .models import ServiceDTO
+from .repositories import ServiceRepository, ReviewRepository
+from .forms import ServiceForm, DescriptionFormSet, ReviewResponseForm
+from .models import ServiceDTO, ReviewDTO
 from .repositories import ServiceRepository, ReviewRepository
 
 service_repo = ServiceRepository()
