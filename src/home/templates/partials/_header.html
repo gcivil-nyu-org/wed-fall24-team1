@@ -2,7 +2,7 @@
     <div class="container mx-auto px-4">
         <form method="get" action="" class="flex flex-wrap items-start gap-6">
             <!-- Search by Name -->
-            <div class="flex flex-col w-full sm:w-auto flex-grow">
+            <div class="flex flex-col w-full sm:w-40">
                 <label for="search" class="mb-1 text-sm font-medium">Search by Name</label>
                 <input type="text" id="search" name="search" placeholder="Search by Name" value="{{ search_query }}" 
                        class="w-full p-2 rounded bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-300 h-12 border border-gray-300">
@@ -50,7 +50,7 @@
                     <input type="range" id="radius" name="radius" min="1" max="20" value="{% if radius == '' %}5{% else %}{{ radius }}{% endif %}"
                            class="flex-grow slider bg-gray-300 rounded-lg">
                     <span id="radiusValue" class="ml-2 text-gray-800 w-5 text-right">{% if radius == '' %}5{% else %}{{ radius }}{% endif %}</span>
-                    <span class="ml-2 text-gray-800 text-right">miles</span>
+                    <span class="ml-2 text-gray-800 text-right">Miles</span>
                 </div>
             </div>
 
@@ -59,13 +59,13 @@
             <input type="hidden" id="user-lon" name="user_lon" value="">
 
             <!-- Apply Filters and Clear Filters Buttons -->
-            <div class="flex flex-col w-full sm:w-auto">
+            <div class="flex flex-col w-full sm:w-40">
                 <label class="mb-1 text-sm font-medium invisible">Actions</label> <!-- Invisible label for alignment -->
                 <div class="flex">
                     <!-- Apply Filters Button -->
                     <button type="submit" id="apply-filters"
                             class="w-full sm:w-auto bg-white text-blue-500 px-4 py-2 rounded hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-300 h-12 border border-gray-300">
-                        Apply Filters
+                        Search
                     </button>
                     <!-- Clear Filters Button (with margin-left) -->
                     <button type="button" id="clear-filters"

@@ -5,8 +5,11 @@ let map;
 let currentLocationMarker = null;
 let userLat = null;
 let userLng = null;
-let serviceMarkers = []; // Array to hold service markers
+let serviceMarkers = {}; // Object to hold service markers by Id
+let selectedMarker = null; // Variable to track the selected marker
+let selectedSidebarButton = null; // Variable to track the selected sidebar button
 
+// Define User Location Icon
 const userLocationIcon = L.icon({
     iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
@@ -14,6 +17,31 @@ const userLocationIcon = L.icon({
     iconAnchor: [12, 41],
     popupAnchor: [1, -34],
     shadowSize: [41, 41]
+});
+
+// Define Default and Selected Icons for Services
+const defaultIcon = L.icon({
+    iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+});
+
+const selectedIcon = L.icon({
+    iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+});
+
+// Preprocess itemsData to ensure Ratings are numbers or NaN
+itemsData.forEach(item => {
+    const rating = parseFloat(item.Ratings);
+    item.Ratings = isNaN(rating) ? NaN : rating;
 });
 
 // Initialize the map when the document is ready
@@ -30,6 +58,13 @@ document.addEventListener('DOMContentLoaded', function() {
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
+    // Retrieve and set the selected filter from localStorage
+    const savedFilter = localStorage.getItem('selectedFilter') || 'distance';
+    const filterSelect = document.getElementById('filterSelect');
+    if (filterSelect) {
+        filterSelect.value = savedFilter;
+    }
+
     // Check if user location is stored in localStorage
     userLat = localStorage.getItem('userLat');
     userLng = localStorage.getItem('userLng');
@@ -45,7 +80,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Check if the address field has a saved value, and populate the input
     if (savedAddress) {
-        document.getElementById('location').value = savedAddress;
+        const locationInput = document.getElementById('location');
+        if (locationInput) {
+            locationInput.value = savedAddress;
+        }
     }
 
     const radiusInput = document.getElementById('radius');
@@ -56,8 +94,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         radiusInput.addEventListener('input', function () {
             radiusValue.textContent = this.value;
-            // Additional code to update map based on radius change
-            initializeServiceMarkers(); // Update markers based on radius change
+            // Update markers and service list based on the new radius
+            initializeServiceMarkers();
+            updateServiceList();
         });
     }
 
@@ -108,7 +147,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 // No location entered, you can decide to use current location or alert the user
                 alert('Please enter a location or use the current location button.');
-        }
+            }
         });
     }
 
@@ -121,7 +160,9 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('location').value = '';
             document.getElementById('type').selectedIndex = 0;
             document.getElementById('radius').value = 5; // Default radius value
-            radiusValue.textContent = '5';
+            if (radiusValue) {
+                radiusValue.textContent = '5';
+            }
 
             // Reset hidden inputs
             document.getElementById('user-lat').value = '';
@@ -131,6 +172,7 @@ document.addEventListener('DOMContentLoaded', function() {
             localStorage.removeItem('userLat');
             localStorage.removeItem('userLng');
             localStorage.removeItem('userAddress');
+            localStorage.removeItem('selectedFilter'); // Clear selected filter
 
             // Reset global variables
             userLat = defaultLat;
@@ -140,17 +182,37 @@ document.addEventListener('DOMContentLoaded', function() {
             setUserLocation(defaultLat, defaultLng, false);
 
             // Remove existing service markers
-            if (serviceMarkers.length > 0) {
-                serviceMarkers.forEach(marker => {
-                    map.removeLayer(marker);
-                });
-                serviceMarkers = [];
+            for (let id in serviceMarkers) {
+                map.removeLayer(serviceMarkers[id]);
             }
+            serviceMarkers = {};
 
-            // Re-initialize service markers
+            // Re-initialize service markers and service list
             initializeServiceMarkers();
+            updateServiceList();
+
+            // Reset filter select to default
+            if (filterSelect) {
+                filterSelect.value = 'distance';
+            }
         });
     }
+
+    // Add event listener to the filter select dropdown
+    if (filterSelect) {
+        filterSelect.addEventListener('change', function() {
+            const selectedFilter = this.value;
+            // Save the selected filter to localStorage
+            localStorage.setItem('selectedFilter', selectedFilter);
+            // Re-initialize markers and service list based on the new filter
+            initializeServiceMarkers();
+            updateServiceList();
+        });
+    }
+
+    // Initialize service markers and service list on page load
+    initializeServiceMarkers();
+    updateServiceList();
 });
 
 // Function to set user's location and update the marker
@@ -177,8 +239,9 @@ function setUserLocation(lat, lon, shouldReverseGeocode = true) {
         reverseGeocode(lat, lon);
     }
 
-    // After updating the user location, re-initialize the service markers
+    // After updating the user location, re-initialize the service markers and service list
     initializeServiceMarkers();
+    updateServiceList();
 }
 
 // Function to reverse geocode coordinates to an address
@@ -190,7 +253,10 @@ function reverseGeocode(lat, lon) {
         .then(data => {
             if (data && data.display_name) {
                 const address = data.display_name;
-                document.getElementById('location').value = address;
+                const locationInput = document.getElementById('location');
+                if (locationInput) {
+                    locationInput.value = address;
+                }
                 // Save the address to localStorage
                 localStorage.setItem('userAddress', address);
             }
@@ -291,80 +357,98 @@ function setFallbackLocation() {
     const defaultLat = 40.7128;
     const defaultLng = -74.0060;
     setUserLocation(defaultLat, defaultLng, false);
-    document.getElementById('location').value = 'New York, NY';
+    const locationInput = document.getElementById('location');
+    if (locationInput) {
+        locationInput.value = 'New York, NY';
+    }
 }
 
-// Function to show service details (Assuming you have this function)
-function showServiceDetails(index) {
-    const service = itemsData[index];
+// Function to show service details
+function showServiceDetails(serviceId) {
+    // Find the service in itemsData by Id
+    const service = itemsData.find(item => item.Id === serviceId);
     if (!service) {
-        console.error(`Service with index ${index} not found.`);
+        console.error(`Service with Id ${serviceId} not found.`);
         return;
     }
 
     // Populate basic service details
-    document.getElementById('serviceId').textContent = service.Id || 'No ID';
-    document.getElementById('serviceName').textContent = service.Name || 'No Name';
-    document.getElementById('serviceAddress').textContent = service.Address || 'N/A';
-    document.getElementById('serviceType').textContent = service.Category || 'Unknown';
-    document.getElementById('serviceRating').textContent = service.Ratings && service.Ratings !== 0 ? parseFloat(service.Ratings).toFixed(2) : 'N/A';
-    document.getElementById('serviceDistance').textContent = service.Distance ? service.Distance + ' miles' : 'N/A';
+    const serviceIdElem = document.getElementById('serviceId');
+    const serviceNameElem = document.getElementById('serviceName');
+    const serviceAddressElem = document.getElementById('serviceAddress');
+    const serviceTypeElem = document.getElementById('serviceType');
+    const serviceRatingElem = document.getElementById('serviceRating');
+    const serviceDistanceElem = document.getElementById('serviceDistance');
+
+    if (serviceIdElem) serviceIdElem.textContent = service.Id || 'No ID';
+    if (serviceNameElem) serviceNameElem.textContent = service.Name || 'No Name';
+    if (serviceAddressElem) serviceAddressElem.textContent = service.Address || 'N/A';
+    if (serviceTypeElem) serviceTypeElem.textContent = service.Category || 'Unknown';
+    if (serviceRatingElem) serviceRatingElem.textContent = !isNaN(service.Ratings) && service.Ratings !== 0 ? parseFloat(service.Ratings).toFixed(2) : 'N/A';
+    if (serviceDistanceElem) serviceDistanceElem.textContent = service.Distance ? parseFloat(service.Distance).toFixed(2) + ' Miles' : 'N/A';
 
     // Clear previous descriptions
     const descriptionElement = document.getElementById('serviceDescription');
-    descriptionElement.innerHTML = '';  // Clear previous content
+    if (descriptionElement) {
+        descriptionElement.innerHTML = '';  // Clear previous content
 
-    const heading = document.createElement('h3');
-    heading.textContent = 'Additional Descriptive Details:';
-    heading.style.marginBottom = '10px'; // Add some space below the heading
-    heading.style.fontSize = '1.1em'; // Adjust font size as needed
-    heading.style.fontWeight = 'bold'; // Make the heading bold
-    descriptionElement.appendChild(heading);
+        const heading = document.createElement('h3');
+        heading.textContent = 'Additional Descriptive Details:';
+        heading.style.marginBottom = '10px'; // Add some space below the heading
+        heading.style.fontSize = '1.1em'; // Adjust font size as needed
+        heading.style.fontWeight = 'bold'; // Make the heading bold
+        descriptionElement.appendChild(heading);
 
-    // Check if Description exists and is an object
-    if (service.Description && typeof service.Description === 'object') {
-        let hasDescription = false;
-        const table = document.createElement('table');
+        // Check if Description exists and is an object
+        if (service.Description && typeof service.Description === 'object') {
+            let hasDescription = false;
+            const table = document.createElement('table');
 
-        for (const [key, value] of Object.entries(service.Description)) {
-            if (value !== null && value !== '') {
-                hasDescription = true;
-                const tr = document.createElement('tr');
+            for (const [key, value] of Object.entries(service.Description)) {
+                if (value !== null && value !== '') {
+                    hasDescription = true;
+                    const tr = document.createElement('tr');
 
-                const th = document.createElement('th');
-                th.textContent = `${key.replace(/_/g, ' ')}:`;
+                    const th = document.createElement('th');
+                    th.textContent = `${key.replace(/_/g, ' ')}:`;
 
-                const td = document.createElement('td');
-                td.innerHTML = value.replace(/\n/g, '<br>'); // Replace \n with <br>
+                    const td = document.createElement('td');
+                    td.innerHTML = value.replace(/\n/g, '<br>'); // Replace \n with <br>
 
-                tr.appendChild(th);
-                tr.appendChild(td);
-                table.appendChild(tr);
+                    tr.appendChild(th);
+                    tr.appendChild(td);
+                    table.appendChild(tr);
+                }
             }
-        }
 
-        if (hasDescription) {
-            descriptionElement.appendChild(table);
+            if (hasDescription) {
+                descriptionElement.appendChild(table);
+            } else {
+                descriptionElement.textContent = 'No description available.';
+            }
         } else {
             descriptionElement.textContent = 'No description available.';
         }
-    } else {
-        descriptionElement.textContent = 'No description available.';
     }
 
+    // Handle Get Directions button
     const getDirectionsBtn = document.getElementById('getDirections');
-
-    if (service.MapLink) {
-        getDirectionsBtn.href = service.MapLink;
-        getDirectionsBtn.style.display = 'inline-block'; // Ensure the button is visible
-    } else {
-        getDirectionsBtn.href = '#';
-        getDirectionsBtn.style.display = 'none'; // Hide the button if no MapLink
+    if (getDirectionsBtn) {
+        if (service.MapLink) {
+            getDirectionsBtn.href = service.MapLink;
+            getDirectionsBtn.style.display = 'inline-block'; // Ensure the button is visible
+        } else {
+            getDirectionsBtn.href = '#';
+            getDirectionsBtn.style.display = 'none'; // Hide the button if no MapLink
+        }
     }
 
     // Assuming you have a function to fetch and display reviews
-    fetchAndDisplayReviews(service.Id, 1);
+    if (typeof fetchAndDisplayReviews === 'function') {
+        fetchAndDisplayReviews(service.Id, 1);
+    }
 
+    // Display the service details panel
     const serviceDetailsDiv = document.getElementById('serviceDetails');
     if (serviceDetailsDiv) {
         serviceDetailsDiv.classList.remove('hidden');
@@ -372,20 +456,164 @@ function showServiceDetails(index) {
     }
 }
 
-// Function to initialize service markers based on the updated location
+// Function to initialize service markers based on the updated location and selected filter
 function initializeServiceMarkers() {
     // Remove existing service markers
-    if (serviceMarkers.length > 0) {
-        serviceMarkers.forEach(marker => {
-            map.removeLayer(marker);
-        });
-        serviceMarkers = [];
+    for (let id in serviceMarkers) {
+        map.removeLayer(serviceMarkers[id]);
     }
+    serviceMarkers = {};
+
+    // Reset selected marker and sidebar button
+    selectedMarker = null;
+    selectedSidebarButton = null;
 
     // Make sure itemsData is defined and accessible
     if (!itemsData || !Array.isArray(itemsData)) {
         console.error('itemsData is not defined or is not an array.');
         return;
+    }
+
+    // Get the selected filter from localStorage
+    const filterSelect = document.getElementById('filterSelect');
+    const selectedFilter = filterSelect ? filterSelect.value : 'distance'; // Default to distance
+
+    // Clone itemsData to avoid mutating the original array
+    let filteredServices = [...itemsData];
+
+    // Sort based on the selected filter
+    if (selectedFilter === 'distance') {
+        filteredServices.sort((a, b) => parseFloat(a.Distance) - parseFloat(b.Distance));
+    } else if (selectedFilter === 'rating') {
+        filteredServices.sort((a, b) => {
+            if (isNaN(b.Ratings) && isNaN(a.Ratings)) return 0;
+            if (isNaN(b.Ratings)) return -1;
+            if (isNaN(a.Ratings)) return 1;
+            return b.Ratings - a.Ratings;
+        });
+    }
+
+    // Calculate distance to filter nearby services
+    const radiusInMiles = document.getElementById('radius').value || 5;
+
+    // Helper function to calculate distance between two lat/lon points
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 3958.8;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a =
+            0.5 - Math.cos(dLat)/2 +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            (1 - Math.cos(dLon))/2;
+
+        return R * 2 * Math.asin(Math.sqrt(a));
+    }
+
+    // Filter services within the specified radius
+    const nearbyServices = filteredServices.filter((item) => {
+        if (item.Lat && item.Log) {
+            const distance = calculateDistance(userLat, userLng, item.Lat, item.Log);
+            item.Distance = distance;
+            return distance <= radiusInMiles;
+        }
+        return false;
+    });
+
+    // Add markers for nearby services
+    nearbyServices.forEach((item) => {
+        const roundedDistance = Number(item.Distance).toFixed(2);
+        const roundedRating = !isNaN(item.Ratings) ? Number(item.Ratings).toFixed(2) : 'N/A';
+
+        // Create popup content with the scroll button
+        const popupContent = document.createElement('div');
+        popupContent.innerHTML = `
+            <div>
+                <b>${item.Name}</b><br>
+                ${item.Address}<br>
+                Rating: ${roundedRating}<br>
+                Distance: ${roundedDistance} Miles<br>
+                <button class="scroll-to-details mt-2 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm">
+                    View Details Below
+                </button>
+            </div>
+        `;
+
+        // Add click event listener to the scroll button
+        const scrollButton = popupContent.querySelector('.scroll-to-details');
+        scrollButton.addEventListener('click', () => {
+            // Show service details first
+            showServiceDetails(item.Id);
+            
+            // Wait for the details to be rendered
+            setTimeout(() => {
+                const serviceDetails = document.getElementById('serviceDetails');
+                if (serviceDetails) {
+                    // Calculate position accounting for any fixed header if present
+                    const headerOffset = 20; // Adjust this value based on your header height
+                    const elementPosition = serviceDetails.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                    
+                    // Smooth scroll to the details section
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            }, 100); // Small delay to ensure DOM updates are complete
+        });
+
+        const marker = L.marker([item.Lat, item.Log], { icon: defaultIcon })
+            .addTo(map)
+            .bindPopup(popupContent)
+            .on('click', () => {
+                selectMarker(marker, item.Id);
+                showServiceDetails(item.Id);
+            });
+
+        // Store the marker in the serviceMarkers map with service Id as the key
+        serviceMarkers[item.Id] = marker;
+    });
+
+    // Adjust map view to include all markers
+    const allMarkers = Object.values(serviceMarkers);
+    if (currentLocationMarker) {
+        allMarkers.push(currentLocationMarker);
+    }
+
+    if (allMarkers.length > 0) {
+        const group = L.featureGroup(allMarkers);
+        map.fitBounds(group.getBounds());
+    } else {
+        // If no service markers, set view to user location or default
+        map.setView([userLat || defaultLat, userLng || defaultLng], 12);
+    }
+}
+
+// Function to update the service list based on the selected filter and radius
+function updateServiceList() {
+    const serviceListDiv = document.getElementById('serviceList');
+    if (!serviceListDiv) {
+        console.error('Service list container not found.');
+        return;
+    }
+
+    // Get the selected filter from localStorage
+    const filterSelect = document.getElementById('filterSelect');
+    const selectedFilter = filterSelect ? filterSelect.value : 'distance'; // Default to distance
+
+    // Clone itemsData to avoid mutating the original array
+    let filteredServices = [...itemsData];
+
+    // Sort based on the selected filter
+    if (selectedFilter === 'distance') {
+        filteredServices.sort((a, b) => parseFloat(a.Distance) - parseFloat(b.Distance));
+    } else if (selectedFilter === 'rating') {
+        filteredServices.sort((a, b) => {
+            if (isNaN(b.Ratings) && isNaN(a.Ratings)) return 0;
+            if (isNaN(b.Ratings)) return -1; // b is NaN, a is valid -> a comes first
+            if (isNaN(a.Ratings)) return 1;  // a is NaN, b is valid -> b comes first
+            return b.Ratings - a.Ratings;    // Both are valid numbers
+        });
     }
 
     // Calculate distance to filter nearby services (e.g., within the specified radius)
@@ -405,46 +633,124 @@ function initializeServiceMarkers() {
     }
 
     // Filter services within the specified radius
-    const nearbyServices = itemsData.filter((item) => {
+    const nearbyServices = filteredServices.filter((item) => {
         if (item.Lat && item.Log) {
             const distance = calculateDistance(userLat, userLng, item.Lat, item.Log);
+            // Update the distance property if it's not already accurate
+            item.Distance = distance;
             return distance <= radiusInMiles;
         }
         return false;
     });
 
-    // Add markers for nearby services
-    nearbyServices.forEach((item, index) => {
-        const marker = L.marker([item.Lat, item.Log])
-            .addTo(map)
-            .bindPopup(`<b>${item.Name}</b><br>${item.Address}<br>Rating: ${item.Ratings}`)
-            .on('click', () => {
-                showServiceDetails(index); // Use index as identifier
-            });
-        serviceMarkers.push(marker);
-    });
+    // Clear the existing service list
+    serviceListDiv.innerHTML = '';
 
-    // Adjust map view to include all markers
-    const allMarkers = [...serviceMarkers, currentLocationMarker];
-    if (allMarkers.length > 0) {
-        const group = L.featureGroup(allMarkers);
-        map.fitBounds(group.getBounds());
-    } else {
-        map.setView([userLat || defaultLat, userLng || defaultLng], 12);
-    }
+    // Populate the service list with filtered and sorted services
+    nearbyServices.forEach((item) => {
+        // Create the button element
+        const button = document.createElement('button');
+        button.className = 'service-button w-full text-left p-2 hover:bg-gray-100 rounded';
+        button.setAttribute('data-id', item.Id);
 
-    // Re-attach event listeners to the service list items
-    const serviceButtons = document.querySelectorAll('.service-button, .service-row');
-    serviceButtons.forEach(button => {
+        // Create the inner HTML structure
+        button.innerHTML = `
+            <div class="flex items-center">
+                <!-- Distance on the Left -->
+                <div class="text-sm text-gray-600 mr-4 w-24">
+                    ${Number(item.Distance).toFixed(2)} Miles
+                </div>
+
+                <!-- Name and Address -->
+                <div class="flex-1">
+                    <div class="font-medium">${item.Name}</div>
+                    <div class="text-sm text-gray-600">${item.Address}</div>
+                </div>
+
+                <!-- Ratings on the Right -->
+                <div class="flex items-center ml-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-400 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                    <span>
+                        ${isNaN(item.Ratings) ? 'N/A' : Number(item.Ratings).toFixed(2)}
+                    </span>
+                </div>
+            </div>
+        `;
+
+        // Add click event listener to the button
         button.addEventListener('click', () => {
-            const serviceId = parseInt(button.getAttribute('data-id'), 10);
-            if (!isNaN(serviceId)) {
-                showServiceDetails(serviceId);
-            } else {
-                console.error(`Invalid service ID: ${serviceId}`);
+            const serviceId = item.Id;
+            if (serviceMarkers[serviceId]) {
+                // Programmatically trigger the marker's click event
+                serviceMarkers[serviceId].fire('click');
             }
         });
+
+        // Append the button to the service list
+        serviceListDiv.appendChild(button);
     });
+
+    // If no services are found, display a message
+    if (nearbyServices.length === 0) {
+        serviceListDiv.innerHTML = '<p class="text-gray-600">No services found within the selected radius.</p>';
+    }
+}
+
+// Function to select a marker and highlight it along with the corresponding sidebar button
+function selectMarker(marker, serviceId) {
+    // Reset the previously selected marker to default icon
+    if (selectedMarker && selectedMarker !== marker) {
+        selectedMarker.setIcon(defaultIcon);
+    }
+
+    // Set the new selected marker
+    selectedMarker = marker;
+    selectedMarker.setIcon(selectedIcon);
+
+    // Reset the previously selected sidebar button
+    if (selectedSidebarButton) {
+        selectedSidebarButton.classList.remove('bg-yellow-100');
+    }
+
+    // Highlight the new sidebar button
+    const newSidebarButton = document.querySelector(`.service-button[data-id="${serviceId}"]`);
+    if (newSidebarButton) {
+        selectedSidebarButton = newSidebarButton;
+        selectedSidebarButton.classList.add('bg-yellow-100');
+
+        // Get the service list container
+        const serviceListDiv = document.getElementById('serviceList');
+        if (serviceListDiv) {
+            // Calculate the scroll position needed
+            const buttonRect = newSidebarButton.getBoundingClientRect();
+            const containerRect = serviceListDiv.getBoundingClientRect();
+            
+            // Calculate if the button is outside the visible area
+            const isAbove = buttonRect.top < containerRect.top;
+            const isBelow = buttonRect.bottom > containerRect.bottom;
+            
+            if (isAbove || isBelow) {
+                // Calculate the new scroll position
+                const scrollPosition = isAbove 
+                    ? newSidebarButton.offsetTop - serviceListDiv.offsetTop
+                    : newSidebarButton.offsetTop - serviceListDiv.offsetTop - (containerRect.height - buttonRect.height);
+                
+                // Smoothly scroll the service list container
+                serviceListDiv.scrollTo({
+                    top: scrollPosition,
+                    behavior: 'smooth'
+                });
+            }
+        }
+    }
+
+    // Pan the map to the selected marker smoothly
+    map.panTo(selectedMarker.getLatLng());
+
+    // Optionally, open the popup associated with the marker
+    selectedMarker.openPopup();
 }
 
 // Function to hide service details
@@ -455,13 +761,3 @@ document.getElementById('closeDetails').addEventListener('click', () => {
         serviceDetailsDiv.classList.remove('block'); // Optionally remove 'block'
     }
 });
-
-// Event listener for the radius input change
-const radiusInput = document.getElementById('radius');
-const radiusValue = document.getElementById('radiusValue');
-if (radiusInput && radiusValue) {
-    radiusInput.addEventListener('input', function () {
-        radiusValue.textContent = this.value;
-        initializeServiceMarkers();
-    });
-}
