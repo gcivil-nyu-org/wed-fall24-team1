@@ -64,7 +64,7 @@ def profile_view(request):
                 "Name": item.get("Name", "No Name"),
                 "Category": item.get("Category", "N/A"),
                 "Distance": "N/A",  # Calculate if needed
-                "Address": item.get("Address", "N/A")
+                "Address": item.get("Address", "N/A"),
             }
             for item in bookmarks
         ]
