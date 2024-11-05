@@ -31,6 +31,21 @@
                 {% endfor %}
             </ul>
 
+            <h2 class="text-xl font-semibold text-gray-700 mt-6">Bookmarked Services:</h2>
+            <ul>
+                {% if bookmarks %}
+                    {% for service in bookmarks %}
+                        <li class="mt-4 p-4 bg-gray-100 rounded">
+                            <p><strong>Name:</strong> {{ service.Name }}</p>
+                            <p><strong>Type:</strong> {{ service.Category }}</p>
+                            <!-- Optionally, display distance if calculated -->
+                        </li>
+                    {% endfor %}
+                {% else %}
+                    <p>No bookmarks yet.</p>
+                {% endif %}
+            </ul>
+
             <button onclick="toggleEdit()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mt-4 rounded focus:outline-none">
                 Edit Profile
             </button>

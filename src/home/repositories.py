@@ -16,6 +16,8 @@ class HomeRepository:
         self.reviews_table = self.dynamodb.Table(
             settings.DYNAMODB_TABLE_REVIEWS
         )  # Ensure this is set in settings
+        self.bookmarks_table = self.dynamodb.Table(settings.DYNAMODB_TABLE_BOOKMARKS)
+
 
     def fetch_items_with_filter(
         self, search_query, category_filter, radius, ulat, ulon
@@ -155,3 +157,66 @@ class HomeRepository:
         except ClientError as e:
             print(f"Error fetching reviews: {e.response['Error']['Message']}")
             return []
+    
+    def add_bookmark(self, bookmark_id, user_id, service_id):
+        try:
+            timestamp = datetime.utcnow().isoformat()
+            self.bookmarks_table.put_item(
+                Item={
+                    'BookmarkId': bookmark_id,
+                    'UserId': user_id,
+                    'ServiceId': service_id,
+                    'timestamp': timestamp,
+                }
+            )
+        except ClientError as e:
+            print(f"Failed to add bookmark: {e.response['Error']['Message']}")
+            raise e
+
+    def remove_bookmark(self, user_id, service_id):
+        try:
+            response = self.bookmarks_table.query(
+                IndexName='UserBookmarksIndex',
+                KeyConditionExpression=Key('UserId').eq(user_id) & Key('ServiceId').eq(service_id)
+            )
+            items = response.get('Items', [])
+            if items:
+                bookmark_id = items[0]['BookmarkId']
+                self.bookmarks_table.delete_item(
+                    Key={'BookmarkId': bookmark_id}
+                )
+        except ClientError as e:
+            print(f"Failed to remove bookmark: {e.response['Error']['Message']}")
+            raise e
+
+    def is_bookmarked(self, user_id, service_id):
+        try:
+            response = self.bookmarks_table.query(
+                IndexName='UserBookmarksIndex',
+                KeyConditionExpression=Key('UserId').eq(user_id) & Key('ServiceId').eq(service_id)
+            )
+            items = response.get('Items', [])
+            return len(items) > 0
+        except ClientError as e:
+            print(f"Failed to check bookmark: {e.response['Error']['Message']}")
+            raise e
+
+    def get_user_bookmarks(self, user_id):
+        try:
+            response = self.bookmarks_table.query(
+                IndexName='UserBookmarksIndex',
+                KeyConditionExpression=Key('UserId').eq(user_id)
+            )
+            bookmarks = response.get('Items', [])
+            services = []
+            for bookmark in bookmarks:
+                service_id = bookmark['ServiceId']
+                service = self.services_table.get_item(
+                    Key={'Id': service_id}
+                ).get('Item')
+                if service:
+                    services.append(service)
+            return services
+        except ClientError as e:
+            print(f"Failed to get user bookmarks: {e.response['Error']['Message']}")
+            raise e

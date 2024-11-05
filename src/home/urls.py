@@ -12,4 +12,6 @@ urlpatterns = [
     path(
         "get_reviews/<str:service_id>/", views.get_reviews, name="get_reviews"
     ),  # Fix this path
+    path('toggle_bookmark/', views.toggle_bookmark, name='toggle_bookmark'),
+
 ]

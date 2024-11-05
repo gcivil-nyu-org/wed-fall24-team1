@@ -12,6 +12,7 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.decorators import login_required
 
 from accounts.models import CustomUser
+from home.repositories import HomeRepository
 
 from .forms import (
     ServiceSeekerForm,
@@ -50,6 +51,21 @@ def profile_view(request):
     elif user.user_type == "user":
         service_seeker = get_object_or_404(CustomUser, email=user.email)
 
+        # Fetch user's bookmarks
+        repo = HomeRepository()
+        bookmarks = repo.get_user_bookmarks(str(user.id))
+
+        # Process the bookmarks
+        processed_bookmarks = [
+            {
+                "Id": item.get("Id"),
+                "Name": item.get("Name", "No Name"),
+                "Category": item.get("Category", "N/A"),
+                "Distance": "N/A",  # Calculate if needed
+            }
+            for item in bookmarks
+        ]
+
         # If it's a POST request, we're updating the profile
         if request.method == "POST":
             form = ServiceSeekerForm(request.POST, instance=service_seeker)
@@ -65,6 +81,8 @@ def profile_view(request):
             {
                 "profile": service_seeker,
                 "form": form,  # Pass the form to the template
+                "bookmarks": processed_bookmarks,
+
             },
         )
 
