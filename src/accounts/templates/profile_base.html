@@ -169,7 +169,9 @@
                         {% for service in bookmarks %}
                             <li class="bookmark-item">
                                 <p class="font-bold">{{ service.Name }}</p>
+                                <p>{{ service.Address }}</p>
                                 <p>{{ service.Category }}</p>
+
                             </li>
                         {% endfor %}
                     </ul>
