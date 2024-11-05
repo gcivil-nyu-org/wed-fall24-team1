@@ -190,6 +190,12 @@ class UserLoginView(CustomLoginView):
     form_class = UserLoginForm
     template_name = "user_login.html"
 
+    def get_success_url(self):
+        if self.request.user.user_type == "user":
+            return reverse_lazy("home")  # Redirect to user's home page
+        else:
+            return reverse_lazy("user_login")
+
 
 # Service provider login view
 class ServiceProviderLoginView(CustomLoginView):
