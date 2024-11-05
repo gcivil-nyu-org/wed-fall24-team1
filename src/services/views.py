@@ -1,4 +1,3 @@
-# from django.shortcuts import render
 import uuid
 from decimal import Decimal
 from datetime import datetime, timezone
@@ -6,9 +5,6 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import Http404, JsonResponse, HttpResponseNotAllowed
-
-# Create your views here.
-# services/views.py
 from django.shortcuts import render, redirect
 
 from home.repositories import HomeRepository
@@ -16,9 +12,11 @@ from public_service_finder.utils.enums.service_status import ServiceStatus
 from .forms import ServiceForm, DescriptionFormSet
 from .models import ServiceDTO
 from .repositories import ServiceRepository
+from .forms import ServiceForm, DescriptionFormSet, ReviewResponseForm
+from .models import ServiceDTO, ReviewDTO
+from .repositories import ServiceRepository, ReviewRepository
 
 service_repo = ServiceRepository()
-
 
 @login_required
 def service_list(request):
@@ -235,3 +233,62 @@ def service_delete(request, service_id):
 
     # If it's not a POST request, return a 405 Method Not Allowed
     return HttpResponseNotAllowed(["POST"])
+
+
+@login_required
+def review_list(request, service_id):
+    review_repo = ReviewRepository()
+
+    service = service_repo.get_service(service_id)
+    if not service:
+        raise Http404("Service not found")
+
+    reviews = review_repo.get_reviews_for_service(service_id)
+
+    return render(request, "review_list.html", {"service": service, "reviews": reviews})
+
+
+@login_required
+def respond_to_review(request, service_id, review_id):
+    review_repo = ReviewRepository()
+
+    # Get the service and verify ownership
+    service = service_repo.get_service(service_id)
+    if not service:
+        raise Http404("Service not found")
+
+    if str(request.user.id) != service.provider_id:
+        messages.error(request, "You don't have permission to respond to this review.")
+        return redirect('services:review_list', service_id=service_id)
+
+    # Get all reviews for the service
+    reviews = review_repo.get_reviews_for_service(service_id)
+    review = next((r for r in reviews if r.review_id == review_id), None)
+
+    if not review:
+        raise Http404("Review not found")
+
+    if request.method == 'POST':
+        form = ReviewResponseForm(request.POST)
+        if form.is_valid():
+            if review_repo.respond_to_review(service_id, review_id, form.cleaned_data['response']):
+                messages.success(request, "Response submitted successfully!")
+                return redirect('services:review_list', service_id=service_id)
+            else:
+                messages.error(request, "Failed to submit response. Please try again.")
+    else:
+        form = ReviewResponseForm()
+
+    return render(request, 'services/respond_to_review.html', {
+        'service': service,
+        'review': review,
+        'form': form
+    })
+
+
+def get_service_by_id(service_id, provider_id):
+    """Utility function to retrieve a service and verify ownership."""
+    service = service_repo.get_service(service_id)
+    if service and service.provider_id == str(provider_id):
+        return service
+    return None

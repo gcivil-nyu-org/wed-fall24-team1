@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Reviews for {{ service.name }}</title>
+</head>
+<body>
+    <h1>Reviews for "{{ service.name }}"</h1>
+
+    <!-- Display Service Details -->
+    <h2>Service Details</h2>
+    <p><strong>Service ID:</strong> {{ service.id }}</p>
+    <p><strong>Service Name:</strong> {{ service.name }}</p>
+
+    <!-- Display Reviews -->
+    <h2>Reviews</h2>
+    {% if service.reviews %}
+        <ul>
+            {% for review in service.reviews %}
+                <li>
+                    <p><strong>User:</strong> {{ review.Username }}</p>
+                    <p><strong>Rating:</strong> {{ review.RatingStars }} stars</p>
+                    <p><strong>Comment:</strong> {{ review.RatingMessage }}</p>
+                    <p><strong>Timestamp:</strong> {{ review.Timestamp }}</p>
+
+                    <!-- Always show the Respond button using ReviewId -->
+                    <a href="{% url 'services:respond_to_review' service.id review.ReviewId %}">Respond to this review</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No reviews available for this service.</p>
+    {% endif %}
+</body>
+</html>

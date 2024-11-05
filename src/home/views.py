@@ -6,6 +6,8 @@ from django.http import JsonResponse
 import uuid  # For generating unique Review IDs
 from django.views.decorators.http import require_POST
 from decimal import Decimal
+from services.repositories import ServiceRepository, ReviewRepository
+from django.shortcuts import render, get_object_or_404
 
 # TODO These constants are maintained in the JS frontend and here, we'll have to unify them
 DEFAULT_LAT, DEFAULT_LON = 40.7128, -74.0060
@@ -209,3 +211,20 @@ def toggle_bookmark(request):
         return JsonResponse(
             {"error": "An error occurred while toggling the bookmark."}, status=500
         )
+
+def service_detail(request, service_id):
+    service_repo = ServiceRepository()
+    review_repo = ReviewRepository()
+
+    service = service_repo.get_service(service_id)
+    if not service:
+        raise Http404("Service does not exist")
+
+    reviews = review_repo.get_reviews_for_service(service_id)
+
+    context = {
+        "service": service,
+        "reviews": reviews,
+    }
+
+    return render(request, "home/service_detail.html", context)

@@ -1,4 +1,3 @@
-# services/forms.py
 from decimal import Decimal
 
 from django import forms
@@ -59,3 +58,14 @@ class DescriptionItemForm(forms.Form):
 
 
 DescriptionFormSet = formset_factory(DescriptionItemForm, extra=1, can_delete=True)
+
+
+class ReviewResponseForm(forms.Form):
+    response = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500',
+            'rows': '4',
+            'placeholder': 'Enter your response to this review...'
+        }),
+        required=True
+    )

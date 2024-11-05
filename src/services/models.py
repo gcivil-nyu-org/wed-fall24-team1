@@ -1,7 +1,7 @@
 # from django.db import models
 
 # Create your models here.
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import Dict, Any
 import uuid
@@ -63,3 +63,48 @@ class ServiceDTO:
             "CreatedTimestamp": self.service_created_timestamp,
             "ApprovedTimestamp": self.service_approved_timestamp,
         }
+
+@dataclass
+class ReviewDTO:
+    """Data Transfer Object for Review"""
+    review_id: str
+    service_id: str
+    user_id: str
+    username: str
+    rating_stars: int
+    rating_message: str
+    timestamp: str
+    response: str = field(default="")
+    responded_at: str = field(default="")
+
+    @classmethod
+    def from_dynamodb_item(cls, review_data: Dict[str, Any]) -> "ReviewDTO":
+        """Create ReviewDTO from review data in DynamoDB item"""
+        return cls(
+            review_id=review_data["ReviewId"],
+            service_id=review_data["ServiceId"],
+            user_id=review_data["UserId"],
+            username=review_data["Username"],
+            rating_stars=int(review_data["RatingStars"]),
+            rating_message=review_data["RatingMessage"],
+            timestamp=review_data["Timestamp"],
+            response=review_data.get("Response", "NULL"),
+            responded_at=review_data.get("RespondedAt", "NULL")
+        )
+
+    def to_dynamodb_item(self) -> Dict[str, Any]:
+        """Convert to DynamoDB review data format"""
+        item = {
+            "ReviewId": self.review_id or str(uuid.uuid4()),
+            "ServiceId": self.service_id,
+            "UserId": self.user_id,
+            "Username": self.username,
+            "RatingStars": str(self.rating_stars),
+            "RatingMessage": self.rating_message,
+            "Timestamp": self.timestamp
+        }
+        if self.response:
+            item["Response"] = self.response
+        if self.responded_at:
+            item["RespondedAt"] = self.responded_at
+        return item
