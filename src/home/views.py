@@ -2,11 +2,10 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import json
 from .repositories import HomeRepository
 from django.http import JsonResponse
-import uuid  # For generating unique Review IDs
+import uuid
 from django.views.decorators.http import require_POST
 from decimal import Decimal
-from services.repositories import ServiceRepository, ReviewRepository
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render
 
 # TODO These constants are maintained in the JS frontend and here, we'll have to unify them
 DEFAULT_LAT, DEFAULT_LON = 40.7128, -74.0060

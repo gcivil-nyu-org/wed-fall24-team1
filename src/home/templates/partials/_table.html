@@ -225,7 +225,7 @@
             document.getElementById('serviceAddress').textContent = service.Address || 'N/A';
             document.getElementById('serviceType').textContent = service.Category || 'Unknown';
             document.getElementById('serviceRating').textContent = service.Ratings && service.Ratings !== 0 ? parseFloat(service.Ratings).toFixed(2) : 'N/A';
-            document.getElementById('serviceDistance').textContent = service.Distance ? service.Distance + ' miles' : 'N/A';
+            document.getElementById('serviceDistance').textContent = service.Distance ? parseFloat(service.Distance).toFixed(2) + ' miles' : 'N/A';
 
             const bookmarkCheckbox = document.getElementById('bookmarkCheckbox');
             console.log('bookmarkCheckbox:', bookmarkCheckbox);

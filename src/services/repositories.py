@@ -57,55 +57,6 @@ class ServiceRepository:
             )
             return None
 
-
-class ReviewRepository:
-    def __init__(self):
-        self.dynamodb = boto3.resource(
-            "dynamodb",
-            region_name=settings.AWS_REGION,
-        )
-        self.table = self.dynamodb.Table(settings.DYNAMODB_TABLE_REVIEWS)
-
-    def get_review(self, review_id: str) -> ReviewDTO | None:
-        """Retrieve a single review by its ID."""
-        try:
-            response = self.table.get_item(Key={"ReviewId": review_id})
-            item = response.get("Item")
-            return ReviewDTO.from_dynamodb_item(item) if item else None
-        except ClientError as e:
-            log.error(
-                f"Error fetching review {review_id}: {e.responseText['Error']['Message']}"
-            )
-            return None
-
-    def respond_to_review(self, review_id: str, response_text: str) -> bool:
-        """Update a review's responseText field."""
-        try:
-            current_time = timezone.now().isoformat()
-            log.debug(
-                "Updating DynamoDB with responseText: %s, respondedAt: %s",
-                response_text,
-                current_time,
-            )
-            self.table.update_item(
-                Key={"ReviewId": review_id},
-                UpdateExpression="SET #response_text = :responseText, RespondedAt = :responded_at",
-                ExpressionAttributeNames={
-                    "#response_text": "ResponseText"
-                },  # Alias for reserved keyword
-                ExpressionAttributeValues={
-                    ":responseText": response_text,
-                    ":responded_at": current_time,
-                },
-            )
-            log.info(f"Updated review {review_id} with response")
-            return True
-        except ClientError as e:
-            log.error(
-                f"Error responding to review {review_id}: {e.response['Error']['Message']}"
-            )
-            return False
-
     def get_pending_approval_services(self) -> list[ServiceDTO]:
         try:
             response = self.table.scan(
@@ -120,6 +71,23 @@ class ReviewRepository:
                 f"Error fetching pending approval services: {e.response['Error']['Message']}"
             )
             return []
+
+    def update_service(self, service_dto: ServiceDTO) -> ServiceDTO | None:
+        try:
+            item = service_dto.to_dynamodb_item()
+            response = self.table.put_item(Item=item)
+            return service_dto if response else None
+        except ClientError as e:
+            print(e.response["Error"]["Message"])
+            return None
+
+    def delete_service(self, service_id: str) -> bool:
+        try:
+            self.table.delete_item(Key={"Id": service_id})
+            return True
+        except ClientError as e:
+            print(e.response["Error"]["Message"])
+            return False
 
     def update_service_status(self, service_id: str, new_status: str) -> bool:
         try:
