@@ -7,26 +7,27 @@
 {% endblock %}
 
 {% block content %}
+<!-- Update the main container -->
 <div class="min-h-screen bg-transparent-50">
-    <div class="container mx-auto px-4 max-w-7xl py-8 content-container"> <!-- Added 'content-container' class -->
-        <!-- Header Section -->
-        <div class="flex flex-col items-center mb-8 header-section"> <!-- Added header-section class -->
-            <h1 class="text-4xl font-bold text-gray-900 centered-text">Services Dashboard</h1> <!-- Increased text size -->
+    <div class="container mx-auto px-4 py-8 max-w-[1400px] min-w-[1000px]">
+        <!-- Header remains the same -->
+        <div class="flex flex-col items-center mb-8 mt-16">
+            <h1 class="text-4xl font-bold text-gray-900">Services Dashboard</h1>
         </div>
 
-        <!-- Search and Add Service Section -->
-        <div class="search-add-container"> <!-- New container for search and add button -->
-            <!-- Search Section -->
-            <div class="mb-6 w-full search-bar"> <!-- Added search-bar class -->
-                <input type="text" 
-                       id="serviceSearch" 
-                       placeholder="Search services..." 
-                       class="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200">
+        <!-- Update the search and add service section -->
+        <div class="flex justify-between items-center gap-4 mb-6">
+            <!-- Search Section - make it flexible but with min-width -->
+            <div class="flex-grow min-w-[600px]">
+                <input type="text"
+                       id="serviceSearch"
+                       placeholder="Search services..."
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200">
             </div>
 
             <!-- Add New Service Button -->
-            <div class="add-service-button"> <!-- Added add-service-button class -->
-                <a href="{% url 'services:create' %}" 
+            <div class="flex-shrink-0">
+                <a href="{% url 'services:create' %}"
                    class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 shadow-sm">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
@@ -36,32 +37,42 @@
             </div>
         </div>
 
-        <!-- Services Grid -->
-        <div id="servicesGrid" class="services-grid">
+        <!-- Update the Services Grid -->
+        <div id="servicesGrid" class="grid grid-cols-3 gap-6 min-w-[1000px]">
             {% for service in services %}
-            <div class="service-box service-card bg-white rounded-xl shadow-sm hover:shadow-md p-6">
+            <div class="service-box service-card bg-white rounded-xl shadow-sm hover:shadow-md p-6 min-w-[300px]">
+                <!-- Service card content remains the same -->
                 <div class="flex justify-between items-start">
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-900 hover:text-blue-500 transition-colors duration-200 cursor-pointer service-name" 
+                    <div class="min-w-0 flex-1"> <!-- Added min-w-0 and flex-1 -->
+                        <h3 class="text-lg font-semibold text-gray-900 hover:text-blue-500 transition-colors duration-200 cursor-pointer service-name truncate"
                             data-service-id="{{ service.id }}">
                             {{ service.name }}
                         </h3>
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mt-2">
-                            {{ service.category }}
-                        </span>
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 mt-2">
-                            {{ service.service_status  }}
-                        </span>
+                        <div class="flex flex-wrap gap-2 mt-2">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                {{ service.category }}
+                            </span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                {% if service.service_status == 'REJECTED' %}
+                                    bg-red-100 text-red-800
+                                {% elif service.service_status == 'APPROVED' %}
+                                    bg-green-100 text-green-800
+                                {% else %}
+                                    bg-yellow-100 text-yellow-800
+                                {% endif %}">
+                                {{ service.service_status }}
+                            </span>
+                        </div>
                     </div>
-                    <div class="flex space-x-2">
-                        <a href="{% url 'services:edit' service.id %}" 
-                           class="text-gray-400 hover:text-blue-500 transition-colors duration-200">
+                    <div class="flex space-x-2 flex-shrink-0"> <!-- Action buttons section -->
+                        <a href="{% url 'services:edit' service.id %}"
+                           class="text-blue-500 hover:text-blue-600 transition-colors duration-200">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                             </svg>
                         </a>
-                        <button class="text-gray-400 hover:text-red-600 transition-colors duration-200 delete-service" 
-                                data-service-id="{{ service.id }}" 
+                        <button class="delete-service text-red-500 hover:text-red-600 transition-colors duration-200"
+                                data-service-id="{{ service.id }}"
                                 data-service-name="{{ service.name }}">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>

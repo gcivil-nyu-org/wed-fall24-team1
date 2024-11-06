@@ -4,7 +4,6 @@ from django.contrib.auth import login
 from django.contrib.auth.views import LoginView
 from django.core.exceptions import PermissionDenied
 from django.db import models
-from django.http import HttpResponseNotFound
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -21,6 +20,7 @@ from .forms import (
     UserRegisterForm,
     UserLoginForm,
     ServiceProviderLoginForm,
+    ServiceProviderForm,
 )
 
 
@@ -47,10 +47,27 @@ def register(request):
 def profile_view(request):
     print("In profile view", request.GET)
     user = request.user
+
     if user.user_type == "service_provider":
-        print("user type is service_provider")
-        return HttpResponseNotFound("Page not found")
+        # Handle service provider profile
+        service_provider = get_object_or_404(CustomUser, email=user.email)
+
+        if request.method == "POST":
+            form = ServiceProviderForm(request.POST, instance=service_provider)
+            if form.is_valid():
+                form.save()
+                return redirect("profile_view")
+        else:
+            form = ServiceProviderForm(instance=service_provider)
+
+        return render(
+            request,
+            "profile_base.html",
+            {"profile": service_provider, "form": form, "is_service_provider": True},
+        )
+
     elif user.user_type == "user":
+        # Existing code for regular users
         service_seeker = get_object_or_404(CustomUser, email=user.email)
 
         # Fetch user's bookmarks
@@ -63,7 +80,7 @@ def profile_view(request):
                 "Id": item.get("Id"),
                 "Name": item.get("Name", "No Name"),
                 "Category": item.get("Category", "N/A"),
-                "Distance": "N/A",  # Calculate if needed
+                "Distance": "N/A",
                 "Address": item.get("Address", "N/A"),
             }
             for item in bookmarks
@@ -71,24 +88,17 @@ def profile_view(request):
 
         # Fetch user's reviews
         reviews = repo.fetch_reviews_by_user(str(user.id))
-
-        # Get unique service IDs from the reviews
         service_ids = set([review["ServiceId"] for review in reviews])
-
-        # Fetch service details
         service_map = repo.get_services_by_ids(service_ids)
 
-        # Add service names and parse timestamps in reviews
         for review in reviews:
             service = service_map.get(review["ServiceId"], {})
             review["ServiceName"] = service.get("Name", "Unknown Service")
-            # Parse the timestamp
             try:
                 review["Timestamp"] = parse_date(review["Timestamp"])
             except Exception:
-                pass  # Keep as string if parsing fails
+                pass
 
-        # If it's a POST request, we're updating the profile
         if request.method == "POST":
             form = ServiceSeekerForm(request.POST, instance=service_seeker)
             if form.is_valid():
@@ -102,9 +112,10 @@ def profile_view(request):
             "profile_base.html",
             {
                 "profile": service_seeker,
-                "form": form,  # Pass the form to the template
+                "form": form,
                 "bookmarks": processed_bookmarks,
-                "reviews": reviews,  # Pass the reviews to the template
+                "reviews": reviews,
+                "is_service_provider": False,
             },
         )
 

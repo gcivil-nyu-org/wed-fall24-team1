@@ -346,7 +346,7 @@ class ProfileViewTest(TestCase):
         # Log in as service provider
         self.client.login(username="provider", password="testpassword")
         response = self.client.get(reverse("profile_view"))
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 200)
 
     def test_profile_view_service_seeker_get(self):
         """Test that the profile view renders correctly for a user with type 'user'."""
