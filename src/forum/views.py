@@ -59,7 +59,7 @@ def post_detail(request, post_id):
             return redirect("forum:category_list")
         return redirect("forum:category_detail", category_id=category.id)
 
-    comments_list = post.comments.all().order_by("created_at")
+    comments_list = post.comments.all().order_by("-created_at")
 
     # Pagination for comments
     paginator = Paginator(comments_list, 5)  # Show 5 comments per page

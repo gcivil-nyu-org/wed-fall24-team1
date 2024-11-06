@@ -126,3 +126,10 @@ class ServiceSeekerForm(forms.ModelForm):
                 }
             ),
         }
+
+
+class ServiceProviderForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ["username", "email", "first_name", "last_name"]
+        # Add any other basic fields you want to include for service providers

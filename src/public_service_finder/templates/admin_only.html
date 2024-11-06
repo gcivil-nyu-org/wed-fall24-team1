@@ -2,48 +2,60 @@
 {% block title %}Admin Only Page{% endblock %}
 
 {% block content %}
-<div class="pt-12">
-<div class="container mx-auto mt-32 mb-10 p-10 bg-white shadow-lg rounded-lg">
-    <h1 class="text-2xl font-bold text-center mb-6">Pending Approval Listings</h1>
+<div class="min-h-screen bg-transparent-50">
+    <div class="container mx-auto px-4 py-8 max-w-[1400px] min-w-[1000px]">
+        <!-- Header section -->
+        <div class="flex flex-col items-center mb-8 mt-16">
+            <h1 class="text-4xl font-bold text-gray-900">Admin Dashboard</h1>
+        </div>
 
-    {% if pending_services %}
-    <div class="overflow-x-auto">
-        <table class="min-w-full bg-white border border-gray-200 rounded-lg">
-            <thead>
-            <tr class="w-full bg-gray-200 text-left text-gray-600 uppercase text-sm leading-normal">
-                <th class="py-3 px-6">Service Name</th>
-                <th class="py-3 px-6">Description</th>
-                <th class="py-3 px-6">Status</th>
-                <th class="py-3 px-6 text-center">Actions</th>
-            </tr>
-            </thead>
-            <tbody id="service-table-body" class="text-gray-700 text-sm font-light">
-            {% for service in pending_services %}
-            <tr id="service-row-{{ service.id }}" class="border-b border-gray-200 hover:bg-gray-100">
-                <td class="py-3 px-6 font-medium">{{ service.name }}</td>
-                <td class="py-3 px-6">{{ service.description }}</td>
-                <td class="py-3 px-6">{{ service.service_status }}</td>
-                <td class="py-3 px-6 text-center">
-                    <form action="{% url 'admin_update_listing' service.id %}" method="post" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit" name="status" value="approve"
-                                class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-3 rounded mx-1">
-                            Approve
-                        </button>
-                        <button type="submit" name="status" value="reject"
-                                class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded mx-1">
-                            Reject
-                        </button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+        <!-- Pending Services Section -->
+        {% if pending_services %}
+        <div class="overflow-x-auto bg-white rounded-xl shadow-sm p-8"> <!-- Increased padding -->
+            <table class="min-w-full text-base"> <!-- Increased base text size -->
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="px-8 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Service Name</th>
+                        <th class="px-8 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Description</th>
+                        <th class="px-8 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Address</th>
+                        <th class="px-8 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Status</th>
+                        <th class="px-8 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for service in pending_services %}
+                    <tr id="service-row-{{ service.id }}" class="hover:bg-gray-50 transition-colors duration-200">
+                        <td class="px-8 py-6 whitespace-nowrap text-base font-medium text-gray-900">{{ service.name }}</td> <!-- Increased padding and text size -->
+                        <td class="px-8 py-6 text-base text-gray-600">{{ service.description }}</td> <!-- Darkened text -->
+                        <td class="px-8 py-6 text-base text-gray-600">{{ service.address }}</td>
+                        <td class="px-8 py-6">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800"> <!-- Increased badge size -->
+                                {{ service.service_status }}
+                            </span>
+                        </td>
+                        <td class="px-8 py-6 text-center">
+                            <form action="{% url 'admin_update_listing' service.id %}" method="post" class="inline-flex gap-3"> <!-- Increased gap -->
+                                {% csrf_token %}
+                                <button type="submit" name="status" value="approve"
+                                    class="inline-flex items-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors duration-200 text-base"> <!-- Increased button size -->
+                                    Approve
+                                </button>
+                                <button type="submit" name="status" value="reject"
+                                    class="inline-flex items-center px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200 text-base">
+                                    Reject
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="bg-white rounded-xl shadow-sm p-8 text-center">
+            <p class="text-gray-500 text-lg">No pending listings at the moment.</p>
+        </div>
+        {% endif %}
     </div>
-    {% else %}
-    <p class="text-center text-gray-500">No pending listings at the moment.</p>
-    {% endif %}
-</div>
 </div>
 {% endblock %}
