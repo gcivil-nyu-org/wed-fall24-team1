@@ -17,15 +17,29 @@
         </div>
 
         <!-- Navigation Items -->
-        <div class="flex items-center space-x-6">
+        <div class="flex items-center justify-end space-x-6">
+            {% if user.is_authenticated and user.user_type == 'service_provider' %}
+            <a href="{% url 'services:list' %}" class="hidden md:flex items-center space-x-2 text-gray-600 hover:text-blue-700 font-medium p-2 rounded-md hover:bg-gray-100">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+            {% else %}
             <a href="{% url 'home' %}" class="hidden md:flex items-center space-x-2 text-gray-600 hover:text-blue-700 font-medium p-2 rounded-md hover:bg-gray-100">
                 <i class="fas fa-home"></i>
                 <span>Home</span>
             </a>
+            {% endif %}
             <a href="{% url 'forum:category_list' %}" class="hidden md:flex items-center space-x-2 text-gray-600 hover:text-blue-700 font-medium p-2 rounded-md hover:bg-gray-100">
                 <i class="fas fa-comments"></i>
                 <span>Forum</span>
             </a>
+
+            {% if user.is_superuser %}
+            <a href="{% url 'admin_only_view_new_listings' %}" class="hidden md:flex items-center space-x-2 text-gray-600 hover:text-blue-700 font-medium p-2 rounded-md hover:bg-gray-100">
+                <i class="fas fa-list"></i>
+                <span>New Service Listings</span>
+            </a>
+            {% endif %}
 
             <!-- Profile Section -->
             <div class="relative">
@@ -54,12 +68,6 @@
                 </form>
             </div>
 
-            <!-- Conditional Button for Superuser -->
-            {% if user.is_superuser %}
-                <a href="{% url 'admin_only_view_new_listings' %}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md">
-                    New Service Listings
-                </a>
-            {% endif %}
         </div>
     </div>
 </nav>
@@ -68,10 +76,17 @@
 <div class="md:hidden bg-white border-b">
     <div class="container mx-auto py-2 px-4">
         <div class="flex justify-center space-x-4">
+            {% if user.is_authenticated and user.user_type == 'service_provider' %}
+            <a href="{% url 'services:list' %}" class="flex items-center space-x-2 text-gray-600 hover:text-blue-700 font-medium">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+            {% else %}
             <a href="{% url 'home' %}" class="flex items-center space-x-2 text-gray-600 hover:text-blue-700 font-medium">
                 <i class="fas fa-home"></i>
                 <span>Home</span>
             </a>
+            {% endif %}
             <a href="{% url 'forum:category_list' %}" class="flex items-center space-x-2 text-gray-600 hover:text-blue-700 font-medium">
                 <i class="fas fa-comments"></i>
                 <span>Forum</span>
