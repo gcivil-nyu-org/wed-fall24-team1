@@ -5,14 +5,10 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import Http404, JsonResponse, HttpResponseNotAllowed
-from django.shortcuts import render, redirect
 from django.shortcuts import render, redirect, get_object_or_404
 
 from home.repositories import HomeRepository
 from public_service_finder.utils.enums.service_status import ServiceStatus
-from .forms import ServiceForm, DescriptionFormSet
-from .models import ServiceDTO
-from .repositories import ServiceRepository
 from .forms import ServiceForm, DescriptionFormSet, ReviewResponseForm
 from .models import ServiceDTO
 from .repositories import ServiceRepository, ReviewRepository
@@ -256,11 +252,8 @@ def review_list(request, service_id):
 
 @login_required
 def respond_to_review(request, service_id, review_id):
-    log.debug("Entering respond_to_review view")
-
     # Check if the user is authenticated
     if not request.user.is_authenticated:
-        log.warning("Unauthorized access attempt: user is not authenticated")
         return JsonResponse(
             {"status": "error", "message": "User not authenticated"}, status=403
         )
@@ -268,29 +261,16 @@ def respond_to_review(request, service_id, review_id):
     # Fetch the service and review data
     service = service_repo.get_service(service_id)
     if not service:
-        log.error("Service with ID %s not found", service_id)
         raise Http404("Service does not exist")
-    log.debug("Service fetched: %s", service)
 
     if service.provider_id != str(request.user.id):
-        log.warning(
-            "User %s does not have permission to respond to review for service %s",
-            request.user.id,
-            service_id,
-        )
         return JsonResponse(
             {"status": "error", "message": "Permission denied"}, status=403
         )
 
     review = review_repo.get_review(review_id)
     if not review or review.service_id != service_id:
-        log.error(
-            "Review with ID %s not found or does not belong to service %s",
-            review_id,
-            service_id,
-        )
         raise Http404("Review does not exist or does not belong to this service")
-    log.debug("Review fetched: %s", review)
 
     if request.method == "POST":
         form = ReviewResponseForm(request.POST)
@@ -300,18 +280,15 @@ def respond_to_review(request, service_id, review_id):
             # Attempt to update the review response in DynamoDB
             success = review_repo.respond_to_review(review_id, response_text)
             if success:
-                log.info("Successfully updated review %s with response", review_id)
                 messages.success(request, "Response successfully added to the review.")
                 return JsonResponse(
                     {"status": "success", "message": "Response saved"}, status=200
                 )
             else:
-                log.error("Failed to update review %s in the database", review_id)
                 return JsonResponse(
                     {"status": "error", "message": "Database update failed"}, status=500
                 )
         else:
-            log.warning("Form data is invalid: %s", form.errors)
             return JsonResponse(
                 {"status": "error", "message": "Invalid form data"}, status=400
             )

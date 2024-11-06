@@ -6,7 +6,6 @@ from django.conf import settings
 from django.utils import timezone
 
 from .models import ServiceDTO, ReviewDTO
-from .models import ServiceDTO
 
 log = logging.getLogger(__name__)
 
