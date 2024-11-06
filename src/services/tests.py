@@ -155,7 +155,7 @@ class ServiceViewsTestCase(TestCase):
         self.client.login(username="provider", password="testpass123")
         service_id = str(uuid.uuid4())
         with patch.object(ServiceRepository, "get_service") as mock_get, patch.object(
-                ServiceRepository, "delete_service"
+            ServiceRepository, "delete_service"
         ) as mock_delete:
             mock_get.return_value = ServiceDTO(
                 id=service_id,
@@ -180,4 +180,3 @@ class ServiceViewsTestCase(TestCase):
         service_id = str(uuid.uuid4())
         resp = self.client.get(reverse("services:delete", args=[service_id]))
         self.assertEqual(resp.status_code, 403)
-
