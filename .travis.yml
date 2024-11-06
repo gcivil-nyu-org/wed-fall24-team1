@@ -19,6 +19,7 @@ after_success:
 
 before_deploy:
   cd src
+  python manage.py collectstatic --noinput
 
 deploy:
   - provider: elasticbeanstalk
