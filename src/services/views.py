@@ -1,7 +1,6 @@
 import uuid
 from decimal import Decimal
 from datetime import datetime, timezone
-from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import Http404, JsonResponse, HttpResponseNotAllowed
@@ -26,22 +25,10 @@ def service_list(request):
     # Filter out services without an ID
     valid_services = [service for service in services if service.id]
 
-    if len(valid_services) != len(services):
-        messages.warning(
-            request,
-            f"{len(services) - len(valid_services)} service(s) were found without a valid ID and have been omitted from the list.",
-        )
-
-    # Get all messages
-    storage = messages.get_messages(request)
-    message_list = list(storage)
-    # Clear the messages
-    storage.used = True
-
     return render(
         request,
         "service_list.html",
-        {"services": valid_services, "messages": message_list},
+        {"services": valid_services},
     )
 
 
@@ -85,9 +72,7 @@ def service_create(request):
                 service_approved_timestamp="1900-01-01T00:00:00Z",
             )
             if service_repo.create_service(service_dto):
-                messages.success(request, "Service created successfully!")
                 return redirect("services:list")
-            messages.error(request, "Error creating service.")
     else:
         form = ServiceForm()
         description_formset = DescriptionFormSet(prefix="description")
@@ -156,9 +141,7 @@ def service_edit(request, service_id):
             )
 
             if service_repo.update_service(updated_service):
-                messages.success(request, "Service updated successfully!")
                 return redirect("services:list")
-            messages.error(request, "Error updating service.")
     else:
         initial_data = {
             "name": service.name,
@@ -223,10 +206,6 @@ def service_delete(request, service_id):
         raise PermissionDenied
 
     if request.method == "POST":
-        if service_repo.delete_service(service_id):
-            messages.success(request, "Service deleted successfully!")
-        else:
-            messages.error(request, "Error deleting service.")
         return redirect("services:list")
 
     # If it's not a POST request, return a 405 Method Not Allowed
@@ -279,7 +258,6 @@ def respond_to_review(request, service_id, review_id):
             # Attempt to update the review response in DynamoDB
             success = review_repo.respond_to_review(review_id, response_text)
             if success:
-                messages.success(request, "Response successfully added to the review.")
                 return JsonResponse(
                     {"status": "success", "message": "Response saved"}, status=200
                 )

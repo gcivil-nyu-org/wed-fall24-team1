@@ -1,7 +1,6 @@
 from django.db.models import Q
 from django.http import HttpResponseForbidden, JsonResponse
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages
 from .models import Category, Post, Comment
 from .forms import PostForm, CommentForm
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -52,8 +51,6 @@ def post_detail(request, post_id):
     try:
         post = get_object_or_404(Post, id=post_id)
     except Http404:
-        # Try to find the category from the URL if possible
-        messages.warning(request, "The requested post was not found.")
         # First try to get any post with this ID to find its category
         try:
             category = Post.objects.get(id=post_id).category
@@ -110,7 +107,6 @@ def edit_post(request, post_id):
         form = PostForm(request.POST, instance=post)
         if form.is_valid():
             form.save()
-            messages.success(request, "Post updated successfully!")
             return redirect("forum:post_detail", post_id=post.id)
 
     return HttpResponseForbidden("Invalid request method.")
@@ -126,7 +122,6 @@ def delete_post(request, post_id):
     if request.method == "POST":
         category_id = post.category.id
         post.delete()
-        messages.success(request, "Post deleted successfully!")
         return redirect("forum:category_detail", category_id=category_id)
 
     return HttpResponseForbidden("Invalid request method.")
@@ -146,7 +141,6 @@ def edit_comment(request, comment_id):
         form = CommentForm(request.POST, instance=comment)
         if form.is_valid():
             form.save()
-            messages.success(request, "Comment updated successfully!")
             return redirect("forum:post_detail", post_id=comment.post.id)
 
     return HttpResponseForbidden("Invalid request method.")
@@ -164,7 +158,6 @@ def delete_comment(request, comment_id):
     if request.method == "POST":
         post_id = comment.post.id
         comment.delete()
-        messages.success(request, "Comment deleted successfully!")
         return redirect("forum:post_detail", post_id=post_id)
 
     return HttpResponseForbidden("Invalid request method.")
@@ -181,7 +174,6 @@ def create_post(request, category_id):
             post.author = request.user
             post.category = category
             post.save()
-            messages.success(request, "Post created successfully!")
             return redirect("forum:category_detail", category_id=category.id)
     else:
         form = PostForm()
