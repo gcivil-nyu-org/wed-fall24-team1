@@ -190,7 +190,7 @@
 
         // Add the showServiceDetails function
         function showServiceDetails(index) {
-            const service = itemsData[index];
+            const service = itemsData.find(item => item.Id === index);
             if (!service) {
                 console.error(`Service with index ${index} not found.`);
                 return;

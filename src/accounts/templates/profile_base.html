@@ -1,247 +1,118 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Service Seeker Profile</title>
-    <style>
-        :root {
-            --primary-color: #3b82f6;
-            --secondary-color: #10b981;
-            --background-color: #f3f4f6;
-            --text-color: #1f2937;
-            --card-background: #ffffff;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            line-height: 1.5;
-            color: var(--text-color);
-            background-color: var(--background-color);
-        }
-
-        .container {
-            max-width: 64rem;
-            margin: 2rem auto;
-            padding: 0 1rem;
-        }
-
-        .text-center { text-align: center; }
-        .text-2xl { font-size: 1.5rem; }
-        .text-3xl { font-size: 1.875rem; }
-        .font-bold { font-weight: 700; }
-        .mb-2 { margin-bottom: 0.5rem; }
-        .mb-4 { margin-bottom: 1rem; }
-        .mb-6 { margin-bottom: 1.5rem; }
-        .mt-4 { margin-top: 1rem; }
-        .p-6 { padding: 1.5rem; }
-        .rounded-lg { border-radius: 0.5rem; }
-        .shadow-md { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
-        .bg-white { background-color: var(--card-background); }
-        .text-primary { color: var(--primary-color); }
-        .flex { display: flex; }
-        .items-center { align-items: center; }
-        .justify-between { justify-content: space-between; }
-        .w-full { width: 100%; }
-
-        .card {
-            background-color: var(--card-background);
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .profile-picture {
-            width: 6rem;
-            height: 6rem;
-            border-radius: 50%;
-            background-color: var(--primary-color);
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 2.25rem;
-            font-weight: bold;
-            margin-right: 1.5rem;
-            text-transform: uppercase;
-        }
-
-        .profile-details p {
-            margin-bottom: 0.5rem;
-        }
-
-        .bookmarks, .reviews {
-            list-style-type: none;
-        }
-
-        .bookmark-item, .review-item {
-            background-color: var(--background-color);
-            border-radius: 0.375rem;
-            padding: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .button {
-            display: inline-block;
-            background-color: var(--primary-color);
-            color: white;
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 0.375rem;
-            cursor: pointer;
-            text-decoration: none;
-            transition: background-color 0.3s ease;
-            font-weight: 600;
-        }
-
-        .button:hover {
-            background-color: #2563eb;
-        }
-
-        .button.secondary {
-            background-color: var(--secondary-color);
-        }
-
-        .button.secondary:hover {
-            background-color: #059669;
-        }
-
-        form {
-            display: grid;
-            gap: 1rem;
-        }
-
-        label {
-            font-weight: 600;
-        }
-
-        input[type="text"],
-        input[type="email"] {
-            width: 100%;
-            padding: 0.5rem;
-            border: 1px solid #d1d5db;
-            border-radius: 0.375rem;
-            font-size: 1rem;
-        }
-
-        input[type="text"]:focus,
-        input[type="email"]:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
-        }
-
-        .hidden {
-            display: none;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1 class="text-3xl font-bold text-center text-primary mb-6">Service Seeker Profile</h1>
-
-        <!-- Profile View Section -->
-        <div id="view-profile" class="card">
-            <div class="flex items-center mb-6">
-                <div class="profile-picture" aria-label="Profile picture with initial {{ profile.username|first }}">
-                    {{ profile.username|first }}
-                </div>
-                <div class="profile-details">
-                    <h2 class="text-2xl font-bold mb-2">Profile Information</h2>
-                    <p><strong>Username:</strong> {{ profile.username }}</p>
-                    <p><strong>Email:</strong> {{ profile.email }}</p>
-                    <p><strong>First Name:</strong> {{ profile.first_name }}</p>
-                    <p><strong>Last Name:</strong> {{ profile.last_name }}</p>
-                </div>
-            </div>
-
-            <div class="mb-6">
-                <h2 class="text-2xl font-bold mb-4">Bookmarked Services</h2>
-                {% if bookmarks %}
-                    <ul class="bookmarks">
-                        {% for service in bookmarks %}
-                            <li class="bookmark-item">
-                                <p class="font-bold">{{ service.Name }}</p>
-                                <p>{{ service.Address }}</p>
-                                <p>{{ service.Category }}</p>
-
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p>No bookmarks yet.</p>
-                {% endif %}
-            </div>
-
-            <div class="mb-6">
-                <h2 class="text-2xl font-bold mb-4">My Reviews</h2>
-                {% if reviews %}
-                    <ul class="reviews">
-                        {% for review in reviews %}
-                            <li class="review-item">
-                                <p class="font-bold">{{ review.ServiceName }}</p>
-                                <p>Rating: {{ review.RatingStars }} stars</p>
-                                <p>{{ review.RatingMessage }}</p>
-                                <p class="text-sm text-gray-500">{{ review.Timestamp|date:"Y-m-d H:i:s" }}</p>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p>No reviews yet.</p>
-                {% endif %}
-            </div>
-
-            <button onclick="toggleEdit()" class="button">Edit Profile</button>
-        </div>
-
-        <!-- Profile Edit Form Section (Initially Hidden) -->
-        <div id="edit-profile" class="card hidden">
-            <h2 class="text-2xl font-bold mb-4">Edit Profile</h2>
-            <form method="POST">
-                {% csrf_token %}
-                
-                <div>
-                    <label for="username">Username</label>
-                    <input type="text" id="username" name="username" value="{{ profile.username }}">
-                </div>
-
-                <div>
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" value="{{ profile.email }}">
-                </div>
-
-                <div>
-                    <label for="first_name">First Name</label>
-                    <input type="text" id="first_name" name="first_name" value="{{ profile.first_name }}">
-                </div>
-
-                <div>
-                    <label for="last_name">Last Name</label>
-                    <input type="text" id="last_name" name="last_name" value="{{ profile.last_name }}">
-                </div>
-
-                <div class="flex justify-between mt-4">
-                    <button type="submit" class="button secondary">Save Changes</button>
-                    <button type="button" onclick="toggleEdit()" class="button">Cancel</button>
-                </div>
-            </form>
-        </div>
+{% extends 'base.html' %}
+{% block title %}Service Seeker Profile{% endblock %}
+{% block content %}
+<div class="container mx-auto px-6 py-12 pb-32 mb-32 max-w-7xl" style="min-width: 1000px;">
+    <div class="mb-10 text-center mt-16">
+        <h1 class="text-4xl font-bold text-gray-800 mb-3">Profile</h1>
+        <p class="text-gray-600 text-lg">Manage your account information and activities</p>
     </div>
 
-    <script>
-        function toggleEdit() {
-            var viewSection = document.getElementById('view-profile');
-            var editSection = document.getElementById('edit-profile');
-            viewSection.classList.toggle('hidden');
-            editSection.classList.toggle('hidden');
-        }
-    </script>
-</body>
-</html>
+    <!-- Profile View Section -->
+    <div id="view-profile" class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center mb-6">
+            <div class="w-24 h-24 rounded-full bg-blue-500 text-white flex items-center justify-center text-4xl font-bold mr-6 uppercase">
+                {{ profile.username|first }}
+            </div>
+            <div>
+                <h2 class="text-xl font-semibold text-blue-700 mb-2">Profile Information</h2>
+                <p class="text-gray-600"><strong>Username:</strong> {{ profile.username }}</p>
+                <p class="text-gray-600"><strong>Email:</strong> {{ profile.email }}</p>
+                <p class="text-gray-600"><strong>First Name:</strong> {{ profile.first_name }}</p>
+                <p class="text-gray-600"><strong>Last Name:</strong> {{ profile.last_name }}</p>
+            </div>
+        </div>
+
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-blue-700 mb-4">Bookmarked Services</h2>
+            {% if bookmarks %}
+                <div class="grid gap-4">
+                    {% for service in bookmarks %}
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="font-semibold text-gray-800">{{ service.Name }}</p>
+                            <p class="text-gray-600">{{ service.Address }}</p>
+                            <p class="text-gray-600">{{ service.Category }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-gray-500">No bookmarks yet.</p>
+            {% endif %}
+        </div>
+
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-blue-700 mb-4">My Reviews</h2>
+            {% if reviews %}
+                <div class="grid gap-4">
+                    {% for review in reviews %}
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="font-semibold text-gray-800">{{ review.ServiceName }}</p>
+                            <p class="text-gray-600">Rating: {{ review.RatingStars }} stars</p>
+                            <p class="text-gray-600">{{ review.RatingMessage }}</p>
+                            <p class="text-sm text-gray-500">{{ review.Timestamp|date:"M d, Y" }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-gray-500">No reviews yet.</p>
+            {% endif %}
+        </div>
+
+        <button onclick="toggleEdit()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300">
+            Edit Profile
+        </button>
+    </div>
+
+    <!-- Profile Edit Form Section -->
+    <div id="edit-profile" class="bg-white rounded-lg shadow-md p-6 hidden">
+        <h2 class="text-xl font-semibold text-blue-700 mb-4">Edit Profile</h2>
+        <form method="POST" class="space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="block text-gray-700 font-medium mb-2" for="username">Username</label>
+                <input type="text" id="username" name="username" value="{{ profile.username }}"
+                       class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            </div>
+
+            <!-- Repeat for other form fields -->
+            <div>
+                <label class="block text-gray-700 font-medium mb-2" for="email">Email</label>
+                <input type="email" id="email" name="email" value="{{ profile.email }}"
+                       class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-medium mb-2" for="first_name">First Name</label>
+                <input type="text" id="first_name" name="first_name" value="{{ profile.first_name }}"
+                       class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-medium mb-2" for="last_name">Last Name</label>
+                <input type="text" id="last_name" name="last_name" value="{{ profile.last_name }}"
+                       class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            </div>
+
+            <div class="flex justify-between mt-6">
+                <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300">
+                    Save Changes
+                </button>
+                <button type="button" onclick="toggleEdit()" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="h-32"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function toggleEdit() {
+        var viewSection = document.getElementById('view-profile');
+        var editSection = document.getElementById('edit-profile');
+        viewSection.classList.toggle('hidden');
+        editSection.classList.toggle('hidden');
+    }
+</script>
+{% endblock %}
