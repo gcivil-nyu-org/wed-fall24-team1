@@ -10,8 +10,11 @@ from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.decorators import login_required
+from dateutil.parser import parse as parse_date
+
 
 from accounts.models import CustomUser
+from home.repositories import HomeRepository
 
 from .forms import (
     ServiceSeekerForm,
@@ -50,6 +53,41 @@ def profile_view(request):
     elif user.user_type == "user":
         service_seeker = get_object_or_404(CustomUser, email=user.email)
 
+        # Fetch user's bookmarks
+        repo = HomeRepository()
+        bookmarks = repo.get_user_bookmarks(str(user.id))
+
+        # Process the bookmarks
+        processed_bookmarks = [
+            {
+                "Id": item.get("Id"),
+                "Name": item.get("Name", "No Name"),
+                "Category": item.get("Category", "N/A"),
+                "Distance": "N/A",  # Calculate if needed
+                "Address": item.get("Address", "N/A"),
+            }
+            for item in bookmarks
+        ]
+
+        # Fetch user's reviews
+        reviews = repo.fetch_reviews_by_user(str(user.id))
+
+        # Get unique service IDs from the reviews
+        service_ids = set([review["ServiceId"] for review in reviews])
+
+        # Fetch service details
+        service_map = repo.get_services_by_ids(service_ids)
+
+        # Add service names and parse timestamps in reviews
+        for review in reviews:
+            service = service_map.get(review["ServiceId"], {})
+            review["ServiceName"] = service.get("Name", "Unknown Service")
+            # Parse the timestamp
+            try:
+                review["Timestamp"] = parse_date(review["Timestamp"])
+            except Exception:
+                pass  # Keep as string if parsing fails
+
         # If it's a POST request, we're updating the profile
         if request.method == "POST":
             form = ServiceSeekerForm(request.POST, instance=service_seeker)
@@ -65,6 +103,8 @@ def profile_view(request):
             {
                 "profile": service_seeker,
                 "form": form,  # Pass the form to the template
+                "bookmarks": processed_bookmarks,
+                "reviews": reviews,  # Pass the reviews to the template
             },
         )
 
@@ -147,6 +187,12 @@ class CustomLoginView(LoginView):
 class UserLoginView(CustomLoginView):
     form_class = UserLoginForm
     template_name = "user_login.html"
+
+    def get_success_url(self):
+        if self.request.user.user_type == "user":
+            return reverse_lazy("home")  # Redirect to user's home page
+        else:
+            return reverse_lazy("user_login")
 
 
 # Service provider login view

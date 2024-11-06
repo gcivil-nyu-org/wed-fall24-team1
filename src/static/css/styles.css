@@ -83,6 +83,18 @@ a:hover {
     --border-color: #ddd;
 }
 
+.bookmark-btn {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin-bottom: 1rem; /* Adjust spacing as needed */
+}
+
+.bookmark-btn:hover #bookmarkIcon {
+    color: #f59e0b; /* Tailwind amber-500 color for hover effect */
+}
+
 * {
     margin: 0;
     padding: 0;

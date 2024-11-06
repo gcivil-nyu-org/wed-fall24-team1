@@ -1,76 +1,118 @@
-{% load widget_tweaks %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Service Seeker Profile</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <script>
-        function toggleEdit() {
-            var viewSection = document.getElementById('view-profile');
-            var editSection = document.getElementById('edit-profile');
-            viewSection.classList.toggle('hidden');
-            editSection.classList.toggle('hidden');
-        }
-    </script>
-</head>
-<body class="bg-gray-100">
-    <div class="max-w-4xl mx-auto mt-10">
-        <h1 class="text-3xl font-semibold text-center text-gray-800 mb-8">Service Seeker Profile</h1>
-
-        <!-- Profile View Section -->
-        <div id="view-profile" class="bg-white shadow-md rounded-lg p-6">
-            <h2 class="text-xl font-semibold text-gray-700">Username: {{ profile.username }}</h2>
-            <h2 class="text-xl font-semibold text-gray-700">Email: {{ profile.email }}</h2>
-            <h2 class="text-xl font-semibold text-gray-700">First Name: {{ profile.first_name }}</h2>
-            <h2 class="text-xl font-semibold text-gray-700">Last Name: {{ profile.last_name }}</h2>
-            <ul>
-                {% for service in profile.bookmarked_services.all %}
-                    <li>{{ service.title }} by {{ service.provider.business_name }}</li>
-                {% endfor %}
-            </ul>
-
-            <button onclick="toggleEdit()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mt-4 rounded focus:outline-none">
-                Edit Profile
-            </button>
-        </div>
-
-        <!-- Profile Edit Form Section (Initially Hidden) -->
-        <div id="edit-profile" class="bg-white shadow-md rounded-lg p-6 hidden">
-            <form method="POST">
-                {% csrf_token %}
-                
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Username</label>
-                    {{ form.username|add_class:"shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" }}
-                </div>
-
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Email</label>
-                    {{ form.email|add_class:"shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" }}
-                </div>
-
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">First Name</label>
-                    {{ form.first_name|add_class:"shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" }}
-                </div>
-
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Last Name</label>
-                    {{ form.last_name|add_class:"shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" }}
-                </div>
-
-                <div class="flex items-center justify-between">
-                    <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none">
-                        Save Changes
-                    </button>
-                    <button type="button" onclick="toggleEdit()" class="text-gray-500 hover:text-gray-700">
-                        Cancel
-                    </button>
-                </div>
-            </form>
-        </div>
+{% extends 'base.html' %}
+{% block title %}Service Seeker Profile{% endblock %}
+{% block content %}
+<div class="container mx-auto px-6 py-12 pb-32 mb-32 max-w-7xl" style="min-width: 1000px;">
+    <div class="mb-10 text-center mt-16">
+        <h1 class="text-4xl font-bold text-gray-800 mb-3">Profile</h1>
+        <p class="text-gray-600 text-lg">Manage your account information and activities</p>
     </div>
-</body>
-</html>
+
+    <!-- Profile View Section -->
+    <div id="view-profile" class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center mb-6">
+            <div class="w-24 h-24 rounded-full bg-blue-500 text-white flex items-center justify-center text-4xl font-bold mr-6 uppercase">
+                {{ profile.username|first }}
+            </div>
+            <div>
+                <h2 class="text-xl font-semibold text-blue-700 mb-2">Profile Information</h2>
+                <p class="text-gray-600"><strong>Username:</strong> {{ profile.username }}</p>
+                <p class="text-gray-600"><strong>Email:</strong> {{ profile.email }}</p>
+                <p class="text-gray-600"><strong>First Name:</strong> {{ profile.first_name }}</p>
+                <p class="text-gray-600"><strong>Last Name:</strong> {{ profile.last_name }}</p>
+            </div>
+        </div>
+
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-blue-700 mb-4">Bookmarked Services</h2>
+            {% if bookmarks %}
+                <div class="grid gap-4">
+                    {% for service in bookmarks %}
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="font-semibold text-gray-800">{{ service.Name }}</p>
+                            <p class="text-gray-600">{{ service.Address }}</p>
+                            <p class="text-gray-600">{{ service.Category }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-gray-500">No bookmarks yet.</p>
+            {% endif %}
+        </div>
+
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold text-blue-700 mb-4">My Reviews</h2>
+            {% if reviews %}
+                <div class="grid gap-4">
+                    {% for review in reviews %}
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="font-semibold text-gray-800">{{ review.ServiceName }}</p>
+                            <p class="text-gray-600">Rating: {{ review.RatingStars }} stars</p>
+                            <p class="text-gray-600">{{ review.RatingMessage }}</p>
+                            <p class="text-sm text-gray-500">{{ review.Timestamp|date:"M d, Y" }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-gray-500">No reviews yet.</p>
+            {% endif %}
+        </div>
+
+        <button onclick="toggleEdit()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300">
+            Edit Profile
+        </button>
+    </div>
+
+    <!-- Profile Edit Form Section -->
+    <div id="edit-profile" class="bg-white rounded-lg shadow-md p-6 hidden">
+        <h2 class="text-xl font-semibold text-blue-700 mb-4">Edit Profile</h2>
+        <form method="POST" class="space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="block text-gray-700 font-medium mb-2" for="username">Username</label>
+                <input type="text" id="username" name="username" value="{{ profile.username }}"
+                       class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            </div>
+
+            <!-- Repeat for other form fields -->
+            <div>
+                <label class="block text-gray-700 font-medium mb-2" for="email">Email</label>
+                <input type="email" id="email" name="email" value="{{ profile.email }}"
+                       class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-medium mb-2" for="first_name">First Name</label>
+                <input type="text" id="first_name" name="first_name" value="{{ profile.first_name }}"
+                       class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-medium mb-2" for="last_name">Last Name</label>
+                <input type="text" id="last_name" name="last_name" value="{{ profile.last_name }}"
+                       class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            </div>
+
+            <div class="flex justify-between mt-6">
+                <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300">
+                    Save Changes
+                </button>
+                <button type="button" onclick="toggleEdit()" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="h-32"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function toggleEdit() {
+        var viewSection = document.getElementById('view-profile');
+        var editSection = document.getElementById('edit-profile');
+        viewSection.classList.toggle('hidden');
+        editSection.classList.toggle('hidden');
+    }
+</script>
+{% endblock %}

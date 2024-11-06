@@ -16,6 +16,7 @@ class HomeRepository:
         self.reviews_table = self.dynamodb.Table(
             settings.DYNAMODB_TABLE_REVIEWS
         )  # Ensure this is set in settings
+        self.bookmarks_table = self.dynamodb.Table(settings.DYNAMODB_TABLE_BOOKMARKS)
 
     def fetch_items_with_filter(
         self, search_query, category_filter, radius, ulat, ulon
@@ -155,3 +156,99 @@ class HomeRepository:
         except ClientError as e:
             print(f"Error fetching reviews: {e.response['Error']['Message']}")
             return []
+
+    def add_bookmark(self, bookmark_id, user_id, service_id):
+        try:
+            timestamp = datetime.utcnow().isoformat()
+            self.bookmarks_table.put_item(
+                Item={
+                    "BookmarkId": bookmark_id,
+                    "UserId": user_id,
+                    "ServiceId": service_id,
+                    "timestamp": timestamp,
+                }
+            )
+        except ClientError as e:
+            print(f"Failed to add bookmark: {e.response['Error']['Message']}")
+            raise e
+
+    def remove_bookmark(self, user_id, service_id):
+        try:
+            response = self.bookmarks_table.query(
+                IndexName="UserBookmarksIndex",
+                KeyConditionExpression=Key("UserId").eq(user_id)
+                & Key("ServiceId").eq(service_id),
+            )
+            items = response.get("Items", [])
+            if items:
+                bookmark_id = items[0]["BookmarkId"]
+                self.bookmarks_table.delete_item(Key={"BookmarkId": bookmark_id})
+        except ClientError as e:
+            print(f"Failed to remove bookmark: {e.response['Error']['Message']}")
+            raise e
+
+    def is_bookmarked(self, user_id, service_id):
+        try:
+            response = self.bookmarks_table.query(
+                IndexName="UserBookmarksIndex",
+                KeyConditionExpression=Key("UserId").eq(user_id)
+                & Key("ServiceId").eq(service_id),
+            )
+            items = response.get("Items", [])
+            return len(items) > 0
+        except ClientError as e:
+            print(f"Failed to check bookmark: {e.response['Error']['Message']}")
+            raise e
+
+    def get_user_bookmarks(self, user_id):
+        try:
+            response = self.bookmarks_table.query(
+                IndexName="UserBookmarksIndex",
+                KeyConditionExpression=Key("UserId").eq(user_id),
+            )
+            bookmarks = response.get("Items", [])
+            services = []
+            for bookmark in bookmarks:
+                service_id = bookmark["ServiceId"]
+                service = self.services_table.get_item(Key={"Id": service_id}).get(
+                    "Item"
+                )
+                if service:
+                    services.append(service)
+            return services
+        except ClientError as e:
+            print(f"Failed to get user bookmarks: {e.response['Error']['Message']}")
+            raise e
+
+    def fetch_reviews_by_user(self, user_id):
+        try:
+            # Since 'UserId' is not the primary key, we need to scan with a filter
+            response = self.reviews_table.scan(
+                FilterExpression=Attr("UserId").eq(user_id)
+            )
+            reviews = response.get("Items", [])
+            # Sort reviews by Timestamp in descending order
+            reviews.sort(key=lambda x: x["Timestamp"], reverse=True)
+            return reviews
+        except ClientError as e:
+            print(f"Error fetching reviews: {e.response['Error']['Message']}")
+            return []
+
+    def get_services_by_ids(self, service_ids):
+        try:
+            services = []
+            keys = [{"Id": service_id} for service_id in service_ids]
+            # DynamoDB batch_get_item limit is 100 items per batch
+            for i in range(0, len(keys), 100):
+                batch_keys = keys[i : i + 100]
+                response = self.dynamodb.batch_get_item(
+                    RequestItems={self.services_table.name: {"Keys": batch_keys}}
+                )
+                services.extend(
+                    response.get("Responses", {}).get(self.services_table.name, [])
+                )
+            service_map = {service["Id"]: service for service in services}
+            return service_map
+        except ClientError as e:
+            print(f"Error fetching services: {e.response['Error']['Message']}")
+            return {}

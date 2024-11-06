@@ -39,6 +39,8 @@ class UserLoginForm(AuthenticationForm):
             if user is None:
                 raise forms.ValidationError("Invalid username/email or password.")
             else:
+                if user.user_type != "user":
+                    raise forms.ValidationError("This page is for users only.")
                 self.confirm_login_allowed(user)
                 self.user_cache = user
         else:
