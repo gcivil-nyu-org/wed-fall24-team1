@@ -1,23 +1,18 @@
-# from django.shortcuts import render
 import uuid
 from decimal import Decimal
 from datetime import datetime, timezone
-from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import Http404, JsonResponse, HttpResponseNotAllowed
-
-# Create your views here.
-# services/views.py
-from django.shortcuts import render, redirect
-
+from django.shortcuts import render, redirect, get_object_or_404
 from home.repositories import HomeRepository
 from public_service_finder.utils.enums.service_status import ServiceStatus
-from .forms import ServiceForm, DescriptionFormSet
+from .forms import ServiceForm, DescriptionFormSet, ReviewResponseForm
 from .models import ServiceDTO
-from .repositories import ServiceRepository
+from .repositories import ServiceRepository, ReviewRepository
 
 service_repo = ServiceRepository()
+review_repo = ReviewRepository()
 
 
 @login_required
@@ -30,22 +25,10 @@ def service_list(request):
     # Filter out services without an ID
     valid_services = [service for service in services if service.id]
 
-    if len(valid_services) != len(services):
-        messages.warning(
-            request,
-            f"{len(services) - len(valid_services)} service(s) were found without a valid ID and have been omitted from the list.",
-        )
-
-    # Get all messages
-    storage = messages.get_messages(request)
-    message_list = list(storage)
-    # Clear the messages
-    storage.used = True
-
     return render(
         request,
         "service_list.html",
-        {"services": valid_services, "messages": message_list},
+        {"services": valid_services},
     )
 
 
@@ -89,9 +72,7 @@ def service_create(request):
                 service_approved_timestamp="1900-01-01T00:00:00Z",
             )
             if service_repo.create_service(service_dto):
-                messages.success(request, "Service created successfully!")
                 return redirect("services:list")
-            messages.error(request, "Error creating service.")
     else:
         form = ServiceForm()
         description_formset = DescriptionFormSet(prefix="description")
@@ -160,9 +141,7 @@ def service_edit(request, service_id):
             )
 
             if service_repo.update_service(updated_service):
-                messages.success(request, "Service updated successfully!")
                 return redirect("services:list")
-            messages.error(request, "Error updating service.")
     else:
         initial_data = {
             "name": service.name,
@@ -227,11 +206,84 @@ def service_delete(request, service_id):
         raise PermissionDenied
 
     if request.method == "POST":
-        if service_repo.delete_service(service_id):
-            messages.success(request, "Service deleted successfully!")
-        else:
-            messages.error(request, "Error deleting service.")
         return redirect("services:list")
 
     # If it's not a POST request, return a 405 Method Not Allowed
     return HttpResponseNotAllowed(["POST"])
+
+
+@login_required
+def review_list(request, service_id):
+    service = get_object_or_404(ServiceDTO, id=service_id)
+
+    # Fetch all reviews for the service
+    reviews = review_repo.get_reviews_for_service(service_id)
+    print(reviews)
+
+    # Debug log to verify retrieved data
+    for review in reviews:
+        print(f"Review ID {review.review_id} has responseText: {review.responseText}")
+
+    # Pass the reviews and service to the template
+    return render(request, "review_html.html", {"service": service, "reviews": reviews})
+
+
+@login_required
+def respond_to_review(request, service_id, review_id):
+    # Check if the user is authenticated
+    if not request.user.is_authenticated:
+        return JsonResponse(
+            {"status": "error", "message": "User not authenticated"}, status=403
+        )
+
+    # Fetch the service and review data
+    service = service_repo.get_service(service_id)
+    if not service:
+        raise Http404("Service does not exist")
+
+    if service.provider_id != str(request.user.id):
+        return JsonResponse(
+            {"status": "error", "message": "Permission denied"}, status=403
+        )
+
+    review = review_repo.get_review(review_id)
+    if not review or review.service_id != service_id:
+        raise Http404("Review does not exist or does not belong to this service")
+
+    if request.method == "POST":
+        form = ReviewResponseForm(request.POST)
+        if form.is_valid():
+            response_text = form.cleaned_data["responseText"]
+
+            # Attempt to update the review response in DynamoDB
+            success = review_repo.respond_to_review(review_id, response_text)
+            if success:
+                return JsonResponse(
+                    {"status": "success", "message": "Response saved"}, status=200
+                )
+            else:
+                return JsonResponse(
+                    {"status": "error", "message": "Database update failed"}, status=500
+                )
+        else:
+            return JsonResponse(
+                {"status": "error", "message": "Invalid form data"}, status=400
+            )
+
+    # If GET request, render the response form template
+    else:
+        form = ReviewResponseForm()
+        context = {
+            "service": service,
+            "review": review,
+            "form": form,
+        }
+        return render(request, "respond_to_review.html", context)
+
+
+def get_service_by_id(service_id, provider_id):
+    """Utility function to retrieve a service and verify ownership."""
+    service = service_repo.get_service(service_id)
+    if service and service.provider_id == str(provider_id):
+        return service
+    return None

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <title>Respond to Review</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="{% static 'css/styles.css' %}" rel="stylesheet">
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="container mx-auto px-4 py-8 max-w-2xl">
+        <h1 class="text-2xl font-bold mb-4">Respond to Review for "{{ service.name }}"</h1>
+        <div class="bg-white p-4 rounded shadow mb-4">
+            <div class="mb-4">
+                <p><strong>Rating:</strong>
+                    <span class="text-yellow-500">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= review.rating_stars %}★{% else %}☆{% endif %}
+                        {% endfor %}
+                    </span>
+                </p>
+                <p><strong>Comment:</strong> {{ review.rating_message }}</p>
+                <p class="text-sm text-gray-600"><strong>Posted:</strong> {{ review.timestamp }}</p>
+            </div>
+            {% if review.responseText %}
+                <div class="mt-2 p-3 bg-green-100 border border-green-400 rounded">
+                    <p><strong>Existing Response:</strong> {{ review.responseText }}</p>
+                    <p class="text-sm text-gray-600"><strong>Responded on:</strong> {{ review.responded_at }}</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Response Form -->
+        <div class="bg-white p-4 rounded shadow">
+            <form method="post" action="{% url 'services:respond_to_review' service.id review.review_id %}">
+                {% csrf_token %}
+
+                <!-- Render Django Form -->
+                <div class="mb-4">
+                    <label for="id_responseText" class="block text-sm font-medium text-gray-700 mb-2">
+                        Your Response
+                    </label>
+                    {{ form.responseText }}
+                </div>
+
+                <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors">
+                    Submit Response
+                </button>
+            </form>
+        </div>
+
+        <a href="{% url 'services:review_list' service.id %}" class="mt-4 inline-block text-blue-500 hover:text-blue-700">
+            Back to Reviews
+        </a>
+    </div>
+</body>
+</html>

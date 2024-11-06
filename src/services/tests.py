@@ -14,9 +14,6 @@ from .models import ServiceDTO
 from .repositories import ServiceRepository
 
 
-# Create your tests here.
-
-
 class ServiceViewsTestCase(TestCase):
     def setUp(self):
         self.client = Client()
@@ -132,72 +129,6 @@ class ServiceViewsTestCase(TestCase):
             response = self.client.get(reverse("services:edit", args=[service_id]))
             self.assertEqual(response.status_code, 200)
             self.assertTemplateUsed(response, "service_form.html")
-
-    # def test_service_edit_view_post_success(self):
-    #     self.client.login(username="provider", password="testpass123")
-    #     service_id = str(uuid.uuid4())
-    #     data = {
-    #         "name": "Updated Service",
-    #         "address": "456 New St",
-    #         "latitude": "40.7128",
-    #         "longitude": "-74.0060",
-    #         "category": "Mental Health Center",
-    #         "description-0-key": "hours",
-    #         "description-0-value": "24/7",
-    #         "description-TOTAL_FORMS": "1",
-    #         "description-INITIAL_FORMS": "1",
-    #         "description-MIN_NUM_FORMS": "0",
-    #         "description-MAX_NUM_FORMS": "1000",
-    #     }
-    #     with patch.object(ServiceRepository, "get_service") as mock_get, patch.object(
-    #         ServiceRepository, "update_service"
-    #     ) as mock_update:
-    #         mock_get.return_value = ServiceDTO(
-    #             id=service_id,
-    #             name="Test Service",
-    #             provider_id=str(self.service_provider.id),
-    #             category="FOOD",
-    #             ratings=Decimal("4.5"),
-    #             description={"hours": "9-5"},
-    #             address="5 Metrotech Center, Brooklyn, NY",
-    #             latitude=Decimal(40.32),
-    #             longitude=Decimal(-74.001),
-    #         )
-    #         mock_update.return_value = True
-    #         response = self.client.post(
-    #             reverse("services:edit", args=[service_id]), data
-    #         )
-    #         self.assertRedirects(response, reverse("services:list"))
-
-    # def test_service_details_view(self):
-    #     self.client.login(username='provider', password='testpass123')
-    #     service_id = str(uuid.uuid4())
-    #     with patch.object(ServiceRepository, 'get_service') as mock_get, \
-    #             patch('src.home.repositories.HomeRepository.fetch_reviews_for_service') as mock_reviews:
-    #         mock_get.return_value = ServiceDTO(
-    #             id=service_id,
-    #             name='Test Service',
-    #             category='MENTAL',
-    #             address='123 Test St',
-    #             latitude=Decimal('40.7128'),
-    #             longitude=Decimal('-74.0060'),
-    #             ratings=None,
-    #             description={'hours': '9-5'},
-    #             provider_id=self.service_provider.id
-    #         )
-    #         mock_reviews.return_value = [{'id': 1, 'content': 'Great service'}]
-    #         response = self.client.get(reverse('services:details', args=[service_id]))
-    #         self.assertEqual(response.status_code, 200)
-    #         self.assertJSONEqual(response.content, {
-    #             'id': service_id,
-    #             'name': 'Test Service',
-    #             'category': 'MENTAL',
-    #             'address': '123 Test St',
-    #             'latitude': 40.7128,
-    #             'longitude': -74.0060,
-    #             'description': {'hours': '9-5'},
-    #             'reviews': [{'id': 1, 'content': 'Great service'}]
-    #         })
 
     def test_service_delete_view_get(self):
         self.client.login(username="provider", password="testpass123")

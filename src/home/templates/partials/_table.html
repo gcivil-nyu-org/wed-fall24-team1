@@ -107,7 +107,7 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        console.log('DOM fully loaded and parsed');
+    console.log('DOM fully loaded and parsed');
 
         function formatTimestamp(timestamp) {
             return new Date(timestamp).toLocaleString();
@@ -155,8 +155,31 @@
                     meta.textContent = `By ${review.Username} on ${timestamp}`;
                     reviewDiv.appendChild(meta);
 
+                    if (review.ResponseText) {
+                        const responseDiv = document.createElement('div');
+                        responseDiv.classList.add('mt-3', 'p-3', 'bg-blue-50', 'rounded');
+
+                        const responseHeader = document.createElement('p');
+                        responseHeader.classList.add('font-semibold', 'text-sm', 'text-blue-600');
+                        responseHeader.textContent = "Provider Response:";
+                        responseDiv.appendChild(responseHeader);
+
+                        const responseText = document.createElement('p');
+                        responseText.classList.add('text-sm');
+                        responseText.textContent = review.ResponseText;
+                        responseDiv.appendChild(responseText);
+
+                        const respondedAt = formatTimestamp(review.RespondedAt);
+                        const responseMeta = document.createElement('p');
+                        responseMeta.classList.add('text-xs', 'text-gray-500');
+                        responseMeta.textContent = `Responded on ${respondedAt}`;
+                        responseDiv.appendChild(responseMeta);
+
+                        reviewDiv.appendChild(responseDiv);
+                    }
+
                     reviewsContainer.appendChild(reviewDiv);
-                });
+        });
 
                 // Pagination controls
                 const paginationDiv = document.createElement('div');
@@ -202,7 +225,7 @@
             document.getElementById('serviceAddress').textContent = service.Address || 'N/A';
             document.getElementById('serviceType').textContent = service.Category || 'Unknown';
             document.getElementById('serviceRating').textContent = service.Ratings && service.Ratings !== 0 ? parseFloat(service.Ratings).toFixed(2) : 'N/A';
-            document.getElementById('serviceDistance').textContent = service.Distance ? service.Distance + ' miles' : 'N/A';
+            document.getElementById('serviceDistance').textContent = service.Distance ? parseFloat(service.Distance).toFixed(2) + ' miles' : 'N/A';
 
             const bookmarkCheckbox = document.getElementById('bookmarkCheckbox');
             console.log('bookmarkCheckbox:', bookmarkCheckbox);
@@ -357,7 +380,6 @@
 
                 if (response.ok) {
                     const result = await response.json();
-                    alert(result.message || "Review submitted successfully!");
                     fetchAndDisplayReviews(serviceId, 1);
                 } else {
                     const error = await response.json();

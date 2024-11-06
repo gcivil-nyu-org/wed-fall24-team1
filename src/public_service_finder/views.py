@@ -4,7 +4,6 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render
 from public_service_finder.utils.enums.service_status import ServiceStatus
 from services.repositories import ServiceRepository
-from django.contrib import messages
 
 
 def root_redirect_view(request):
@@ -34,7 +33,7 @@ def admin_update_listing(request, service_id):
 
         # Only allow "approve" or "reject" as valid status values
         if new_status not in ["approve", "reject"]:
-            messages.error(request, "Invalid status value.")
+            print(request, "Invalid status value.")
             return redirect("admin_only_view_new_listings")
 
         service_repo = ServiceRepository()
@@ -47,14 +46,8 @@ def admin_update_listing(request, service_id):
                     else ServiceStatus.REJECTED.value
                 ),
             )
-            messages.success(
-                request,
-                f"Service ID {service_id} has been successfully updated to '{new_status}'.",
-            )
         except Exception as e:
-            messages.error(
-                request, f"An error occurred while updating the service: {str(e)}"
-            )
+            print(f"Exception occurred: {e}")
 
         # Redirect to the listings page to see updated statuses
         return redirect("admin_only_view_new_listings")
