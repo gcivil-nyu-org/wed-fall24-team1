@@ -4,6 +4,8 @@ from boto3.dynamodb.conditions import Attr
 from botocore.exceptions import ClientError
 from django.conf import settings
 from django.utils import timezone
+from boto3.dynamodb.conditions import Key
+from typing import List
 
 from .models import ServiceDTO, ReviewDTO
 
@@ -171,3 +173,18 @@ class ReviewRepository:
                 f"Error responding to review {review_id}: {e.response['Error']['Message']}"
             )
             return False
+
+    def get_reviews_for_service(self, service_id: str) -> List[ReviewDTO]:
+        """Retrieve all reviews for a given service ID."""
+        try:
+            response = self.table.query(
+                IndexName="ServiceIdIndex",  # Ensure this index exists in your DynamoDB table
+                KeyConditionExpression=Key("ServiceId").eq(service_id),
+            )
+            items = response.get("Items", [])
+            return [ReviewDTO.from_dynamodb_item(item) for item in items]
+        except ClientError as e:
+            log.error(
+                f"Error fetching reviews for service {service_id}: {e.response['Error']['Message']}"
+            )
+            return []
