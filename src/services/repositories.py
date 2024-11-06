@@ -25,7 +25,7 @@ class ServiceRepository:
             log.info(f"Persisted service: {item} to DynamoDB")
             return service_dto
         except ClientError as e:
-            log.error(f"Error creating service: {e.response['Error']['Message']}")
+            log.error(f"Error creating service: {e.responseText['Error']['Message']}")
             return None
 
     def get_services_by_provider(self, provider_id: str) -> list[ServiceDTO]:
@@ -41,7 +41,7 @@ class ServiceRepository:
             log.debug(f"Fetched {len(services)} services for provider {provider_id}")
             return services
         except ClientError as e:
-            log.error(f"Error fetching services: {e.response['Error']['Message']}")
+            log.error(f"Error fetching services: {e.responseText['Error']['Message']}")
             return []
 
     def get_service(self, service_id: str) -> ServiceDTO | None:
@@ -52,7 +52,9 @@ class ServiceRepository:
                 log.debug(f"Fetched service {service_id}")
             return ServiceDTO.from_dynamodb_item(item) if item else None
         except ClientError as e:
-            log.error(f"Error fetching service {service_id}: {e.response['Error']['Message']}")
+            log.error(
+                f"Error fetching service {service_id}: {e.responseText['Error']['Message']}"
+            )
             return None
 
 
@@ -62,59 +64,46 @@ class ReviewRepository:
             "dynamodb",
             region_name=settings.AWS_REGION,
         )
-        self.table = self.dynamodb.Table(settings.DYNAMODB_TABLE_SERVICES)
+        self.table = self.dynamodb.Table(settings.DYNAMODB_TABLE_REVIEWS)
 
-    def get_reviews_for_service(self, service_id: str) -> list:
-        """Retrieve all reviews for a specific service."""
+    def get_review(self, review_id: str) -> ReviewDTO | None:
+        """Retrieve a single review by its ID."""
         try:
-            response = self.table.scan(
-                FilterExpression="ServiceId = :sid",
-                ExpressionAttributeValues={":sid": service_id},
+            response = self.table.get_item(Key={"ReviewId": review_id})
+            item = response.get("Item")
+            return ReviewDTO.from_dynamodb_item(item) if item else None
+        except ClientError as e:
+            log.error(
+                f"Error fetching review {review_id}: {e.responseText['Error']['Message']}"
             )
-            return [
-                ReviewDTO.from_dynamodb_item(item)
-                for item in response.get("Items", [])
-            ]
-        except Exception as e:
-            print(f"Error retrieving reviews: {e}")
-            return []
+            return None
 
-    def respond_to_review(self, service_id: str, review_id: str, response_text: str) -> bool:
-        """Add a response to a specific review."""
+    def respond_to_review(self, review_id: str, response_text: str) -> bool:
+        """Update a review's responseText field."""
         try:
             current_time = timezone.now().isoformat()
-
-            # First get the service to find the review in the reviews array
-            response = self.table.get_item(Key={"Id": service_id})
-            service_item = response.get("Item", {})
-            reviews = service_item.get("reviews", [])
-
-            # Find and update the specific review
-            updated = False
-            for review in reviews:
-                if review["ReviewId"] == review_id:
-                    review["Response"] = response_text
-                    review["RespondedAt"] = current_time
-                    updated = True
-                    break
-
-            if not updated:
-                log.error(f"Review {review_id} not found in service {service_id}")
-                return False
-
-            # Update the entire service item with the modified reviews
-            self.table.update_item(
-                Key={"Id": service_id},
-                UpdateExpression="SET reviews = :reviews",
-                ExpressionAttributeValues={
-                    ":reviews": reviews
-                }
+            log.debug(
+                "Updating DynamoDB with responseText: %s, respondedAt: %s",
+                response_text,
+                current_time,
             )
-
+            self.table.update_item(
+                Key={"ReviewId": review_id},
+                UpdateExpression="SET #response_text = :responseText, RespondedAt = :responded_at",
+                ExpressionAttributeNames={
+                    "#response_text": "ResponseText"
+                },  # Alias for reserved keyword
+                ExpressionAttributeValues={
+                    ":responseText": response_text,
+                    ":responded_at": current_time,
+                },
+            )
             log.info(f"Updated review {review_id} with response")
             return True
         except ClientError as e:
-            log.error(f"Error responding to review {review_id}: {e.response['Error']['Message']}")
+            log.error(
+                f"Error responding to review {review_id}: {e.response['Error']['Message']}"
+            )
             return False
 
     def get_pending_approval_services(self) -> list[ServiceDTO]:

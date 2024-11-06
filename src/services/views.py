@@ -5,7 +5,6 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import Http404, JsonResponse, HttpResponseNotAllowed
-from django.shortcuts import render, redirect
 from django.shortcuts import render, redirect, get_object_or_404
 
 from home.repositories import HomeRepository
