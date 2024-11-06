@@ -1,9 +1,14 @@
 from django.test import TestCase, Client
 from django.urls import reverse
-from unittest.mock import patch
 import json
 
 from accounts.models import CustomUser
+from unittest.mock import patch, MagicMock
+from decimal import Decimal
+from botocore.exceptions import ClientError
+import uuid
+
+from home.repositories import HomeRepository
 
 
 class ViewsTest(TestCase):
@@ -198,3 +203,175 @@ class ViewsTest(TestCase):
         items = json.loads(response.context["serialized_items"])
         self.assertEqual(len(items), 1)
         self.assertEqual(items[0]["Distance"], "N/A")
+
+
+class HomeRepositoryTests(TestCase):
+    @patch("home.repositories.boto3.resource")
+    def setUp(self, mock_boto_resource):
+        # Mock DynamoDB and tables
+        self.repo = HomeRepository()
+        self.mock_dynamodb = mock_boto_resource.return_value
+        self.mock_services_table = MagicMock()
+        self.mock_reviews_table = MagicMock()
+        self.mock_bookmarks_table = MagicMock()
+
+        # Assign mocks to the repository's table attributes
+        self.repo.services_table = self.mock_services_table
+        self.repo.reviews_table = self.mock_reviews_table
+        self.repo.bookmarks_table = self.mock_bookmarks_table
+
+        # Sample data
+        self.sample_service_id = str(uuid.uuid4())
+        self.sample_user_id = str(uuid.uuid4())
+
+    def test_fetch_items_with_filter_name_only(self):
+        self.mock_services_table.scan.return_value = {
+            "Items": [{"Name": "Test Service"}]
+        }
+
+        result = self.repo.fetch_items_with_filter("Test", None, None, None, None)
+
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["Name"], "Test Service")
+        self.mock_services_table.scan.assert_called_once()
+
+    def test_add_review_success(self):
+        self.mock_reviews_table.put_item.return_value = {}
+
+        self.repo.add_review(
+            review_id=str(uuid.uuid4()),
+            service_id=self.sample_service_id,
+            user_id=self.sample_user_id,
+            rating_stars=5,
+            rating_message="Great service!",
+            username="testuser",
+        )
+
+        self.mock_reviews_table.put_item.assert_called_once()
+
+    def test_add_review_client_error(self):
+        self.mock_reviews_table.put_item.side_effect = ClientError(
+            error_response={"Error": {"Message": "DynamoDB Error"}},
+            operation_name="PutItem",
+        )
+
+        with self.assertRaises(ClientError):
+            self.repo.add_review(
+                review_id=str(uuid.uuid4()),
+                service_id=self.sample_service_id,
+                user_id=self.sample_user_id,
+                rating_stars=5,
+                rating_message="Great service!",
+                username="testuser",
+            )
+
+    def test_update_service_rating_success(self):
+        self.mock_services_table.get_item.return_value = {
+            "Item": {"Ratings": Decimal("4.5"), "rating_count": 10}
+        }
+
+        self.repo.update_service_rating(service_id=self.sample_service_id, new_rating=5)
+
+        self.mock_services_table.get_item.assert_called_once()
+        self.mock_services_table.update_item.assert_called_once()
+
+    def test_update_service_rating_client_error(self):
+        self.mock_services_table.get_item.side_effect = ClientError(
+            error_response={"Error": {"Message": "DynamoDB Error"}},
+            operation_name="GetItem",
+        )
+
+        with self.assertRaises(ClientError):
+            self.repo.update_service_rating(
+                service_id=self.sample_service_id, new_rating=5
+            )
+
+    def test_process_items_with_decimal(self):
+        # Test the process_items with decimal conversion
+        items = [{"Ratings": Decimal("4.5"), "Address": "123 Test St"}]
+        result = self.repo.process_items(items)
+
+        # Assert the Decimal is converted to string in result
+        self.assertEqual(str(result[0]["Ratings"]), "4.5")
+        self.assertEqual(result[0]["Address"], "123 Test St")
+
+    def test_fetch_reviews_for_service_success(self):
+        # Mock the reviews table scan response
+        self.mock_reviews_table.scan.return_value = {
+            "Items": [
+                {
+                    "ReviewId": "1",
+                    "ServiceId": self.sample_service_id,
+                    "RatingStars": 5,
+                    "Timestamp": "2022-01-01T12:00:00Z",
+                }
+            ]
+        }
+
+        result = self.repo.fetch_reviews_for_service(self.sample_service_id)
+
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["ReviewId"], "1")
+        self.mock_reviews_table.scan.assert_called_once()
+
+    def test_fetch_reviews_for_service_client_error(self):
+        self.mock_reviews_table.scan.side_effect = ClientError(
+            error_response={"Error": {"Message": "DynamoDB Error"}},
+            operation_name="Scan",
+        )
+
+        result = self.repo.fetch_reviews_for_service(self.sample_service_id)
+
+        self.assertEqual(result, [])
+        self.mock_reviews_table.scan.assert_called_once()
+
+    def test_add_bookmark_success(self):
+        self.mock_bookmarks_table.put_item.return_value = {}
+
+        bookmark_id = str(uuid.uuid4())
+        self.repo.add_bookmark(
+            bookmark_id=bookmark_id,
+            user_id=self.sample_user_id,
+            service_id=self.sample_service_id,
+        )
+
+        self.mock_bookmarks_table.put_item.assert_called_once()
+
+    def test_remove_bookmark_success(self):
+        self.mock_bookmarks_table.query.return_value = {
+            "Items": [{"BookmarkId": "bookmark-123"}]
+        }
+
+        self.repo.remove_bookmark(
+            user_id=self.sample_user_id, service_id=self.sample_service_id
+        )
+
+        self.mock_bookmarks_table.query.assert_called_once()
+        self.mock_bookmarks_table.delete_item.assert_called_once()
+
+    def test_is_bookmarked_true(self):
+        self.mock_bookmarks_table.query.return_value = {
+            "Items": [{"BookmarkId": "bookmark-123"}]
+        }
+
+        result = self.repo.is_bookmarked(
+            user_id=self.sample_user_id, service_id=self.sample_service_id
+        )
+
+        self.assertTrue(result)
+        self.mock_bookmarks_table.query.assert_called_once()
+
+    def test_get_user_bookmarks_success(self):
+        self.mock_bookmarks_table.query.return_value = {
+            "Items": [{"ServiceId": self.sample_service_id}]
+        }
+        self.mock_services_table.get_item.return_value = {
+            "Item": {"Id": self.sample_service_id}
+        }
+
+        result = self.repo.get_user_bookmarks(user_id=self.sample_user_id)
+
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["Id"], self.sample_service_id)
+        self.mock_bookmarks_table.query.assert_called_once()
+        self.mock_services_table.get_item.assert_called_once()
