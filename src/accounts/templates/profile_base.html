@@ -16,17 +16,24 @@
 
     <!-- Profile View Section -->
     <div id="view-profile" class="bg-white rounded-lg shadow-md p-6">
-        <div class="flex items-center mb-6">
-            <div class="w-24 h-24 rounded-full bg-blue-500 text-white flex items-center justify-center text-4xl font-bold mr-6 uppercase">
-                {{ profile.username|first }}
+        <div class="flex justify-between items-start mb-6">
+            <!-- Grouped Profile Picture and Information -->
+            <div class="flex items-center">
+                <div class="w-24 h-24 rounded-full bg-blue-500 text-white flex items-center justify-center text-4xl font-bold mr-6 uppercase">
+                    {{ profile.username|first }}
+                </div>
+                <div>
+                    <h2 class="text-xl font-semibold text-blue-700 mb-2">Profile Information</h2>
+                    <p class="text-gray-600"><strong>Username:</strong> {{ profile.username }}</p>
+                    <p class="text-gray-600"><strong>Email:</strong> {{ profile.email }}</p>
+                    <p class="text-gray-600"><strong>First Name:</strong> {{ profile.first_name }}</p>
+                    <p class="text-gray-600"><strong>Last Name:</strong> {{ profile.last_name }}</p>
+                </div>
             </div>
-            <div>
-                <h2 class="text-xl font-semibold text-blue-700 mb-2">Profile Information</h2>
-                <p class="text-gray-600"><strong>Username:</strong> {{ profile.username }}</p>
-                <p class="text-gray-600"><strong>Email:</strong> {{ profile.email }}</p>
-                <p class="text-gray-600"><strong>First Name:</strong> {{ profile.first_name }}</p>
-                <p class="text-gray-600"><strong>Last Name:</strong> {{ profile.last_name }}</p>
-            </div>
+            <!-- Edit Profile Button -->
+            <button onclick="toggleEdit()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300 mt-4 sm:mt-0">
+                Edit Profile
+            </button>
         </div>
 
         {% if not is_service_provider %}
@@ -66,10 +73,6 @@
             {% endif %}
         </div>
         {% endif %}
-
-        <button onclick="toggleEdit()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300">
-            Edit Profile
-        </button>
     </div>
 
     <!-- Profile Edit Form Section -->
