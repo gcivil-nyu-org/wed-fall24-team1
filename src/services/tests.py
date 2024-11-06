@@ -252,3 +252,57 @@ class ServiceViewsTestCase(TestCase):
         service_id = str(uuid.uuid4())
         resp = self.client.get(reverse("services:delete", args=[service_id]))
         self.assertEqual(resp.status_code, 403)
+
+    @patch.object(ServiceRepository, 'get_pending_approval_services')
+    def test_get_pending_approval_services(self, mock_get_pending_approval_services):
+        # Mock the response to simulate services in "PENDING_APPROVAL" status
+        mock_get_pending_approval_services.return_value = [
+            ServiceDTO(
+                id=str(uuid.uuid4()),
+                name="Pending Service 1",
+                address="Address 1",
+                category="Category 1",
+                provider_id=str(uuid.uuid4()),
+                latitude=None,
+                longitude=None,
+                ratings=None,
+                description=None,
+                service_created_timestamp="2022-01-01T12:00:00Z",
+                service_status="PENDING_APPROVAL",
+                service_approved_timestamp=None,
+            ),
+            ServiceDTO(
+                id=str(uuid.uuid4()),
+                name="Pending Service 2",
+                address="Address 2",
+                category="Category 2",
+                provider_id=str(uuid.uuid4()),
+                latitude=None,
+                longitude=None,
+                ratings=None,
+                description=None,
+                service_created_timestamp="2022-01-01T12:00:00Z",
+                service_status="PENDING_APPROVAL",
+                service_approved_timestamp=None,
+            ),
+        ]
+
+        result = self.service_repo.get_pending_approval_services()
+        self.assertEqual(len(result), 2)
+        self.assertEqual(result[0].service_status, "PENDING_APPROVAL")
+        self.assertEqual(result[1].service_status, "PENDING_APPROVAL")
+
+    @patch.object(ServiceRepository, 'update_service_status')
+    def test_update_service_status(self, mock_update_service_status):
+        # Mock the response to simulate successful status update
+        mock_update_service_status.return_value = True
+
+        service_id = str(uuid.uuid4())
+        new_status = "APPROVED"
+
+        # Call the method
+        result = self.service_repo.update_service_status(service_id, new_status)
+
+        # Assertions
+        self.assertTrue(result)
+        mock_update_service_status.assert_called_once_with(service_id, new_status)
