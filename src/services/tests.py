@@ -7,6 +7,8 @@ from accounts.models import CustomUser
 from django.test import TestCase, Client
 from django.urls import reverse
 
+from public_service_finder.utils.enums.service_status import ServiceStatus
+
 from .forms import ServiceForm, DescriptionFormSet
 from .models import ServiceDTO
 from .repositories import ServiceRepository
@@ -50,6 +52,9 @@ class ServiceViewsTestCase(TestCase):
                     longitude=None,
                     ratings=None,
                     description=None,
+                    service_created_timestamp="2022-01-01T12:00:00Z",
+                    service_status=ServiceStatus.APPROVED.value,
+                    service_approved_timestamp="2022-01-01T12:00:00Z",
                 ),
                 ServiceDTO(
                     id=str(uuid.uuid4()),
@@ -61,6 +66,9 @@ class ServiceViewsTestCase(TestCase):
                     latitude=None,
                     longitude=None,
                     description=None,
+                    service_created_timestamp="2022-01-01T12:00:00Z",
+                    service_status=ServiceStatus.APPROVED.value,
+                    service_approved_timestamp="2022-01-01T12:00:00Z",
                 ),
             ]
             response = self.client.get(reverse("services:list"))
@@ -117,6 +125,9 @@ class ServiceViewsTestCase(TestCase):
                 longitude=Decimal(-74.32),
                 ratings=Decimal("4.5"),
                 description={"hours": "9-5"},
+                service_created_timestamp="2022-01-01T12:00:00Z",
+                service_status=ServiceStatus.APPROVED.value,
+                service_approved_timestamp="2022-01-01T12:00:00Z",
             )
             response = self.client.get(reverse("services:edit", args=[service_id]))
             self.assertEqual(response.status_code, 200)
@@ -151,6 +162,9 @@ class ServiceViewsTestCase(TestCase):
                 address="5 Metrotech Center, Brooklyn, NY",
                 latitude=Decimal(40.32),
                 longitude=Decimal(-74.001),
+                service_created_timestamp="2022-01-01T12:00:00Z",
+                service_status=ServiceStatus.APPROVED.value,
+                service_approved_timestamp="2022-01-01T12:00:00Z",
             )
             mock_update.return_value = True
             response = self.client.post(
@@ -202,6 +216,9 @@ class ServiceViewsTestCase(TestCase):
                 description=None,
                 category="MENTAL",
                 provider_id=str(self.service_provider.id),
+                service_created_timestamp="2022-01-01T12:00:00Z",
+                service_status=ServiceStatus.APPROVED.value,
+                service_approved_timestamp="2022-01-01T12:00:00Z",
             )
             response = self.client.post(reverse("services:delete", args=[service_id]))
             self.assertEqual(response.status_code, 302)
@@ -222,6 +239,9 @@ class ServiceViewsTestCase(TestCase):
                 description=None,
                 category="MENTAL",
                 provider_id=str(self.service_provider.id),
+                service_created_timestamp="2022-01-01T12:00:00Z",
+                service_status=ServiceStatus.APPROVED.value,
+                service_approved_timestamp="2022-01-01T12:00:00Z",
             )
             mock_delete.return_value = True
             response = self.client.post(reverse("services:delete", args=[service_id]))

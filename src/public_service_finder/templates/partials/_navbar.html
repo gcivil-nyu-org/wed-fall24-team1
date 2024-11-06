@@ -17,15 +17,29 @@
         </div>
 
         <!-- Navigation Items -->
-        <div class="flex items-center space-x-6">
+        <div class="flex items-center justify-end space-x-6">
+            {% if user.is_authenticated and user.user_type == 'service_provider' %}
+            <a href="{% url 'services:list' %}" class="hidden md:flex items-center space-x-2 text-gray-600 hover:text-blue-700 font-medium p-2 rounded-md hover:bg-gray-100">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+            {% else %}
             <a href="{% url 'home' %}" class="hidden md:flex items-center space-x-2 text-gray-600 hover:text-blue-700 font-medium p-2 rounded-md hover:bg-gray-100">
                 <i class="fas fa-home"></i>
                 <span>Home</span>
             </a>
+            {% endif %}
             <a href="{% url 'forum:category_list' %}" class="hidden md:flex items-center space-x-2 text-gray-600 hover:text-blue-700 font-medium p-2 rounded-md hover:bg-gray-100">
                 <i class="fas fa-comments"></i>
                 <span>Forum</span>
             </a>
+
+            {% if user.is_superuser %}
+            <a href="{% url 'admin_only_view_new_listings' %}" class="hidden md:flex items-center space-x-2 text-gray-600 hover:text-blue-700 font-medium p-2 rounded-md hover:bg-gray-100">
+                <i class="fas fa-list"></i>
+                <span>New Service Listings</span>
+            </a>
+            {% endif %}
 
             <!-- Profile Section -->
             <div class="relative">
@@ -35,25 +49,25 @@
                     <i class="fas fa-caret-down text-gray-500"></i>
                 </button>
 
-                <!-- Dropdown Menu -->
-                <div id="profileDropdown" class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 shadow-md rounded-md text-gray-700 z-20 hidden">
-                    <a href="/accounts/profile" class="block px-4 py-2 hover:bg-gray-100 flex items-center space-x-2">
-                        <i class="fas fa-user-circle text-blue-500"></i>
-                        <span>View Profile</span>
-                    </a>
-                    <a href="#" class="block px-4 py-2 hover:bg-gray-100 flex items-center space-x-2">
-                        <i class="fas fa-cog text-blue-500"></i>
-                        <span>Settings</span>
-                    </a>
-                    <form method="post" action="{% url 'logout' %}">
-                        {% csrf_token %}
-                        <button type="submit" class="block w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2">
-                            <i class="fas fa-sign-out-alt text-red-500"></i>
-                            <span>Logout</span>
-                        </button>
-                    </form>
-                </div>
+            <!-- Dropdown Menu -->
+            <div id="profileDropdown" class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 shadow-md rounded-md text-gray-700 z-20 hidden">
+                <a href="/accounts/profile" class="block px-4 py-2 hover:bg-gray-100 flex items-center space-x-2">
+                    <i class="fas fa-user-circle text-blue-500"></i>
+                    <span>View Profile</span>
+                </a>
+                <a href="#" class="block px-4 py-2 hover:bg-gray-100 flex items-center space-x-2">
+                    <i class="fas fa-cog text-blue-500"></i>
+                    <span>Settings</span>
+                </a>
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="block w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2">
+                        <i class="fas fa-sign-out-alt text-red-500"></i>
+                        <span>Logout</span>
+                    </button>
+                </form>
             </div>
+
         </div>
     </div>
 </nav>
@@ -62,10 +76,17 @@
 <div class="md:hidden bg-white border-b">
     <div class="container mx-auto py-2 px-4">
         <div class="flex justify-center space-x-4">
+            {% if user.is_authenticated and user.user_type == 'service_provider' %}
+            <a href="{% url 'services:list' %}" class="flex items-center space-x-2 text-gray-600 hover:text-blue-700 font-medium">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+            {% else %}
             <a href="{% url 'home' %}" class="flex items-center space-x-2 text-gray-600 hover:text-blue-700 font-medium">
                 <i class="fas fa-home"></i>
                 <span>Home</span>
             </a>
+            {% endif %}
             <a href="{% url 'forum:category_list' %}" class="flex items-center space-x-2 text-gray-600 hover:text-blue-700 font-medium">
                 <i class="fas fa-comments"></i>
                 <span>Forum</span>

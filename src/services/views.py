@@ -1,7 +1,7 @@
 # from django.shortcuts import render
 import uuid
 from decimal import Decimal
-
+from datetime import datetime, timezone
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -12,6 +12,7 @@ from django.http import Http404, JsonResponse, HttpResponseNotAllowed
 from django.shortcuts import render, redirect
 
 from home.repositories import HomeRepository
+from public_service_finder.utils.enums.service_status import ServiceStatus
 from .forms import ServiceForm, DescriptionFormSet
 from .models import ServiceDTO
 from .repositories import ServiceRepository
@@ -83,8 +84,10 @@ def service_create(request):
                 description=description_data,
                 category=service_data["category"],
                 provider_id=str(request.user.id),
+                service_status=ServiceStatus.PENDING_APPROVAL.value,
+                service_created_timestamp=datetime.now(timezone.utc).isoformat(),
+                service_approved_timestamp="1900-01-01T00:00:00Z",
             )
-
             if service_repo.create_service(service_dto):
                 messages.success(request, "Service created successfully!")
                 return redirect("services:list")
@@ -151,6 +154,9 @@ def service_edit(request, service_id):
                     "category"
                 ],  # This is already translated in the form's clean method
                 provider_id=str(request.user.id),
+                service_status=ServiceStatus.PENDING_APPROVAL.value,
+                service_created_timestamp=datetime.now(timezone.utc).isoformat(),
+                service_approved_timestamp="1900-01-01T00:00:00Z",
             )
 
             if service_repo.update_service(updated_service):
