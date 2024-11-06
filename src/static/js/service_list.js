@@ -179,15 +179,10 @@ function sendResponse(serviceId, reviewId) {
                 </div>
             `;
 
-            // Hide the response form
             const form = document.getElementById(`responseForm-${reviewId}`);
             if (form) {
                 form.remove(); // or form.classList.add('hidden');
             }
-
-            alert('Response sent successfully!');
-            // Reload the page to ensure the response is displayed correctly
-            // window.location.reload();
         } else {
             alert(`Failed to send response: ${data.message}`);
         }

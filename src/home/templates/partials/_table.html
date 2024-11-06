@@ -380,7 +380,6 @@
 
                 if (response.ok) {
                     const result = await response.json();
-                    alert(result.message || "Review submitted successfully!");
                     fetchAndDisplayReviews(serviceId, 1);
                 } else {
                     const error = await response.json();
