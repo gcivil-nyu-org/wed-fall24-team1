@@ -143,3 +143,4 @@ GitHub.sublime-settings
 .history
 .env
 ps_env
+.aider*
