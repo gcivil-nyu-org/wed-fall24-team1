@@ -6,11 +6,11 @@ from unittest.mock import patch
 from accounts.models import CustomUser
 from django.test import TestCase, Client
 from django.urls import reverse
-
+from django.contrib.auth import get_user_model
 from public_service_finder.utils.enums.service_status import ServiceStatus
 
-from .forms import ServiceForm, DescriptionFormSet
-from .models import ServiceDTO
+from .forms import ServiceForm, DescriptionFormSet, ReviewResponseForm
+from .models import ServiceDTO, ReviewDTO
 from .repositories import ServiceRepository
 
 
@@ -180,3 +180,269 @@ class ServiceViewsTestCase(TestCase):
         service_id = str(uuid.uuid4())
         resp = self.client.get(reverse("services:delete", args=[service_id]))
         self.assertEqual(resp.status_code, 403)
+
+
+User = get_user_model()
+
+
+class ReviewListViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            username="testuser", password="testpass", email="testuser@example.com"
+        )
+        self.service_id = "service-id-123"
+        self.client.login(username="testuser", password="testpass")
+
+        # Sample service and reviews
+        self.service = ServiceDTO(
+            id=self.service_id,
+            name="Test Service",
+            provider_id=str(self.user.id),
+            address="123 Main St",
+            category="Category",
+            latitude=0.0,
+            longitude=0.0,
+            ratings=5.0,
+            description="Description",
+            service_status="Active",
+            service_created_timestamp="2021-01-01T00:00:00Z",
+            service_approved_timestamp="2021-01-01T00:00:00Z",
+        )
+        self.review = ReviewDTO(
+            review_id="review-id-123",
+            service_id=self.service_id,
+            user_id="user-id-123",
+            username="reviewer",
+            rating_stars=5,
+            rating_message="Great service!",
+            timestamp="2021-01-01T12:00:00Z",
+        )
+
+    @patch("services.views.review_repo.get_reviews_for_service")
+    @patch("services.views.service_repo.get_service")
+    def test_review_list_view_authenticated(self, mock_get_service, mock_get_reviews):
+        # Mock repository methods
+        mock_get_service.return_value = self.service
+        mock_get_reviews.return_value = [self.review]
+
+        response = self.client.get(
+            reverse("services:review_list", args=[self.service_id])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "review_list.html")
+        self.assertEqual(response.context["service"], self.service)
+        self.assertEqual(response.context["reviews"], [self.review])
+
+    @patch("services.views.service_repo.get_service")
+    def test_review_list_view_service_not_found(self, mock_get_service):
+        # Mock service not found
+        mock_get_service.return_value = None
+
+        response = self.client.get(
+            reverse("services:review_list", args=[self.service_id])
+        )
+        self.assertEqual(response.status_code, 404)
+
+
+class RespondToReviewViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.provider = User.objects.create_user(
+            username="provider",
+            password="testpass",
+            email="provider@example.com",
+            user_type="service_provider",
+        )
+        self.regular_user = User.objects.create_user(
+            username="regular",
+            password="testpass",
+            email="regular@example.com",
+            user_type="user",
+        )
+        self.service_id = "service-id-123"
+        self.review_id = "review-id-123"
+
+        # Sample service and review data
+        self.service = ServiceDTO(
+            id=self.service_id,
+            name="Test Service",
+            provider_id=str(self.provider.id),
+            address="123 Main St",
+            category="Category",
+            latitude=0.0,
+            longitude=0.0,
+            ratings=5.0,
+            description="Description",
+            service_status="Active",
+            service_created_timestamp="2021-01-01T00:00:00Z",
+            service_approved_timestamp="2021-01-01T00:00:00Z",
+        )
+        self.review = ReviewDTO(
+            review_id=self.review_id,
+            service_id=self.service_id,
+            user_id=str(self.regular_user.id),
+            username="regular",
+            rating_stars=5,
+            rating_message="Excellent service",
+            timestamp="2021-01-01T12:00:00Z",
+            responseText="",
+            responded_at="",
+        )
+
+    @patch("services.views.service_repo.get_service")
+    @patch("services.views.review_repo.get_review")
+    def test_respond_to_review_get_provider(self, mock_get_review, mock_get_service):
+        # Service provider can access the response form
+        self.client.login(username="provider", password="testpass")
+        mock_get_service.return_value = self.service
+        mock_get_review.return_value = self.review
+
+        response = self.client.get(
+            reverse(
+                "services:respond_to_review", args=[self.service_id, self.review_id]
+            )
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "respond_to_review.html")
+        self.assertIn("service", response.context)
+        self.assertIn("review", response.context)
+        self.assertIsInstance(response.context["form"], ReviewResponseForm)
+
+    @patch("services.views.service_repo.get_service")
+    @patch("services.views.review_repo.get_review")
+    @patch("services.views.review_repo.respond_to_review")
+    def test_respond_to_review_post_success(
+        self, mock_respond_to_review, mock_get_review, mock_get_service
+    ):
+        # Service provider successfully submits a response
+        self.client.login(username="provider", password="testpass")
+        mock_get_service.return_value = self.service
+        mock_get_review.return_value = self.review
+        mock_respond_to_review.return_value = True
+
+        response = self.client.post(
+            reverse(
+                "services:respond_to_review", args=[self.service_id, self.review_id]
+            ),
+            {"responseText": "Thank you for your feedback!"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(
+            response.content, {"status": "success", "message": "Response saved"}
+        )
+        mock_respond_to_review.assert_called_once_with(
+            self.review_id, "Thank you for your feedback!"
+        )
+
+    @patch("services.views.service_repo.get_service")
+    @patch("services.views.review_repo.get_review")
+    def test_respond_to_review_get_permission_denied(
+        self, mock_get_review, mock_get_service
+    ):
+        # Regular user should not be able to access respond to review
+        self.client.login(username="regular", password="testpass")
+        mock_get_service.return_value = self.service
+        mock_get_review.return_value = self.review
+
+        response = self.client.get(
+            reverse(
+                "services:respond_to_review", args=[self.service_id, self.review_id]
+            )
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.assertJSONEqual(
+            response.content, {"status": "error", "message": "Permission denied"}
+        )
+
+    @patch("services.views.service_repo.get_service")
+    @patch("services.views.review_repo.get_review")
+    def test_respond_to_review_post_permission_denied(
+        self, mock_get_review, mock_get_service
+    ):
+        # Regular user attempts to POST a response
+        self.client.login(username="regular", password="testpass")
+        mock_get_service.return_value = self.service
+        mock_get_review.return_value = self.review
+
+        response = self.client.post(
+            reverse(
+                "services:respond_to_review", args=[self.service_id, self.review_id]
+            ),
+            {"responseText": "Trying to respond"},
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.assertJSONEqual(
+            response.content, {"status": "error", "message": "Permission denied"}
+        )
+
+    @patch("services.views.service_repo.get_service")
+    @patch("services.views.review_repo.get_review")
+    def test_respond_to_review_service_not_found(
+        self, mock_get_review, mock_get_service
+    ):
+        # Service does not exist
+        self.client.login(username="provider", password="testpass")
+        mock_get_service.return_value = None  # Simulate service not found
+
+        response = self.client.get(
+            reverse(
+                "services:respond_to_review", args=[self.service_id, self.review_id]
+            )
+        )
+
+        self.assertEqual(response.status_code, 404)
+
+    @patch("services.views.service_repo.get_service")
+    @patch("services.views.review_repo.get_review")
+    def test_respond_to_review_review_not_found(
+        self, mock_get_review, mock_get_service
+    ):
+        # Review does not exist
+        self.client.login(username="provider", password="testpass")
+        mock_get_service.return_value = self.service
+        mock_get_review.return_value = None  # Simulate review not found
+
+        response = self.client.get(
+            reverse(
+                "services:respond_to_review", args=[self.service_id, self.review_id]
+            )
+        )
+
+        self.assertEqual(response.status_code, 404)
+
+    @patch("services.views.service_repo.get_service")
+    @patch("services.views.review_repo.get_review")
+    def test_respond_to_review_invalid_form(self, mock_get_review, mock_get_service):
+        # Invalid form data submitted
+        self.client.login(username="provider", password="testpass")
+        mock_get_service.return_value = self.service
+        mock_get_review.return_value = self.review
+
+        response = self.client.post(
+            reverse(
+                "services:respond_to_review", args=[self.service_id, self.review_id]
+            ),
+            {"responseText": ""},  # Empty responseText is invalid
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertJSONEqual(
+            response.content, {"status": "error", "message": "Invalid form data"}
+        )
+
+    def test_respond_to_review_not_authenticated(self):
+        # Unauthenticated user tries to access the view
+        response = self.client.get(
+            reverse(
+                "services:respond_to_review", args=[self.service_id, self.review_id]
+            )
+        )
+
+        # Should redirect to login page
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith("/accounts/login/"))

@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import Http404, JsonResponse, HttpResponseNotAllowed
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from home.repositories import HomeRepository
 from public_service_finder.utils.enums.service_status import ServiceStatus
 from .forms import ServiceForm, DescriptionFormSet, ReviewResponseForm
@@ -214,18 +214,15 @@ def service_delete(request, service_id):
 
 @login_required
 def review_list(request, service_id):
-    service = get_object_or_404(ServiceDTO, id=service_id)
+    service = service_repo.get_service(service_id)
+    if not service:
+        raise Http404("Service does not exist")
 
     # Fetch all reviews for the service
     reviews = review_repo.get_reviews_for_service(service_id)
-    print(reviews)
-
-    # Debug log to verify retrieved data
-    for review in reviews:
-        print(f"Review ID {review.review_id} has responseText: {review.responseText}")
 
     # Pass the reviews and service to the template
-    return render(request, "review_html.html", {"service": service, "reviews": reviews})
+    return render(request, "review_list.html", {"service": service, "reviews": reviews})
 
 
 @login_required
