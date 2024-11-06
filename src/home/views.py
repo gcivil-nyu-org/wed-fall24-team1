@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import json
 from .repositories import HomeRepository
@@ -211,20 +210,3 @@ def toggle_bookmark(request):
         return JsonResponse(
             {"error": "An error occurred while toggling the bookmark."}, status=500
         )
-
-def service_detail(request, service_id):
-    service_repo = ServiceRepository()
-    review_repo = ReviewRepository()
-
-    service = service_repo.get_service(service_id)
-    if not service:
-        raise Http404("Service does not exist")
-
-    reviews = review_repo.get_reviews_for_service(service_id)
-
-    context = {
-        "service": service,
-        "reviews": reviews,
-    }
-
-    return render(request, "home/service_detail.html", context)

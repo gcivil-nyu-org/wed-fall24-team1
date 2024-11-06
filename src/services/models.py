@@ -64,9 +64,11 @@ class ServiceDTO:
             "ApprovedTimestamp": self.service_approved_timestamp,
         }
 
+
 @dataclass
 class ReviewDTO:
     """Data Transfer Object for Review"""
+
     review_id: str
     service_id: str
     user_id: str
@@ -74,7 +76,7 @@ class ReviewDTO:
     rating_stars: int
     rating_message: str
     timestamp: str
-    response: str = field(default="")
+    responseText: str = field(default="")
     responded_at: str = field(default="")
 
     @classmethod
@@ -88,8 +90,8 @@ class ReviewDTO:
             rating_stars=int(review_data["RatingStars"]),
             rating_message=review_data["RatingMessage"],
             timestamp=review_data["Timestamp"],
-            response=review_data.get("Response", "NULL"),
-            responded_at=review_data.get("RespondedAt", "NULL")
+            responseText=review_data.get("ResponseText", ""),
+            responded_at=review_data.get("RespondedAt", ""),
         )
 
     def to_dynamodb_item(self) -> Dict[str, Any]:
@@ -101,10 +103,10 @@ class ReviewDTO:
             "Username": self.username,
             "RatingStars": str(self.rating_stars),
             "RatingMessage": self.rating_message,
-            "Timestamp": self.timestamp
+            "Timestamp": self.timestamp,
         }
-        if self.response:
-            item["Response"] = self.response
+        if self.responseText:
+            item["ResponseText"] = self.responseText
         if self.responded_at:
             item["RespondedAt"] = self.responded_at
         return item

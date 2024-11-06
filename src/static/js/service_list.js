@@ -1,25 +1,8 @@
 document.addEventListener('DOMContentLoaded', function() {
     const servicesGrid = document.getElementById('servicesGrid');
-    const serviceSearch = document.getElementById('serviceSearch');
     const serviceModal = document.getElementById('serviceModal');
     const closeModal = document.getElementById('closeModal');
     let map = null;
-
-    // Search functionality
-    serviceSearch.addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
-        const serviceBoxes = servicesGrid.querySelectorAll('.service-box');
-
-        serviceBoxes.forEach(box => {
-            const serviceName = box.querySelector('.service-name').textContent.toLowerCase();
-            const serviceCategory = box.querySelector('p').textContent.toLowerCase();
-            if (serviceName.includes(searchTerm) || serviceCategory.includes(searchTerm)) {
-                box.style.display = '';
-            } else {
-                box.style.display = 'none';
-            }
-        });
-    });
 
     // Service name click event
     servicesGrid.addEventListener('click', function(e) {
@@ -34,7 +17,6 @@ document.addEventListener('DOMContentLoaded', function() {
         serviceModal.classList.add('hidden');
     });
 
-    // Function to open service modal
     function openServiceModal(serviceId) {
         fetch(`/services/${serviceId}/details/`)
             .then(response => response.json())
@@ -59,12 +41,45 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Populate reviews
                 const reviewsContainer = document.getElementById('modalReviews');
                 reviewsContainer.innerHTML = '<h4 class="font-semibold mt-4">Reviews:</h4>';
+
                 if (data.reviews && data.reviews.length > 0) {
                     data.reviews.forEach(review => {
+                        const hasResponseText = review.ResponseText && review.ResponseText.trim() !== "";
+                        let respondedAtDate = "Responded just now";
+                        if (review.RespondedAt) {
+                            const date = new Date(review.RespondedAt);
+                            const day = String(date.getDate()).padStart(2, '0'); // Ensure 2-digit day
+                            const month = date.toLocaleString('default', { month: 'long' }); // Full month name
+                            const year = date.getFullYear();
+                            respondedAtDate = `${day} ${month} ${year}`; // Format as 'dd Month yyyy'
+                        }
+                        console.log("Review Data:", review);
+
                         reviewsContainer.innerHTML += `
                             <div class="review mb-2 p-2 bg-gray-100 rounded">
                                 <p><strong>${review.Username}</strong> - ${review.RatingStars} stars</p>
                                 <p class="text-sm text-gray-600">${review.RatingMessage}</p>
+                                ${hasResponseText ? `
+                                    <!-- Show the provider response with timestamp if it exists -->
+                                    <div class="mt-3 p-3 bg-blue-50 rounded" id="reviewResponse-${review.ReviewId}">
+                                        <p class="font-semibold">Provider Response:</p>
+                                        <p>${review.ResponseText}</p>
+                                        <p class="text-sm text-gray-600">Responded at: ${respondedAtDate}</p>
+                                    </div>
+                                ` : `
+                                    <!-- Show the Respond button and form if there is no response -->
+                                    <button class="respond-button bg-blue-500 text-white py-1 px-3 rounded mt-2" 
+                                            onclick="showResponseForm('${serviceId}', '${review.ReviewId}')">
+                                        Respond
+                                    </button>
+                                    <div id="responseForm-${review.ReviewId}" class="response-form hidden mt-2">
+                                        <textarea id="responseText-${review.ReviewId}" class="w-full p-2 border rounded" rows="2" placeholder="Write your response here..."></textarea>
+                                        <button class="send-response bg-green-500 text-white py-1 px-3 rounded mt-2" 
+                                                onclick="sendResponse('${serviceId}', '${review.ReviewId}')">
+                                            Send Response
+                                        </button>
+                                    </div>
+                                `}
                             </div>
                         `;
                     });
@@ -72,9 +87,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     reviewsContainer.innerHTML += '<p>No reviews yet.</p>';
                 }
 
-                serviceModal.classList.remove('hidden');
 
-                // Initialize map after modal is visible
+
+                serviceModal.classList.remove('hidden');
                 setTimeout(() => {
                     initializeMap(data.latitude, data.longitude);
                 }, 100);
@@ -87,35 +102,98 @@ document.addEventListener('DOMContentLoaded', function() {
             map.remove();
         }
         const mapContainer = document.getElementById('modalMap');
-        mapContainer.style.height = '300px'; // Set a fixed height
+        mapContainer.style.height = '300px';
         map = L.map('modalMap').setView([latitude, longitude], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
         L.marker([latitude, longitude]).addTo(map);
-
-        // Force a resize event on the map
         setTimeout(() => {
             map.invalidateSize();
         }, 100);
     }
-
 });
 
-document.addEventListener('DOMContentLoaded', function() {
-    var serviceSearch = document.getElementById('serviceSearch');
-    var servicesGrid = document.getElementById('servicesGrid');
-    var serviceBoxes = servicesGrid.getElementsByClassName('service-box');
-
-    serviceSearch.addEventListener('input', function() {
-        var searchTerm = this.value.toLowerCase();
-        for (var i = 0; i < serviceBoxes.length; i++) {
-            var serviceName = serviceBoxes[i].querySelector('.service-name').textContent.toLowerCase();
-            if (serviceName.includes(searchTerm)) {
-                serviceBoxes[i].style.display = 'block';
-            } else {
-                serviceBoxes[i].style.display = 'none';
+// Function to get CSRF token from cookies
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
             }
         }
+    }
+    return cookieValue;
+}
+
+// Function to toggle response form visibility
+function showResponseForm(serviceId, reviewId) {
+    const form = document.getElementById(`responseForm-${reviewId}`);
+    form.classList.toggle('hidden');
+}
+
+// Function to send a response to a review
+function sendResponse(serviceId, reviewId) {
+    const responseText = document.getElementById(`responseText-${reviewId}`).value;
+    if (responseText.trim() === '') {
+        alert('Response cannot be empty.');
+        return;
+    }
+
+    let responseContainer = document.getElementById(`reviewResponse-${reviewId}`);
+    if (!responseContainer) {
+        // Create the container if it doesn't exist
+        responseContainer = document.createElement('div');
+        responseContainer.id = `reviewResponse-${reviewId}`;
+        // Insert it after the response form
+        const responseForm = document.getElementById(`responseForm-${reviewId}`);
+        responseForm.parentNode.insertBefore(responseContainer, responseForm.nextSibling);
+    }
+
+    const csrfToken = getCookie('csrftoken');
+    fetch(`/services/${serviceId}/reviews/${reviewId}/respond/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrfToken,
+        },
+        body: new URLSearchParams({ responseText: responseText }),
+    })
+    .then(response => {
+        console.log("Response status:", response.status);
+        return response.json();
+    })
+    .then(data => {
+        console.log("Response data:", data);
+        if (data.status === "success") {
+            // Update the response container
+            responseContainer.innerHTML = `
+                <div class="mt-3 p-3 bg-blue-50 rounded">
+                    <p class="font-semibold">Provider Response:</p>
+                    <p>${responseText}</p>
+                    <p class="text-sm text-gray-600">Responded just now</p>
+                </div>
+            `;
+
+            // Hide the response form
+            const form = document.getElementById(`responseForm-${reviewId}`);
+            if (form) {
+                form.remove(); // or form.classList.add('hidden');
+            }
+
+            alert('Response sent successfully!');
+            // Reload the page to ensure the response is displayed correctly
+            // window.location.reload();
+        } else {
+            alert(`Failed to send response: ${data.message}`);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert(error.message);
     });
-});
+}

@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import Http404, JsonResponse, HttpResponseNotAllowed
 from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 
 from home.repositories import HomeRepository
 from public_service_finder.utils.enums.service_status import ServiceStatus
@@ -13,10 +14,12 @@ from .forms import ServiceForm, DescriptionFormSet
 from .models import ServiceDTO
 from .repositories import ServiceRepository
 from .forms import ServiceForm, DescriptionFormSet, ReviewResponseForm
-from .models import ServiceDTO, ReviewDTO
+from .models import ServiceDTO
 from .repositories import ServiceRepository, ReviewRepository
 
 service_repo = ServiceRepository()
+review_repo = ReviewRepository()
+
 
 @login_required
 def service_list(request):
@@ -237,53 +240,91 @@ def service_delete(request, service_id):
 
 @login_required
 def review_list(request, service_id):
-    review_repo = ReviewRepository()
+    service = get_object_or_404(ServiceDTO, id=service_id)
 
-    service = service_repo.get_service(service_id)
-    if not service:
-        raise Http404("Service not found")
-
+    # Fetch all reviews for the service
     reviews = review_repo.get_reviews_for_service(service_id)
+    print(reviews)
 
-    return render(request, "review_list.html", {"service": service, "reviews": reviews})
+    # Debug log to verify retrieved data
+    for review in reviews:
+        print(f"Review ID {review.review_id} has responseText: {review.responseText}")
+
+    # Pass the reviews and service to the template
+    return render(request, "review_html.html", {"service": service, "reviews": reviews})
 
 
 @login_required
 def respond_to_review(request, service_id, review_id):
-    review_repo = ReviewRepository()
+    log.debug("Entering respond_to_review view")
 
-    # Get the service and verify ownership
+    # Check if the user is authenticated
+    if not request.user.is_authenticated:
+        log.warning("Unauthorized access attempt: user is not authenticated")
+        return JsonResponse(
+            {"status": "error", "message": "User not authenticated"}, status=403
+        )
+
+    # Fetch the service and review data
     service = service_repo.get_service(service_id)
     if not service:
-        raise Http404("Service not found")
+        log.error("Service with ID %s not found", service_id)
+        raise Http404("Service does not exist")
+    log.debug("Service fetched: %s", service)
 
-    if str(request.user.id) != service.provider_id:
-        messages.error(request, "You don't have permission to respond to this review.")
-        return redirect('services:review_list', service_id=service_id)
+    if service.provider_id != str(request.user.id):
+        log.warning(
+            "User %s does not have permission to respond to review for service %s",
+            request.user.id,
+            service_id,
+        )
+        return JsonResponse(
+            {"status": "error", "message": "Permission denied"}, status=403
+        )
 
-    # Get all reviews for the service
-    reviews = review_repo.get_reviews_for_service(service_id)
-    review = next((r for r in reviews if r.review_id == review_id), None)
+    review = review_repo.get_review(review_id)
+    if not review or review.service_id != service_id:
+        log.error(
+            "Review with ID %s not found or does not belong to service %s",
+            review_id,
+            service_id,
+        )
+        raise Http404("Review does not exist or does not belong to this service")
+    log.debug("Review fetched: %s", review)
 
-    if not review:
-        raise Http404("Review not found")
-
-    if request.method == 'POST':
+    if request.method == "POST":
         form = ReviewResponseForm(request.POST)
         if form.is_valid():
-            if review_repo.respond_to_review(service_id, review_id, form.cleaned_data['response']):
-                messages.success(request, "Response submitted successfully!")
-                return redirect('services:review_list', service_id=service_id)
+            response_text = form.cleaned_data["responseText"]
+
+            # Attempt to update the review response in DynamoDB
+            success = review_repo.respond_to_review(review_id, response_text)
+            if success:
+                log.info("Successfully updated review %s with response", review_id)
+                messages.success(request, "Response successfully added to the review.")
+                return JsonResponse(
+                    {"status": "success", "message": "Response saved"}, status=200
+                )
             else:
-                messages.error(request, "Failed to submit response. Please try again.")
+                log.error("Failed to update review %s in the database", review_id)
+                return JsonResponse(
+                    {"status": "error", "message": "Database update failed"}, status=500
+                )
+        else:
+            log.warning("Form data is invalid: %s", form.errors)
+            return JsonResponse(
+                {"status": "error", "message": "Invalid form data"}, status=400
+            )
+
+    # If GET request, render the response form template
     else:
         form = ReviewResponseForm()
-
-    return render(request, 'services/respond_to_review.html', {
-        'service': service,
-        'review': review,
-        'form': form
-    })
+        context = {
+            "service": service,
+            "review": review,
+            "form": form,
+        }
+        return render(request, "respond_to_review.html", context)
 
 
 def get_service_by_id(service_id, provider_id):

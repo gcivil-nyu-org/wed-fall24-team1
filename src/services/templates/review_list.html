@@ -1,35 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    {% load static %}
     <meta charset="UTF-8">
     <title>Reviews for {{ service.name }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="{% static 'css/styles.css' %}" rel="stylesheet">
 </head>
-<body>
-    <h1>Reviews for "{{ service.name }}"</h1>
+<body class="bg-gray-100 font-sans">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-2xl font-bold mb-4">Reviews for "{{ service.name }}"</h1>
 
-    <!-- Display Service Details -->
-    <h2>Service Details</h2>
-    <p><strong>Service ID:</strong> {{ service.id }}</p>
-    <p><strong>Service Name:</strong> {{ service.name }}</p>
+        <!-- Debug info for all available reviews -->
+        <div class="mb-4 p-4 bg-gray-100 border border-gray-300 rounded">
+            <p class="text-sm font-mono">Debug - Number of reviews: {{ reviews|length }}</p>
+        </div>
 
-    <!-- Display Reviews -->
-    <h2>Reviews</h2>
-    {% if service.reviews %}
-        <ul>
-            {% for review in service.reviews %}
-                <li>
-                    <p><strong>User:</strong> {{ review.Username }}</p>
-                    <p><strong>Rating:</strong> {{ review.RatingStars }} stars</p>
-                    <p><strong>Comment:</strong> {{ review.RatingMessage }}</p>
-                    <p><strong>Timestamp:</strong> {{ review.Timestamp }}</p>
-
-                    <!-- Always show the Respond button using ReviewId -->
-                    <a href="{% url 'services:respond_to_review' service.id review.ReviewId %}">Respond to this review</a>
-                </li>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="mb-4 p-4 rounded {% if message.tags == 'success' %}bg-green-100 text-green-700{% elif message.tags == 'error' %}bg-red-100 text-red-700{% endif %}">
+                    {{ message }}
+                </div>
             {% endfor %}
-        </ul>
-    {% else %}
-        <p>No reviews available for this service.</p>
-    {% endif %}
+        {% endif %}
+
+        {% if reviews %}
+            <ul class="space-y-4">
+                {% for review in reviews %}
+                <li class="bg-white p-4 rounded shadow">
+                <div class="mb-2">
+                    <p><strong>User:</strong> {{ review.username }}</p>
+                    <p><strong>Rating:</strong>
+                        <span class="text-yellow-500">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= review.rating_stars %}★{% else %}☆{% endif %}
+                            {% endfor %}
+                        </span>
+                    </p>
+                    <p><strong>Comment:</strong> {{ review.rating_message }}</p>
+                    <p class="text-sm text-gray-600"><strong>Posted:</strong> {{ review.timestamp }}</p>
+                </div>
+
+                {% if review.responseText %}
+                    <!-- Show the existing response if it exists -->
+                    <div class="mt-3 p-3 bg-blue-50 rounded">
+                        <p class="font-semibold">Provider Response:</p>
+                        <p>{{ review.responseText }}</p>
+                        <p class="text-sm text-gray-600">Responded on: {{ review.responded_at }}</p>
+                    </div>
+                {% else %}
+                    <!-- Show the Respond button and form if there is no responseText -->
+                    {% if user.id|stringformat:"s" == service.provider_id %}
+                        <div id="responseForm-{{ review.review_id }}" class="mt-2">
+                            <textarea id="responseText-{{ review.review_id }}"
+                                      class="w-full p-2 border rounded"
+                                      placeholder="Write your response..."></textarea>
+                            <button onclick="sendResponse('{{ service.id }}', '{{ review.review_id }}')"
+                                    class="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
+                                Submit Response
+                            </button>
+                        </div>
+                    {% endif %}
+                {% endif %}
+            </li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-gray-600">No reviews available for this service.</p>
+        {% endif %}
+        <a href="{% url 'services:list' %}" class="mt-4 inline-block text-blue-500 hover:text-blue-700">Back to Services List</a>
+    </div>
 </body>
 </html>

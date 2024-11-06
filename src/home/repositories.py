@@ -105,6 +105,8 @@ class HomeRepository:
                     "RatingStars": rating_stars,
                     "RatingMessage": rating_message,
                     "Timestamp": timestamp,  # New timestamp field
+                    "ResponseText": None,
+                    "RespondedAt": None,
                 }
             )
         except ClientError as e:
