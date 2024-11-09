@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const userLonInput = document.getElementById('user-lon');
             const userLatValue = userLatInput ? userLatInput.value : '';
             const userLonValue = userLonInput ? userLonInput.value : '';
-            console.log(address)
+
             if (address !== '') {
                 // Location input has a value, geocode the address
                 geocodeAddress(address).then(function() {

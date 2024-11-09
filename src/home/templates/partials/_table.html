@@ -57,7 +57,6 @@
 <script>
     const itemsData = JSON.parse('{{ serialized_items|escapejs }}');
     const userIsAuthenticated = {{ user.is_authenticated|yesno:'true,false' }};
-    console.log(userIsAuthenticated)
 </script>
 
 <div id="serviceDetails" class="bg-white rounded-lg shadow-md p-4 mb-8 hidden">
@@ -107,14 +106,12 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM fully loaded and parsed');
 
         function formatTimestamp(timestamp) {
             return new Date(timestamp).toLocaleString();
         }
 
         async function fetchAndDisplayReviews(serviceId, page = 1) {
-            console.log(`Fetching reviews for service ID: ${serviceId}, Page: ${page}`);
 
             try {
                 const response = await fetch(`/home/get_reviews/${serviceId}/?page=${page}`);
@@ -123,7 +120,6 @@
                 }
 
                 const { reviews, has_next, has_previous, current_page } = await response.json();
-                console.log('Fetched reviews:', reviews);
 
                 const reviewsContainer = document.getElementById('reviewsContainer');
                 reviewsContainer.innerHTML = '';
@@ -228,10 +224,8 @@
             document.getElementById('serviceDistance').textContent = service.Distance ? parseFloat(service.Distance).toFixed(2) + ' miles' : 'N/A';
 
             const bookmarkCheckbox = document.getElementById('bookmarkCheckbox');
-            console.log('bookmarkCheckbox:', bookmarkCheckbox);
-            console.log('userIsAuthenticated:', userIsAuthenticated);
+
             if (bookmarkCheckbox && userIsAuthenticated) {
-                console.log('Adding event listener to bookmarkCheckbox');
 
                 // Set the initial checkbox state based on the bookmark status
                 bookmarkCheckbox.checked = service.IsBookmarked;
@@ -354,8 +348,6 @@
             const rating = document.getElementById('reviewRating').value;
             const message = document.getElementById('reviewText').value;
             const serviceId = document.getElementById('serviceId').textContent.trim();
-
-            console.log('Submitting review:', { serviceId, rating, message });
 
             if (rating === "" || message.trim() === "") {
                 alert("Please provide both a rating and a message.");
