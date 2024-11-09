@@ -124,11 +124,15 @@ class HomeRepository:
             rating_count = int(item.get("rating_count", 0))
 
             # Calculate the new ratings
-            updated_ratings = (current_ratings * rating_count + new_rating) / (rating_count + 1)
+            updated_ratings = (current_ratings * rating_count + new_rating) / (
+                rating_count + 1
+            )
             updated_ratings = round(updated_ratings, 2)
             updated_rating_count = rating_count + 1
 
-            updated_ratings = Decimal(updated_ratings).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+            updated_ratings = Decimal(updated_ratings).quantize(
+                Decimal("0.01"), rounding=ROUND_HALF_UP
+            )
 
             # Update the table
             self.services_table.update_item(

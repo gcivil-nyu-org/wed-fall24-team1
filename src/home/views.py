@@ -73,7 +73,10 @@ def submit_review(request):
     except (Inexact, Rounded) as decimal_error:
         print(f"Decimal error in submit_review: {decimal_error}")
         return JsonResponse(
-            {"error": "A decimal precision error occurred while submitting the review."}, status=500
+            {
+                "error": "A decimal precision error occurred while submitting the review."
+            },
+            status=500,
         )
 
     except Exception as e:
