@@ -21,7 +21,6 @@
     {% block head %}{% endblock %}
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col justify-between">
-    {% load static %}
     <!-- Navbar (included as a partial) -->
     {% include 'partials/_navbar.html' %}
 
@@ -33,22 +32,27 @@
     <!-- Footer (included as a partial) -->
     {% include 'partials/_footer.html' %}
 
-    <!-- Leaflet Map JS -->
+    <!-- JavaScript files -->
+
+    <!-- Include Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 
-    <!-- JavaScript files -->
+    <!-- Include Moment.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+
+    <!-- Include Chart.js library (UMD build) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- Include Chart.js date adapter for Moment.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.1/dist/chartjs-adapter-moment.min.js"></script>
+
+    <!-- Include D3.js and D3 Cloud -->
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-cloud/1.2.5/d3.layout.cloud.min.js"></script>
+
+    <!-- Custom JavaScript files -->
     <script src="{% static 'js/nav.js' %}"></script>
 
-    {% comment %} URL/APP specific JS files{% endcomment %}
-    {% if request.path == "/home/" %}
-        <script> 
-            window.itemsData = {{ serialized_items|safe }}; 
-        </script>
-        <script src="{% static 'apps/home/js/map.js' %}"></script>
-    {% endif %}
-
-    <!-- Additional scripts, if needed by extending templates -->
     {% block scripts %}{% endblock %}
 </body>
-
 </html>

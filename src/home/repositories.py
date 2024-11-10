@@ -259,3 +259,23 @@ class HomeRepository:
         except ClientError as e:
             print(f"Error fetching services: {e.response['Error']['Message']}")
             return {}
+        
+    def get_bookmarks_for_services(self, service_ids):
+        try:
+            response = self.bookmarks_table.scan(
+                FilterExpression=Attr('ServiceId').is_in(service_ids)
+            )
+            return response.get('Items', [])
+        except ClientError as e:
+            print(f"Failed to get bookmarks for services: {e.response['Error']['Message']}")
+            return []
+
+    def get_reviews_for_services(self, service_ids):
+        try:
+            response = self.reviews_table.scan(
+                FilterExpression=Attr('ServiceId').is_in(service_ids)
+            )
+            return response.get('Items', [])
+        except ClientError as e:
+            print(f"Failed to get reviews for services: {e.response['Error']['Message']}")
+            return []

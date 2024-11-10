@@ -8,6 +8,10 @@
                 <img src="{% static 'images/logo-psf.png' %}" alt="Logo" class="h-10 w-10 rounded-full border border-gray-300 shadow-sm">
                 <span class="text-2xl font-extrabold tracking-wide text-blue-700">Public Service Finder</span>
             </a>
+            <a href="{% url 'services:dashboard' %}" class="hidden md:flex items-center space-x-2 text-gray-600 hover:text-blue-700 font-medium p-2 rounded-md hover:bg-gray-100">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+            </a>
             {% else %}
             <a href="{% url 'home' %}" class="flex items-center space-x-3">
                 <img src="{% static 'images/logo-psf.png' %}" alt="Logo" class="h-10 w-10 rounded-full border border-gray-300 shadow-sm">
