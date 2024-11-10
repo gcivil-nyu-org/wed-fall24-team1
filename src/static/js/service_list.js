@@ -53,7 +53,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             const year = date.getFullYear();
                             respondedAtDate = `${day} ${month} ${year}`; // Format as 'dd Month yyyy'
                         }
-                        console.log("Review Data:", review);
 
                         reviewsContainer.innerHTML += `
                             <div class="review mb-2 p-2 bg-gray-100 rounded">
@@ -164,11 +163,9 @@ function sendResponse(serviceId, reviewId) {
         body: new URLSearchParams({ responseText: responseText }),
     })
     .then(response => {
-        console.log("Response status:", response.status);
         return response.json();
     })
     .then(data => {
-        console.log("Response data:", data);
         if (data.status === "success") {
             // Update the response container
             responseContainer.innerHTML = `
