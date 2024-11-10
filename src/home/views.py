@@ -7,6 +7,8 @@ import uuid
 from django.views.decorators.http import require_POST
 from decimal import Decimal, Inexact, Rounded
 from django.shortcuts import render
+from django.views.decorators.http import require_http_methods
+
 
 # TODO These constants are maintained in the JS frontend and here, we'll have to unify them
 DEFAULT_LAT, DEFAULT_LON = 40.7128, -74.0060
@@ -222,3 +224,51 @@ def toggle_bookmark(request):
         return JsonResponse(
             {"error": "An error occurred while toggling the bookmark."}, status=500
         )
+
+
+@require_http_methods(["DELETE"])
+def delete_review(request, review_id):
+    try:
+        repo = HomeRepository()
+        # Delete the review
+        repo.delete_review(review_id)
+        return JsonResponse(
+            {"success": True, "message": "Review deleted successfully."}, status=200
+        )
+
+    except Exception as e:
+        print(f"Error deleting review: {e}")
+        return JsonResponse({"error": "Failed to delete review."}, status=500)
+
+
+@require_http_methods(["PUT"])
+def edit_review(request, review_id):
+    try:
+        data = json.loads(request.body)
+        new_rating = data.get("rating")
+        new_message = data.get("message")
+
+        if not new_rating or not new_message:
+            return JsonResponse(
+                {"error": "Rating and message are required."}, status=400
+            )
+
+        repo = HomeRepository()
+
+        result = repo.edit_review(
+            review_id=review_id, new_rating=new_rating, new_message=new_message
+        )
+
+        # Check if there was an error in the repository response
+        if "error" in result:
+            return JsonResponse(result, status=404)
+
+        return JsonResponse(result, status=200)
+
+    except Exception as e:
+        print(f"Error editing review: {e}")
+        return JsonResponse({"error": "Failed to edit review."}, status=500)
+
+    except Exception as e:
+        print(f"Error editing review: {e}")
+        return JsonResponse({"error": "Failed to update review."}, status=500)
