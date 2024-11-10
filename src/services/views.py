@@ -19,7 +19,6 @@ review_repo = ReviewRepository()
 home_repo = HomeRepository()
 
 
-
 @login_required
 def service_list(request):
     if request.user.user_type != "service_provider":
@@ -296,7 +295,8 @@ def dashboard(request):
     if request.user.user_type != "service_provider":
         raise PermissionDenied
 
-    return render(request, 'dashboard.html')
+    return render(request, "dashboard.html")
+
 
 @login_required
 def bookmarks_over_time(request):
@@ -315,15 +315,16 @@ def bookmarks_over_time(request):
     bookmarks_over_time = {date_str: 0 for date_str in date_strs}
 
     for bookmark in bookmarks:
-        timestamp = datetime.fromisoformat(bookmark['timestamp']).date().isoformat()
+        timestamp = datetime.fromisoformat(bookmark["timestamp"]).date().isoformat()
         if timestamp in bookmarks_over_time:
             bookmarks_over_time[timestamp] += 1
 
     data = {
         "dates": date_strs,
-        "counts": [bookmarks_over_time[date_str] for date_str in date_strs]
+        "counts": [bookmarks_over_time[date_str] for date_str in date_strs],
     }
     return JsonResponse(data)
+
 
 @login_required
 def reviews_over_time(request):
@@ -342,16 +343,17 @@ def reviews_over_time(request):
     reviews_over_time = {date_str: 0 for date_str in date_strs}
 
     for review in reviews:
-        timestamp = datetime.fromisoformat(review['Timestamp']).date().isoformat()
+        timestamp = datetime.fromisoformat(review["Timestamp"]).date().isoformat()
         if timestamp in reviews_over_time:
             reviews_over_time[timestamp] += 1
 
     data = {
         "dates": date_strs,
-        "counts": [reviews_over_time[date_str] for date_str in date_strs]
+        "counts": [reviews_over_time[date_str] for date_str in date_strs],
     }
 
     return JsonResponse(data)
+
 
 @login_required
 def average_rating_over_time(request):
@@ -367,29 +369,29 @@ def average_rating_over_time(request):
     today = timezone.now().date()
     dates = [today - timedelta(days=i) for i in range(29, -1, -1)]
     date_strs = [date.isoformat() for date in dates]
-    rating_over_time = {date_str: {'total_rating': 0, 'count': 0} for date_str in date_strs}
+    rating_over_time = {
+        date_str: {"total_rating": 0, "count": 0} for date_str in date_strs
+    }
 
     for review in reviews:
-        timestamp = datetime.fromisoformat(review['Timestamp']).date().isoformat()
+        timestamp = datetime.fromisoformat(review["Timestamp"]).date().isoformat()
         if timestamp in rating_over_time:
-            rating_over_time[timestamp]['total_rating'] += int(review['RatingStars'])
-            rating_over_time[timestamp]['count'] += 1
+            rating_over_time[timestamp]["total_rating"] += int(review["RatingStars"])
+            rating_over_time[timestamp]["count"] += 1
 
     avg_ratings = []
     for date_str in date_strs:
         data_point = rating_over_time[date_str]
-        if data_point['count'] > 0:
-            avg_rating = data_point['total_rating'] / data_point['count']
+        if data_point["count"] > 0:
+            avg_rating = data_point["total_rating"] / data_point["count"]
         else:
             avg_rating = None  # Use None to represent missing data
         avg_ratings.append(avg_rating)
 
-    data = {
-        "dates": date_strs,
-        "avg_ratings": avg_ratings
-    }
+    data = {"dates": date_strs, "avg_ratings": avg_ratings}
 
     return JsonResponse(data)
+
 
 @login_required
 def rating_distribution(request):
@@ -404,15 +406,16 @@ def rating_distribution(request):
     # Calculate rating distribution
     rating_counts = {str(i): 0 for i in range(1, 6)}
     for review in reviews:
-        rating = str(review['RatingStars'])
+        rating = str(review["RatingStars"])
         rating_counts[rating] += 1
 
     data = {
         "ratings": list(rating_counts.keys()),
-        "counts": list(rating_counts.values())
+        "counts": list(rating_counts.values()),
     }
 
     return JsonResponse(data)
+
 
 @login_required
 def recent_reviews(request):
@@ -425,17 +428,16 @@ def recent_reviews(request):
     reviews = home_repo.get_reviews_for_services(service_ids)
 
     # Sort reviews by timestamp descending
-    reviews.sort(key=lambda x: x['Timestamp'], reverse=True)
+    reviews.sort(key=lambda x: x["Timestamp"], reverse=True)
 
     # Take the top 5 recent reviews
     recent_reviews = reviews[:5]
 
     # Prepare data
-    data = {
-        "reviews": recent_reviews
-    }
+    data = {"reviews": recent_reviews}
 
     return JsonResponse(data)
+
 
 @login_required
 def response_rate(request):
@@ -448,17 +450,20 @@ def response_rate(request):
     reviews = home_repo.get_reviews_for_services(service_ids)
 
     total_reviews = len(reviews)
-    responded_reviews = sum(1 for review in reviews if review.get('ResponseText'))
+    responded_reviews = sum(1 for review in reviews if review.get("ResponseText"))
 
-    response_rate = (responded_reviews / total_reviews) * 100 if total_reviews > 0 else 0
+    response_rate = (
+        (responded_reviews / total_reviews) * 100 if total_reviews > 0 else 0
+    )
 
     data = {
         "total_reviews": total_reviews,
         "responded_reviews": responded_reviews,
-        "response_rate": round(response_rate, 2)
+        "response_rate": round(response_rate, 2),
     }
 
     return JsonResponse(data)
+
 
 @login_required
 def review_word_cloud(request):
@@ -471,11 +476,27 @@ def review_word_cloud(request):
     reviews = home_repo.get_reviews_for_services(service_ids)
 
     # Combine all review texts
-    text = ' '.join(review['RatingMessage'] for review in reviews)
+    text = " ".join(review["RatingMessage"] for review in reviews)
 
     # Simple text processing
-    words = re.findall(r'\w+', text.lower())
-    stopwords = set(['the', 'and', 'is', 'in', 'it', 'of', 'to', 'a', 'i', 'for', 'this', 'that', 'with'])
+    words = re.findall(r"\w+", text.lower())
+    stopwords = set(
+        [
+            "the",
+            "and",
+            "is",
+            "in",
+            "it",
+            "of",
+            "to",
+            "a",
+            "i",
+            "for",
+            "this",
+            "that",
+            "with",
+        ]
+    )
     words = [word for word in words if word not in stopwords and len(word) > 2]
 
     # Count word frequencies
@@ -483,9 +504,10 @@ def review_word_cloud(request):
     most_common = word_counts.most_common(50)
 
     # Prepare data
-    data = [{'text': word, 'size': count} for word, count in most_common]
+    data = [{"text": word, "size": count} for word, count in most_common]
 
-    return JsonResponse({'words': data})
+    return JsonResponse({"words": data})
+
 
 @login_required
 def service_category_distribution(request):
@@ -502,10 +524,11 @@ def service_category_distribution(request):
 
     data = {
         "categories": list(category_counts.keys()),
-        "counts": list(category_counts.values())
+        "counts": list(category_counts.values()),
     }
 
     return JsonResponse(data)
+
 
 @login_required
 def user_analytics(request):
@@ -518,6 +541,6 @@ def user_analytics(request):
     user_metrics = home_repo.compute_user_metrics(user_id)
 
     data = {
-        'user_metrics': user_metrics,
+        "user_metrics": user_metrics,
     }
     return JsonResponse(data)
