@@ -1,6 +1,6 @@
 # home/repositories.py
 from datetime import datetime
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 import boto3
 from urllib.parse import quote
 from boto3.dynamodb.conditions import Attr, And, Key, Or
@@ -127,14 +127,19 @@ class HomeRepository:
             updated_ratings = (current_ratings * rating_count + new_rating) / (
                 rating_count + 1
             )
+            updated_ratings = round(updated_ratings, 2)
             updated_rating_count = rating_count + 1
+
+            updated_ratings = Decimal(updated_ratings).quantize(
+                Decimal("0.01"), rounding=ROUND_HALF_UP
+            )
 
             # Update the table
             self.services_table.update_item(
                 Key={"Id": service_id},
                 UpdateExpression="SET Ratings = :r, rating_count = :c",
                 ExpressionAttributeValues={
-                    ":r": Decimal(updated_ratings),
+                    ":r": updated_ratings,
                     ":c": updated_rating_count,
                 },
             )

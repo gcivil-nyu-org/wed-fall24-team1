@@ -1,15 +1,19 @@
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import json
+import decimal
 from .repositories import HomeRepository
 from django.http import JsonResponse
 import uuid
 from django.views.decorators.http import require_POST
-from decimal import Decimal
+from decimal import Decimal, Inexact, Rounded
 from django.shortcuts import render
 
 # TODO These constants are maintained in the JS frontend and here, we'll have to unify them
 DEFAULT_LAT, DEFAULT_LON = 40.7128, -74.0060
 DEFAULT_RADIUS = 5.0
+
+decimal.getcontext().traps[decimal.Inexact] = False
+decimal.getcontext().traps[decimal.Rounded] = False
 
 
 def convert_decimals(obj):
@@ -64,6 +68,15 @@ def submit_review(request):
                 "username": user.username,
             },
             status=200,
+        )
+
+    except (Inexact, Rounded) as decimal_error:
+        print(f"Decimal error in submit_review: {decimal_error}")
+        return JsonResponse(
+            {
+                "error": "A decimal precision error occurred while submitting the review."
+            },
+            status=500,
         )
 
     except Exception as e:
