@@ -24,4 +24,5 @@ urlpatterns = [
     path("analytics/response_rate/", views.response_rate, name="response_rate"),
     path("analytics/review_word_cloud/", views.review_word_cloud, name="review_word_cloud"),
     path("analytics/service_category_distribution/", views.service_category_distribution, name="service_category_distribution"),
+    path('analytics/user_analytics/', views.user_analytics, name='user_analytics'),
 ]

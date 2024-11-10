@@ -1,6 +1,8 @@
 # home/repositories.py
 from datetime import datetime
 from decimal import Decimal, ROUND_HALF_UP
+import decimal
+import logging
 import boto3
 from urllib.parse import quote
 from boto3.dynamodb.conditions import Attr, And, Key, Or
@@ -17,7 +19,6 @@ class HomeRepository:
             settings.DYNAMODB_TABLE_REVIEWS
         )  # Ensure this is set in settings
         self.bookmarks_table = self.dynamodb.Table(settings.DYNAMODB_TABLE_BOOKMARKS)
-
     def fetch_items_with_filter(
         self, search_query, category_filter, radius, ulat, ulon
     ):
@@ -279,3 +280,76 @@ class HomeRepository:
         except ClientError as e:
             print(f"Failed to get reviews for services: {e.response['Error']['Message']}")
             return []
+
+    def compute_user_metrics(self, user_id):
+        from services.repositories import ServiceRepository
+        service_repo = ServiceRepository()
+        total_ratings = Decimal('0')
+        total_services_with_metrics = 0
+        total_bookmarks = 0
+        total_reviews = 0
+
+        # Get services owned by the user
+        services = service_repo.get_services_by_provider(user_id)
+        service_ids = [service.id for service in services]
+
+        # Get bookmarks and reviews for user's services
+        bookmarks = self.get_bookmarks_for_services(service_ids)
+        reviews = self.get_reviews_for_services(service_ids)
+
+        # Build mappings
+        bookmark_counts = {}
+        for bookmark in bookmarks:
+            service_id = bookmark['ServiceId']
+            bookmark_counts[service_id] = bookmark_counts.get(service_id, 0) + 1
+
+        review_counts = {}
+        for review in reviews:
+            service_id = review['ServiceId']
+            review_counts[service_id] = review_counts.get(service_id, 0) + 1
+
+        # Process each service
+        for service in services:
+            service_id = service.id
+            rating_value = service.ratings
+
+            # Convert rating to Decimal
+            try:
+                if rating_value is None or rating_value == '':
+                    rating_decimal = Decimal('0')
+                else:
+                    rating_decimal = Decimal(str(rating_value))
+            except decimal.InvalidOperation:
+                logging.error(f"Invalid rating value '{rating_value}' for service ID {service_id}")
+                rating_decimal = Decimal('0')
+
+            num_bookmarks = bookmark_counts.get(service_id, 0)
+            num_reviews = review_counts.get(service_id, 0)
+
+            # Skip services with zero ratings, zero bookmarks, and zero reviews
+            if rating_decimal == 0 and num_bookmarks == 0 and num_reviews == 0:
+                continue
+
+            # Include in totals
+            total_ratings += rating_decimal
+            total_services_with_metrics += 1
+            total_bookmarks += num_bookmarks
+            total_reviews += num_reviews
+
+        # Calculate averages
+        if total_services_with_metrics > 0:
+            average_rating = total_ratings / total_services_with_metrics
+            average_bookmarks = total_bookmarks / total_services_with_metrics
+            average_reviews = total_reviews / total_services_with_metrics
+        else:
+            average_rating = Decimal('0')
+            average_bookmarks = 0
+            average_reviews = 0
+
+        return {
+            'average_rating': float(average_rating),
+            'total_bookmarks': total_bookmarks,
+            'total_reviews': total_reviews,
+            'total_services': total_services_with_metrics,
+        }
+

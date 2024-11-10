@@ -506,3 +506,18 @@ def service_category_distribution(request):
     }
 
     return JsonResponse(data)
+
+@login_required
+def user_analytics(request):
+    if request.user.user_type != "service_provider":
+        return JsonResponse({"error": "Unauthorized"}, status=403)
+
+    user_id = str(request.user.id)
+
+    # Compute user's metrics
+    user_metrics = home_repo.compute_user_metrics(user_id)
+
+    data = {
+        'user_metrics': user_metrics,
+    }
+    return JsonResponse(data)

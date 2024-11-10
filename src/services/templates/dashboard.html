@@ -67,6 +67,13 @@
             <svg width="100%" height="400"></svg>
         </div>
     </div>
+
+    <!-- Comparative Analytics -->
+    <div class="mt-8">
+        <h2 class="text-xl font-semibold mb-4">User Analytics</h2>
+        <canvas id="comparativeChart"></canvas>
+    </div>
+
 </div>
 {% endblock %}
 
@@ -345,6 +352,58 @@ fetch("{% url 'services:response_rate' %}")
                 .text(function(d) { return d.text; });
         }
     });
+
+    // User Analytics
+fetch("{% url 'services:user_analytics' %}")
+.then(response => response.json())
+.then(data => {
+    const labels = ['Average Rating', 'Average Bookmarks per Service', 'Average Reviews per Service'];
+    const userMetrics = [
+        data.user_metrics.average_rating,
+        data.user_metrics.total_bookmarks / data.user_metrics.total_services || 0,
+        data.user_metrics.total_reviews / data.user_metrics.total_services || 0,
+    ];
+
+    const ctx = document.getElementById('comparativeChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Your Services',
+                    data: userMetrics,
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                },
+            ],
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Values',
+                    },
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Metrics',
+                    },
+                },
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+            },
+        },
+    });
+})
+.catch(error => {
+    console.error('Error fetching comparative analytics data:', error);
+});
 });
 </script>
 {% endblock %}
