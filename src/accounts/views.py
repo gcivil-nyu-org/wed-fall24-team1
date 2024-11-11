@@ -1,3 +1,5 @@
+from decimal import Decimal
+import json
 from axes.models import AccessAttempt
 from django.conf import settings
 from django.contrib.auth import login
@@ -43,6 +45,16 @@ def register(request):
     return render(request, "register.html", {"form": form})
 
 
+def convert_decimals(obj):
+    if isinstance(obj, list):
+        return [convert_decimals(item) for item in obj]
+    elif isinstance(obj, dict):
+        return {k: convert_decimals(v) for k, v in obj.items()}
+    elif isinstance(obj, Decimal):
+        return str(obj)
+    else:
+        return obj
+
 @login_required
 def profile_view(request):
     print("In profile view", request.GET)
@@ -79,9 +91,20 @@ def profile_view(request):
             {
                 "Id": item.get("Id"),
                 "Name": item.get("Name", "No Name"),
-                "Category": item.get("Category", "N/A"),
-                "Distance": "N/A",
                 "Address": item.get("Address", "N/A"),
+                "Lat": float(item.get("Lat")) if item.get("Lat") else None,
+                "Log": float(item.get("Log")) if item.get("Log") else None,
+                "Ratings": (
+                    "N/A"
+                    if item.get("Ratings") in [0, "0", None]
+                    else str(item.get("Ratings"))
+                ),
+                "RatingCount": str(item.get("rating_count", 0)),
+                "Category": item.get("Category", "N/A"),
+                "MapLink": item.get("MapLink"),
+                "Distance": "N/A",  # Since distance may not be available
+                "Description": convert_decimals(item.get("Description", {})),
+                "IsBookmarked": True,  # These are bookmarks
             }
             for item in bookmarks
         ]
@@ -116,6 +139,8 @@ def profile_view(request):
                 "bookmarks": processed_bookmarks,
                 "reviews": reviews,
                 "is_service_provider": False,
+                "serialized_bookmarks": json.dumps(processed_bookmarks),
+
             },
         )
 
