@@ -1,13 +1,15 @@
-import logging
 import uuid
 from decimal import Decimal
 from datetime import datetime, timezone
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.http import Http404, JsonResponse, HttpResponseNotAllowed, HttpResponseForbidden, HttpResponseRedirect, HttpResponse
+from django.http import (
+    Http404,
+    JsonResponse,
+    HttpResponseNotAllowed,
+)
 from django.shortcuts import render, redirect
 from home.repositories import HomeRepository
-from django.urls import reverse
 from public_service_finder.utils.enums.service_status import ServiceStatus
 from .forms import ServiceForm, DescriptionFormSet, ReviewResponseForm
 from .models import ServiceDTO
@@ -46,7 +48,7 @@ def service_create(request):
         if form.is_valid() and description_formset.is_valid():
             # Process the main form data
             service_data = form.cleaned_data
-            is_active = service_data.get('is_active', True)
+            is_active = service_data.get("is_active", True)
 
             # Process the description formset
             description_data = {}
@@ -216,7 +218,6 @@ def service_details(request, service_id):
     return JsonResponse(data)
 
 
-@login_required
 def service_delete(request, service_id):
     try:
         _ = uuid.UUID(service_id)
@@ -231,7 +232,10 @@ def service_delete(request, service_id):
         raise PermissionDenied
 
     if request.method == "POST":
-        return redirect("services:list")
+        if service_repo.delete_service(service_id):
+            return redirect("services:list")
+        else:
+            return HttpResponse("Failed to delete service.", status=500)
 
     # If it's not a POST request, return a 405 Method Not Allowed
     return HttpResponseNotAllowed(["POST"])

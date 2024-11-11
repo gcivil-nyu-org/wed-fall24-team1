@@ -18,7 +18,9 @@ class ServiceForm(forms.Form):
     name = forms.CharField(max_length=255)
     address = forms.CharField(widget=forms.Textarea)
     category = forms.ChoiceField(choices=CATEGORY_CHOICES)
-    is_active = forms.BooleanField(required=False, initial=True, label='Is the service currently available?')
+    is_active = forms.BooleanField(
+        required=False, initial=True, label="Is the service currently available?"
+    )
 
     def clean(self):
         cleaned_data = super().clean()
