@@ -57,6 +57,7 @@ def convert_decimals(obj):
     else:
         return obj
 
+
 @login_required
 def profile_view(request):
     print("In profile view", request.GET)
@@ -142,7 +143,6 @@ def profile_view(request):
                 "reviews": reviews,
                 "is_service_provider": False,
                 "serialized_bookmarks": json.dumps(processed_bookmarks),
-
             },
         )
 
