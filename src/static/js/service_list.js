@@ -1,3 +1,5 @@
+// service_list.js
+
 document.addEventListener('DOMContentLoaded', function() {
     const servicesGrid = document.getElementById('servicesGrid');
     const serviceModal = document.getElementById('serviceModal');
@@ -25,6 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('modalDetails').innerHTML = `
                     <p><strong>Category:</strong> ${data.category}</p>
                     <p><strong>Address:</strong> ${data.address}</p>
+                    ${data.is_active ? '' : '<p class="text-red-500">This service is currently unavailable.</p>'}
                     <div class="mt-4">
                         <h4 class="font-semibold">Description:</h4>
                         <dl class="mt-2 space-y-1">
@@ -48,10 +51,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         let respondedAtDate = "Responded just now";
                         if (review.RespondedAt) {
                             const date = new Date(review.RespondedAt);
-                            const day = String(date.getDate()).padStart(2, '0'); // Ensure 2-digit day
-                            const month = date.toLocaleString('default', { month: 'long' }); // Full month name
+                            const day = String(date.getDate()).padStart(2, '0');
+                            const month = date.toLocaleString('default', { month: 'long' });
                             const year = date.getFullYear();
-                            respondedAtDate = `${day} ${month} ${year}`; // Format as 'dd Month yyyy'
+                            respondedAtDate = `${day} ${month} ${year}`;
                         }
 
                         reviewsContainer.innerHTML += `
@@ -59,14 +62,12 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <p><strong>${review.Username}</strong> - ${review.RatingStars} stars</p>
                                 <p class="text-sm text-gray-600">${review.RatingMessage}</p>
                                 ${hasResponseText ? `
-                                    <!-- Show the provider response with timestamp if it exists -->
                                     <div class="mt-3 p-3 bg-blue-50 rounded" id="reviewResponse-${review.ReviewId}">
                                         <p class="font-semibold">Provider Response:</p>
                                         <p>${review.ResponseText}</p>
                                         <p class="text-sm text-gray-600">Responded at: ${respondedAtDate}</p>
                                     </div>
                                 ` : `
-                                    <!-- Show the Respond button and form if there is no response -->
                                     <button class="respond-button bg-blue-500 text-white py-1 px-3 rounded mt-2" 
                                             onclick="showResponseForm('${serviceId}', '${review.ReviewId}')">
                                         Respond
@@ -85,8 +86,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else {
                     reviewsContainer.innerHTML += '<p>No reviews yet.</p>';
                 }
-
-
 
                 serviceModal.classList.remove('hidden');
                 setTimeout(() => {
@@ -118,10 +117,10 @@ function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
         const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(cookie.slice(name.length + 1));
                 break;
             }
         }
@@ -162,9 +161,7 @@ function sendResponse(serviceId, reviewId) {
         },
         body: new URLSearchParams({ responseText: responseText }),
     })
-    .then(response => {
-        return response.json();
-    })
+    .then(response => response.json())
     .then(data => {
         if (data.status === "success") {
             // Update the response container
@@ -178,7 +175,7 @@ function sendResponse(serviceId, reviewId) {
 
             const form = document.getElementById(`responseForm-${reviewId}`);
             if (form) {
-                form.remove(); // or form.classList.add('hidden');
+                form.remove();
             }
         } else {
             alert(`Failed to send response: ${data.message}`);

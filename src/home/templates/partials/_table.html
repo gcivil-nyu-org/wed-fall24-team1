@@ -63,18 +63,26 @@
     <div class="flex justify-between items-start mb-4">
         <h2 id="serviceId" class="text-lg font-semibold" style="display: none;">Id</h2>
         <h2 id="serviceName" class="text-lg font-semibold">Service Name</h2>
-        {% if user.is_authenticated %}
-        <label class="bookmark-label">
-            <input type="checkbox" id="bookmarkCheckbox">
-            <i class="bookmark-icon fas fa-bookmark"></i>
-        </label>
-        {% endif %}
+
+        <!-- Availability and Bookmark Icon -->
+        <div class="flex items-center space-x-3">
+            <span id="serviceAvailability" class="font-semibold hidden">Currently Unavailable</span>
+
+            {% if user.is_authenticated %}
+            <label class="bookmark-label">
+                <input type="checkbox" id="bookmarkCheckbox">
+                <i class="bookmark-icon fas fa-bookmark"></i>
+            </label>
+            {% endif %}
+        </div>
+
         <button id="closeDetails" class="text-gray-500 hover:text-gray-700">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
         </button>
     </div>
+
 
     <div class="space-y-1 mb-4">
         <p class="text-sm"><strong>Address:</strong> <span id="serviceAddress">123 Main St</span></p>
@@ -222,6 +230,21 @@
             document.getElementById('serviceType').textContent = service.Category || 'Unknown';
             document.getElementById('serviceRating').textContent = service.Ratings && service.Ratings !== 0 ? parseFloat(service.Ratings).toFixed(2) : 'N/A';
             document.getElementById('serviceDistance').textContent = service.Distance ? parseFloat(service.Distance).toFixed(2) + ' miles' : 'N/A';
+
+            console.log(service)
+
+            const serviceAvailability = document.getElementById('serviceAvailability');
+            if (service.IsActive === false) {
+                serviceAvailability.textContent = 'Currently Unavailable';
+                serviceAvailability.classList.remove('text-green-500');
+                serviceAvailability.classList.add('text-red-500');
+            } else {
+                serviceAvailability.textContent = 'Available';
+                serviceAvailability.classList.remove('text-red-500');
+                serviceAvailability.classList.add('text-green-500');
+            }
+            serviceAvailability.classList.remove('hidden');
+
 
             const bookmarkCheckbox = document.getElementById('bookmarkCheckbox');
 
