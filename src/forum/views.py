@@ -84,7 +84,7 @@ def post_detail(request, post_id):
                     sender=comment.author,
                     post=post,
                     comment=comment,
-                    message=f"{comment.author.username} commented on your post: {post.title}"
+                    message=f"{comment.author.username} commented on your post: {post.title}",
                 )
 
             return redirect("forum:post_detail", post_id=post.id)
@@ -189,41 +189,50 @@ def create_post(request, category_id):
 
     return render(request, "create_post.html", {"form": form, "category": category})
 
+
 @login_required
 def mark_notification_read(request, notification_id):
-    notification = get_object_or_404(Notification, id=notification_id, recipient=request.user)
+    notification = get_object_or_404(
+        Notification, id=notification_id, recipient=request.user
+    )
     notification.is_read = True
     notification.save()
 
     # If it's an AJAX request, return JSON response
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return JsonResponse({'status': 'success'})
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return JsonResponse({"status": "success"})
 
     # Otherwise, redirect back to the previous page
-    return redirect(request.META.get('HTTP_REFERER', '/'))
+    return redirect(request.META.get("HTTP_REFERER", "/"))
+
 
 @login_required
 def get_notifications_count(request):
     count = Notification.objects.filter(recipient=request.user, is_read=False).count()
-    return JsonResponse({'count': count})
+    return JsonResponse({"count": count})
+
 
 @login_required
 def mark_all_notifications_read(request):
     if request.method == "POST":
-        Notification.objects.filter(recipient=request.user, is_read=False).update(is_read=True)
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({'status': 'success'})
-        return redirect(request.META.get('HTTP_REFERER', '/'))
+        Notification.objects.filter(recipient=request.user, is_read=False).update(
+            is_read=True
+        )
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return JsonResponse({"status": "success"})
+        return redirect(request.META.get("HTTP_REFERER", "/"))
     return HttpResponseForbidden("Invalid request method.")
 
 
 @login_required
 def delete_notification(request, notification_id):
     if request.method == "POST":
-        notification = get_object_or_404(Notification, id=notification_id, recipient=request.user)
+        notification = get_object_or_404(
+            Notification, id=notification_id, recipient=request.user
+        )
         notification.delete()
 
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({'status': 'success'})
-        return redirect(request.META.get('HTTP_REFERER', '/'))
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return JsonResponse({"status": "success"})
+        return redirect(request.META.get("HTTP_REFERER", "/"))
     return HttpResponseForbidden("Invalid request method.")

@@ -262,7 +262,9 @@ def respond_to_review(request, service_id, review_id):
             # Attempt to update the review response in DynamoDB
             success = review_repo.respond_to_review(review_id, response_text)
             if success:
-                reviewer_id = review.user_id  # Assuming this is how you store the reviewer's ID
+                reviewer_id = (
+                    review.user_id
+                )  # Assuming this is how you store the reviewer's ID
                 try:
                     reviewer = CustomUser.objects.get(id=reviewer_id)
                     # In services/views.py, in the respond_to_review view:
@@ -272,7 +274,7 @@ def respond_to_review(request, service_id, review_id):
                         post=None,
                         comment=None,
                         message=f"Service provider responded to your review of {service.name}",
-                        notification_type='review_response'  # Add this line
+                        notification_type="review_response",  # Add this line
                     )
                 except CustomUser.DoesNotExist:
                     pass  # Handle the case where the user doesn't exist

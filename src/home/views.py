@@ -30,7 +30,6 @@ def convert_decimals(obj):
         return obj
 
 
-
 @require_POST
 def submit_review(request):
     try:
@@ -76,7 +75,7 @@ def submit_review(request):
                     post=None,
                     comment=None,
                     message=f"{user.username} left a {rating}-star review on your service: {service.name}",
-                    notification_type='review'
+                    notification_type="review",
                 )
 
                 return JsonResponse(
@@ -93,14 +92,18 @@ def submit_review(request):
                 )
             except CustomUser.DoesNotExist:
                 # Handle case where provider user doesn't exist
-                return JsonResponse({"error": "Service provider not found."}, status=404)
+                return JsonResponse(
+                    {"error": "Service provider not found."}, status=404
+                )
         else:
             return JsonResponse({"error": "Service not found."}, status=404)
 
     except (Inexact, Rounded) as decimal_error:
         print(f"Decimal error in submit_review: {decimal_error}")
         return JsonResponse(
-            {"error": "A decimal precision error occurred while submitting the review."},
+            {
+                "error": "A decimal precision error occurred while submitting the review."
+            },
             status=500,
         )
 
