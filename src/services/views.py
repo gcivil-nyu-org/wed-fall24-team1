@@ -6,6 +6,8 @@ from django.core.exceptions import PermissionDenied
 from django.http import Http404, JsonResponse, HttpResponseNotAllowed
 from django.shortcuts import render, redirect
 from django.utils import timezone  # Ensure this is imported
+
+from forum.models import Notification
 from home.repositories import HomeRepository
 from public_service_finder.utils.enums.service_status import ServiceStatus
 from .forms import ServiceForm, DescriptionFormSet, ReviewResponseForm
@@ -13,6 +15,7 @@ from .models import ServiceDTO
 from .repositories import ServiceRepository, ReviewRepository
 from collections import Counter
 import re
+from accounts.models import CustomUser
 
 service_repo = ServiceRepository()
 review_repo = ReviewRepository()
@@ -259,6 +262,21 @@ def respond_to_review(request, service_id, review_id):
             # Attempt to update the review response in DynamoDB
             success = review_repo.respond_to_review(review_id, response_text)
             if success:
+                reviewer_id = review.user_id  # Assuming this is how you store the reviewer's ID
+                try:
+                    reviewer = CustomUser.objects.get(id=reviewer_id)
+                    # In services/views.py, in the respond_to_review view:
+                    Notification.objects.create(
+                        recipient=reviewer,
+                        sender=request.user,
+                        post=None,
+                        comment=None,
+                        message=f"Service provider responded to your review of {service.name}",
+                        notification_type='review_response'  # Add this line
+                    )
+                except CustomUser.DoesNotExist:
+                    pass  # Handle the case where the user doesn't exist
+
                 return JsonResponse(
                     {"status": "success", "message": "Response saved"}, status=200
                 )

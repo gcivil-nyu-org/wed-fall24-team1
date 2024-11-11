@@ -1,7 +1,7 @@
 # Register your models here.
 
 from django.contrib import admin
-from .models import Category, Post, Comment
+from .models import Category, Post, Comment, Notification
 
 
 @admin.register(Category)
@@ -22,3 +22,10 @@ class CommentAdmin(admin.ModelAdmin):
     list_display = ("author", "post", "created_at")
     list_filter = ("created_at",)
     search_fields = ("content", "author__username", "post__title")
+
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ('recipient', 'sender', 'post', 'is_read', 'created_at')
+    list_filter = ('is_read', 'created_at')
+    search_fields = ('recipient__username', 'sender__username', 'post__title', 'message')
+

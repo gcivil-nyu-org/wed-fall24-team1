@@ -4,72 +4,141 @@
         <!-- Logo Section -->
         <div class="flex items-center space-x-3">
             {% if user.is_authenticated and user.user_type == 'service_provider' %}
-            <a href="{% url 'services:list' %}" class="flex items-center space-x-3">
-                <img src="{% static 'images/logo-psf.png' %}" alt="Logo" class="h-10 w-10 rounded-full border border-gray-300 shadow-sm">
-                <span class="text-2xl font-extrabold tracking-wide text-blue-700">Public Service Finder</span>
-            </a>
-            <a href="{% url 'services:dashboard' %}" class="hidden md:flex items-center space-x-2 text-gray-600 hover:text-blue-700 font-medium p-2 rounded-md hover:bg-gray-100">
-                <i class="fas fa-chart-line"></i>
-                <span>Dashboard</span>
-            </a>
+                <a href="{% url 'services:list' %}" class="flex items-center space-x-3">
+                    <img src="{% static 'images/logo-psf.png' %}" alt="Logo"
+                         class="h-10 w-10 rounded-full border border-gray-300 shadow-sm">
+                    <span class="text-2xl font-extrabold tracking-wide text-blue-700">Public Service Finder</span>
+                </a>
             {% else %}
-            <a href="{% url 'home' %}" class="flex items-center space-x-3">
-                <img src="{% static 'images/logo-psf.png' %}" alt="Logo" class="h-10 w-10 rounded-full border border-gray-300 shadow-sm">
-                <span class="text-2xl font-extrabold tracking-wide text-blue-700">Public Service Finder</span>
-            </a>
+                <a href="{% url 'home' %}" class="flex items-center space-x-3">
+                    <img src="{% static 'images/logo-psf.png' %}" alt="Logo"
+                         class="h-10 w-10 rounded-full border border-gray-300 shadow-sm">
+                    <span class="text-2xl font-extrabold tracking-wide text-blue-700">Public Service Finder</span>
+                </a>
             {% endif %}
         </div>
 
         <!-- Navigation Items -->
         <div class="flex items-center justify-end space-x-6">
             {% if user.is_authenticated and user.user_type == 'service_provider' %}
-            <a href="{% url 'services:list' %}" class="hidden md:flex items-center space-x-2 text-gray-600 hover:text-blue-700 font-medium p-2 rounded-md hover:bg-gray-100">
-                <i class="fas fa-home"></i>
-                <span>Home</span>
-            </a>
+                <a href="{% url 'services:list' %}"
+                   class="hidden md:flex items-center space-x-2 text-gray-600 hover:text-blue-700 font-medium p-2 rounded-md hover:bg-gray-100">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </a>
             {% else %}
-            <a href="{% url 'home' %}" class="hidden md:flex items-center space-x-2 text-gray-600 hover:text-blue-700 font-medium p-2 rounded-md hover:bg-gray-100">
-                <i class="fas fa-home"></i>
-                <span>Home</span>
-            </a>
+                <a href="{% url 'home' %}"
+                   class="hidden md:flex items-center space-x-2 text-gray-600 hover:text-blue-700 font-medium p-2 rounded-md hover:bg-gray-100">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </a>
             {% endif %}
-            <a href="{% url 'forum:category_list' %}" class="hidden md:flex items-center space-x-2 text-gray-600 hover:text-blue-700 font-medium p-2 rounded-md hover:bg-gray-100">
+            <a href="{% url 'forum:category_list' %}"
+               class="hidden md:flex items-center space-x-2 text-gray-600 hover:text-blue-700 font-medium p-2 rounded-md hover:bg-gray-100">
                 <i class="fas fa-comments"></i>
                 <span>Forum</span>
             </a>
 
             {% if user.is_superuser %}
-            <a href="{% url 'admin_only_view_new_listings' %}" class="hidden md:flex items-center space-x-2 text-gray-600 hover:text-blue-700 font-medium p-2 rounded-md hover:bg-gray-100">
-                <i class="fas fa-list"></i>
-                <span>New Service Listings</span>
-            </a>
+                <a href="{% url 'admin_only_view_new_listings' %}"
+                   class="hidden md:flex items-center space-x-2 text-gray-600 hover:text-blue-700 font-medium p-2 rounded-md hover:bg-gray-100">
+                    <i class="fas fa-list"></i>
+                    <span>New Service Listings</span>
+                </a>
+            {% endif %}
+            {% if user.is_authenticated %}
+                <div class="relative">
+                    <button id="notificationsButton"
+                            class="flex items-center space-x-2 focus:outline-none hover:bg-gray-100 p-2 rounded-md">
+                        <div class="relative">
+                            <i class="fas fa-bell text-gray-600"></i>
+                            <span id="notificationCount"
+                                  class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                                {{ unread_notifications_count }}
+                            </span>
+                        </div>
+                    </button>
+
+                    <!-- Notifications Dropdown -->
+                    <div id="notificationsDropdown"
+                         class="absolute right-0 mt-2 w-80 bg-white border border-gray-200 shadow-md rounded-md text-gray-700 z-50 hidden">
+                        {% if notifications %}
+                            <div class="border-b p-2 flex justify-end bg-gray-50">
+                                <form method="post" action="{% url 'forum:mark_all_notifications_read' %}"
+                                      class="mark-all-read-form">
+                                    {% csrf_token %}
+                                    <button type="submit"
+                                            class="notification-action-btn text-xs text-gray-600 hover:text-blue-700 font-medium transition-colors duration-200">
+                                        Mark All as Read
+                                    </button>
+                                </form>
+                            </div>
+                        {% endif %}
+                        <div class="max-h-96 overflow-y-auto">
+                            {% for notification in notifications %}
+                                <div class="p-4 border-b hover:bg-gray-50 {% if not notification.is_read %}bg-blue-50{% endif %}">
+                                    <div class="flex justify-between items-start">
+                                        <p class="text-sm flex-grow">{{ notification.message }}</p>
+                                        <div class="flex items-center space-x-2">
+                                            <form method="post"
+                                                  action="{% url 'forum:mark_notification_read' notification.id %}">
+                                                {% csrf_token %}
+                                                <button type="submit"
+                                                        class="notification-action-btn text-xs text-gray-400 hover:text-blue-600 transition-colors duration-200">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            </form>
+                                            <form method="post"
+                                                  action="{% url 'forum:delete_notification' notification.id %}"
+                                                  class="delete-notification-form">
+                                                {% csrf_token %}
+                                                <button type="submit"
+                                                        class="notification-action-btn text-xs text-gray-400 hover:text-red-600 transition-colors duration-200">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">{{ notification.created_at|timesince }}
+                                        ago</p>
+                                </div>
+                                {% empty %}
+                                <div class="p-4 text-center text-gray-500">
+                                    No notifications
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
             {% endif %}
 
             <!-- Profile Section -->
             <div class="relative">
-                <button id="profileButton" class="flex items-center space-x-2 focus:outline-none hover:bg-gray-100 p-2 rounded-md">
-                    <img src="{% static 'images/profile-placeholder.jpg' %}" alt="Profile" class="h-10 w-10 rounded-full border border-gray-300 shadow-sm">
+                <button id="profileButton"
+                        class="flex items-center space-x-2 focus:outline-none hover:bg-gray-100 p-2 rounded-md">
+                    <img src="{% static 'images/profile-placeholder.jpg' %}" alt="Profile"
+                         class="h-10 w-10 rounded-full border border-gray-300 shadow-sm">
                     <span class="text-gray-600">Profile</span>
                     <i class="fas fa-caret-down text-gray-500"></i>
                 </button>
 
-            <!-- Dropdown Menu -->
-            <div id="profileDropdown" class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 shadow-md rounded-md text-gray-700 z-20 hidden">
-                <a href="/accounts/profile" class="block px-4 py-2 hover:bg-gray-100 flex items-center space-x-2">
-                    <i class="fas fa-user-circle text-blue-500"></i>
-                    <span>View Profile</span>
-                </a>
-                <form method="post" action="{% url 'logout' %}">
-                    {% csrf_token %}
-                    <button type="submit" class="block w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2">
-                        <i class="fas fa-sign-out-alt text-red-500"></i>
-                        <span>Logout</span>
-                    </button>
-                </form>
+                <!-- Dropdown Menu -->
+                <div id="profileDropdown"
+                     class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 shadow-md rounded-md text-gray-700 z-20 hidden">
+                    <a href="/accounts/profile" class="block px-4 py-2 hover:bg-gray-100 flex items-center space-x-2">
+                        <i class="fas fa-user-circle text-blue-500"></i>
+                        <span>View Profile</span>
+                    </a>
+                    <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button type="submit"
+                                class="block w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-2">
+                            <i class="fas fa-sign-out-alt text-red-500"></i>
+                            <span>Logout</span>
+                        </button>
+                    </form>
+                </div>
             </div>
-
-        </div>
-    </div>
 </nav>
 
 <!-- Mobile Navigation -->
@@ -77,17 +146,20 @@
     <div class="container mx-auto py-2 px-4">
         <div class="flex justify-center space-x-4">
             {% if user.is_authenticated and user.user_type == 'service_provider' %}
-            <a href="{% url 'services:list' %}" class="flex items-center space-x-2 text-gray-600 hover:text-blue-700 font-medium">
-                <i class="fas fa-home"></i>
-                <span>Home</span>
-            </a>
+                <a href="{% url 'services:list' %}"
+                   class="flex items-center space-x-2 text-gray-600 hover:text-blue-700 font-medium">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </a>
             {% else %}
-            <a href="{% url 'home' %}" class="flex items-center space-x-2 text-gray-600 hover:text-blue-700 font-medium">
-                <i class="fas fa-home"></i>
-                <span>Home</span>
-            </a>
+                <a href="{% url 'home' %}"
+                   class="flex items-center space-x-2 text-gray-600 hover:text-blue-700 font-medium">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </a>
             {% endif %}
-            <a href="{% url 'forum:category_list' %}" class="flex items-center space-x-2 text-gray-600 hover:text-blue-700 font-medium">
+            <a href="{% url 'forum:category_list' %}"
+               class="flex items-center space-x-2 text-gray-600 hover:text-blue-700 font-medium">
                 <i class="fas fa-comments"></i>
                 <span>Forum</span>
             </a>
