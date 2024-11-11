@@ -21,6 +21,7 @@
     {% block head %}{% endblock %}
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col justify-between">
+    {% load static %}
     <!-- Navbar (included as a partial) -->
     {% include 'partials/_navbar.html' %}
 
@@ -33,12 +34,27 @@
     {% include 'partials/_footer.html' %}
 
     <!-- JavaScript files -->
+    <script src="{% static 'js/nav.js' %}"></script>
 
     <!-- Include Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 
     <!-- Include Moment.js library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+
+    {% comment %} URL/APP specific JS files{% endcomment %}
+
+    {% if request.path == "/home/" %}
+
+        <script>
+
+            window.itemsData = {{ serialized_items|safe }};
+
+        </script>
+
+        <script src="{% static 'apps/home/js/map.js' %}"></script>
+
+    {% endif %}
 
     <!-- Include Chart.js library (UMD build) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
