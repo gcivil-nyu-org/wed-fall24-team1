@@ -120,6 +120,7 @@
         </div>
         <div class="mt-3">
             <h2 id="serviceName" class="text-xl font-semibold text-gray-900 mb-4">Service Name</h2>
+            <div id="serviceMap" class="w-full h-64 rounded-lg overflow-hidden mb-6"></div>
             <div class="space-y-1 mb-4">
                 <p class="text-sm"><strong>Address:</strong> <span id="serviceAddress">123 Main St</span></p>
                 <p class="text-sm"><strong>Type:</strong> <span id="serviceType">Homeless</span></p>
@@ -266,6 +267,9 @@
             }
         }
 
+        let map = null;
+        let marker = null;
+
         function showServiceDetails(serviceId) {
             const service = itemsData.find(item => item.Id === serviceId);
             if (!service) {
@@ -286,6 +290,18 @@
             } else {
                 getDirectionsBtn.href = '#';
                 getDirectionsBtn.style.display = 'none';
+            }
+
+            // Initialize or update map
+            if (!map) {
+                map = L.map('serviceMap').setView([service.Lat, service.Log], 15);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(map);
+                marker = L.marker([service.Lat, service.Log]).addTo(map);
+            } else {
+                map.setView([service.Lat, service.Log], 15);
+                marker.setLatLng([service.Lat, service.Log]);
             }
 
             const descriptionElement = document.getElementById('serviceDescription');
@@ -319,14 +335,19 @@
                 descriptionElement.textContent = 'No description available.';
             }
 
-            // Fetch and display reviews
-            fetchAndDisplayReviews(service.Id, 1);
-
+            // Show the modal
             const serviceDetailsDiv = document.getElementById('serviceDetails');
             if (serviceDetailsDiv) {
                 serviceDetailsDiv.classList.remove('hidden');
                 serviceDetailsDiv.classList.add('block');
+                // Invalidate map size after modal is shown
+                setTimeout(() => {
+                    map.invalidateSize();
+                }, 100);
             }
+
+            // Fetch and display reviews
+            fetchAndDisplayReviews(service.Id, 1);
         }
 
         // Expose the function globally
