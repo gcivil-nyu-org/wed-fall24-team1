@@ -213,6 +213,29 @@
                     meta.textContent = `By ${review.Username} on ${timestamp}`;
                     reviewDiv.appendChild(meta);
 
+                    if (review.ResponseText) {
+                        const responseDiv = document.createElement('div');
+                        responseDiv.classList.add('mt-3', 'p-3', 'bg-blue-50', 'rounded');
+
+                        const responseHeader = document.createElement('p');
+                        responseHeader.classList.add('font-semibold', 'text-sm', 'text-blue-600');
+                        responseHeader.textContent = "Provider Response:";
+                        responseDiv.appendChild(responseHeader);
+
+                        const responseText = document.createElement('p');
+                        responseText.classList.add('text-sm');
+                        responseText.textContent = review.ResponseText;
+                        responseDiv.appendChild(responseText);
+
+                        const respondedAt = formatTimestamp(review.RespondedAt);
+                        const responseMeta = document.createElement('p');
+                        responseMeta.classList.add('text-xs', 'text-gray-500');
+                        responseMeta.textContent = `Responded on ${respondedAt}`;
+                        responseDiv.appendChild(responseMeta);
+
+                        reviewDiv.appendChild(responseDiv);
+                    }
+
                     reviewsContainer.appendChild(reviewDiv);
                 });
 
