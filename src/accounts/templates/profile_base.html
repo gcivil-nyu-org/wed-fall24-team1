@@ -44,10 +44,25 @@
             {% if bookmarks %}
                 <div class="grid gap-4">
                     {% for service in bookmarks %}
-                        <div class="bg-gray-50 rounded-lg p-4 cursor-pointer" onclick="showServiceDetails('{{ service.Id }}')">
-                            <p class="font-semibold text-gray-800">{{ service.Name }}</p>
-                            <p class="text-gray-600">{{ service.Address }}</p>
-                            <p class="text-gray-600">{{ service.Category }}</p>
+                        <div class="bg-gray-50 rounded-lg p-4 flex justify-between items-center">
+                            <div class="flex-grow">
+                                <p class="font-semibold text-gray-800 hover:text-blue-600 cursor-pointer"
+                                   onclick="showServiceDetails('{{ service.Id }}')"
+                                   style="text-decoration: underline;">
+                                    {{ service.Name }}
+                                </p>
+                                <p class="text-gray-600">{{ service.Address }}</p>
+                                <p class="text-gray-600">{{ service.Category }}</p>
+                            </div>
+                            <div class="flex items-center ml-4">
+                                <label class="bookmark-label">
+                                    <input type="checkbox"
+                                           class="bookmark-checkbox hidden"
+                                           checked
+                                           data-service-id="{{ service.Id }}">
+                                    <i class="bookmark-icon fas fa-bookmark text-2xl cursor-pointer text-blue-500 hover:text-blue-700 transition-colors duration-300"></i>
+                                </label>
+                            </div>
                         </div>
                     {% endfor %}
                 </div>
@@ -402,6 +417,59 @@
                 console.error('Error submitting review:', error);
                 alert("An error occurred. Please try again.");
             }
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Add event listeners for bookmark checkboxes
+        const bookmarkCheckboxes = document.querySelectorAll('.bookmark-checkbox');
+        bookmarkCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', async function() {
+                const serviceId = this.dataset.serviceId;
+                const action = this.checked ? 'add' : 'remove';
+
+                try {
+                    const response = await fetch('/home/toggle_bookmark/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCsrfToken(),
+                        },
+                        body: JSON.stringify({
+                            'service_id': serviceId,
+                            'action': action,
+                        }),
+                    });
+
+                    const data = await response.json();
+                    if (!data.success) {
+                        // Revert the checkbox state if the request failed
+                        this.checked = !this.checked;
+                        alert(data.error || 'Failed to toggle bookmark.');
+                    } else {
+                        // If removing bookmark, remove the service card from the UI
+                        if (action === 'remove') {
+                            const serviceCard = this.closest('.bg-gray-50');
+                            serviceCard.remove();
+
+                            // Check if there are any remaining bookmarks
+                            const remainingBookmarks = document.querySelectorAll('.bookmark-checkbox');
+                            if (remainingBookmarks.length === 0) {
+                                const bookmarksContainer = document.querySelector('.grid.gap-4');
+                                const noBookmarksMessage = document.createElement('p');
+                                noBookmarksMessage.className = 'text-gray-500';
+                                noBookmarksMessage.textContent = 'No bookmarks yet.';
+                                bookmarksContainer.innerHTML = '';
+                                bookmarksContainer.appendChild(noBookmarksMessage);
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error toggling bookmark:', error);
+                    this.checked = !this.checked;
+                    alert('An error occurred. Please try again.');
+                }
+            });
         });
     });
 
