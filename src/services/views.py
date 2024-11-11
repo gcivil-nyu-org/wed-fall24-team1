@@ -6,6 +6,7 @@ from django.core.exceptions import PermissionDenied
 from django.http import (
     Http404,
     JsonResponse,
+    HttpResponse,
     HttpResponseNotAllowed,
 )
 from django.shortcuts import render, redirect
