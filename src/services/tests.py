@@ -52,6 +52,7 @@ class ServiceViewsTestCase(TestCase):
                     service_created_timestamp="2022-01-01T12:00:00Z",
                     service_status=ServiceStatus.APPROVED.value,
                     service_approved_timestamp="2022-01-01T12:00:00Z",
+                    is_active=False,
                 ),
                 ServiceDTO(
                     id=str(uuid.uuid4()),
@@ -66,6 +67,7 @@ class ServiceViewsTestCase(TestCase):
                     service_created_timestamp="2022-01-01T12:00:00Z",
                     service_status=ServiceStatus.APPROVED.value,
                     service_approved_timestamp="2022-01-01T12:00:00Z",
+                    is_active=False,
                 ),
             ]
             response = self.client.get(reverse("services:list"))
@@ -125,6 +127,7 @@ class ServiceViewsTestCase(TestCase):
                 service_created_timestamp="2022-01-01T12:00:00Z",
                 service_status=ServiceStatus.APPROVED.value,
                 service_approved_timestamp="2022-01-01T12:00:00Z",
+                is_active=True,
             )
             response = self.client.get(reverse("services:edit", args=[service_id]))
             self.assertEqual(response.status_code, 200)
@@ -147,6 +150,7 @@ class ServiceViewsTestCase(TestCase):
                 service_created_timestamp="2022-01-01T12:00:00Z",
                 service_status=ServiceStatus.APPROVED.value,
                 service_approved_timestamp="2022-01-01T12:00:00Z",
+                is_active=False,
             )
             response = self.client.post(reverse("services:delete", args=[service_id]))
             self.assertEqual(response.status_code, 302)
@@ -170,6 +174,7 @@ class ServiceViewsTestCase(TestCase):
                 service_created_timestamp="2022-01-01T12:00:00Z",
                 service_status=ServiceStatus.APPROVED.value,
                 service_approved_timestamp="2022-01-01T12:00:00Z",
+                is_active=False,
             )
             mock_delete.return_value = True
             response = self.client.post(reverse("services:delete", args=[service_id]))
@@ -208,6 +213,7 @@ class ReviewListViewTest(TestCase):
             service_status="Active",
             service_created_timestamp="2021-01-01T00:00:00Z",
             service_approved_timestamp="2021-01-01T00:00:00Z",
+            is_active=True,
         )
         self.review = ReviewDTO(
             review_id="review-id-123",
@@ -277,6 +283,7 @@ class RespondToReviewViewTest(TestCase):
             service_status="Active",
             service_created_timestamp="2021-01-01T00:00:00Z",
             service_approved_timestamp="2021-01-01T00:00:00Z",
+            is_active=True,
         )
         self.review = ReviewDTO(
             review_id=self.review_id,
@@ -467,6 +474,7 @@ class ServiceRepositoryTestCase(TestCase):
             service_created_timestamp="2022-01-01T12:00:00Z",
             service_status=ServiceStatus.APPROVED.value,
             service_approved_timestamp="2022-01-01T12:00:00Z",
+            is_active=True,
         )
 
     @patch("services.repositories.ServiceRepository.get_services_by_provider")
@@ -570,6 +578,7 @@ class ServiceViewsAdditionalTests(TestCase):
             service_created_timestamp="2022-01-01T12:00:00Z",
             service_status=ServiceStatus.APPROVED.value,
             service_approved_timestamp="2022-01-01T12:00:00Z",
+            is_active=False,
         )
 
     def test_service_list_view_permission_denied_regular_user(self):
@@ -608,6 +617,7 @@ class ServiceViewsAdditionalTests(TestCase):
                 service_created_timestamp="2022-01-01T12:00:00Z",
                 service_status=ServiceStatus.APPROVED.value,
                 service_approved_timestamp="2022-01-01T12:00:00Z",
+                is_active=True,
             )
             response = self.client.get(
                 reverse("services:edit", args=[another_service_id])
@@ -632,6 +642,7 @@ class ServiceViewsAdditionalTests(TestCase):
                 service_created_timestamp="2022-01-01T12:00:00Z",
                 service_status=ServiceStatus.APPROVED.value,
                 service_approved_timestamp="2022-01-01T12:00:00Z",
+                is_active=True,
             )
             response = self.client.post(
                 reverse("services:delete", args=[another_service_id])
@@ -669,6 +680,7 @@ class ServiceViewsAdditionalTests(TestCase):
                 service_created_timestamp="2022-01-01T12:00:00Z",
                 service_status=ServiceStatus.APPROVED.value,
                 service_approved_timestamp="2022-01-01T12:00:00Z",
+                is_active=True,
             )
             mock_get_review.return_value = MagicMock(service_id=another_service_id)
 
