@@ -1,5 +1,7 @@
 from decimal import Decimal
 import json
+from urllib.parse import quote
+
 from axes.models import AccessAttempt
 from django.conf import settings
 from django.contrib.auth import login
@@ -101,7 +103,7 @@ def profile_view(request):
                 ),
                 "RatingCount": str(item.get("rating_count", 0)),
                 "Category": item.get("Category", "N/A"),
-                "MapLink": item.get("MapLink"),
+                "MapLink": f"https://www.google.com/maps/dir/?api=1&destination={quote(item.get('Address'))}",
                 "Distance": "N/A",  # Since distance may not be available
                 "Description": convert_decimals(item.get("Description", {})),
                 "IsBookmarked": True,  # These are bookmarks

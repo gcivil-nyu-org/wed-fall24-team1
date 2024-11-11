@@ -125,7 +125,7 @@
                 <p class="text-sm"><strong>Address:</strong> <span id="serviceAddress">123 Main St</span></p>
                 <p class="text-sm"><strong>Type:</strong> <span id="serviceType">Homeless</span></p>
                 <p class="text-sm"><strong>Rating:</strong> <span id="serviceRating">4.5</span></p>
-                <p class="text-sm"><strong>Distance:</strong> <span id="serviceDistance">1.2 miles</span></p>
+<!--                <p class="text-sm"><strong>Distance:</strong> <span id="serviceDistance">1.2 miles</span></p>-->
                 <a id="getDirections" href="#" target="_blank" rel="noopener noreferrer"
                    class="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-2">Get Directions</a>
                 <div class="space-y-1 mb-4">
@@ -281,7 +281,6 @@
             document.getElementById('serviceAddress').textContent = service.Address || 'N/A';
             document.getElementById('serviceType').textContent = service.Category || 'Unknown';
             document.getElementById('serviceRating').textContent = service.Ratings && service.Ratings !== 0 ? parseFloat(service.Ratings).toFixed(2) : 'N/A';
-            document.getElementById('serviceDistance').textContent = service.Distance ? parseFloat(service.Distance).toFixed(2) + ' miles' : 'N/A';
 
             const getDirectionsBtn = document.getElementById('getDirections');
             if (service.MapLink) {
