@@ -105,9 +105,8 @@ def profile_view(request):
                 "RatingCount": str(item.get("rating_count", 0)),
                 "Category": item.get("Category", "N/A"),
                 "MapLink": f"https://www.google.com/maps/dir/?api=1&destination={quote(item.get('Address'))}",
-                "Distance": "N/A",  # Since distance may not be available
                 "Description": convert_decimals(item.get("Description", {})),
-                "IsBookmarked": True,  # These are bookmarks
+                "IsBookmarked": True,
             }
             for item in bookmarks
         ]
