@@ -10,7 +10,7 @@ from django.http import (
     HttpResponseNotAllowed,
 )
 from django.shortcuts import render, redirect
-from django.utils import timezone as timezone2 # Ensure this is imported
+from django.utils import timezone as timezone2  # Ensure this is imported
 from forum.models import Notification
 from home.repositories import HomeRepository
 from public_service_finder.utils.enums.service_status import ServiceStatus
