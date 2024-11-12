@@ -170,6 +170,7 @@ def get_reviews(request, service_id):
     try:
         page = int(request.GET.get("page", 1))  # Default to page 1
         repo = HomeRepository()
+        user = request.user
 
         # Fetch all reviews for the given service ID
         reviews = repo.fetch_reviews_for_service(service_id)
@@ -184,6 +185,7 @@ def get_reviews(request, service_id):
             "has_next": page_obj.has_next(),
             "has_previous": page_obj.has_previous(),
             "current_page": page_obj.number,
+            "username": user.username
         }
 
         return JsonResponse(response_data, status=200)
@@ -230,6 +232,10 @@ def toggle_bookmark(request):
 def delete_review(request, review_id):
     try:
         repo = HomeRepository()
+        data = json.loads(request.body)
+        if data.get("username") != request.user.username:
+            return JsonResponse({"error": "You are not authorized to edit this review."}, status=403)
+        
         # Delete the review
         repo.delete_review(review_id)
         return JsonResponse(
@@ -247,6 +253,10 @@ def edit_review(request, review_id):
         data = json.loads(request.body)
         new_rating = data.get("rating")
         new_message = data.get("message")
+        
+        if data.get("username") != request.user.username:
+            return JsonResponse({"error": "You are not authorized to edit this review."}, status=403)
+
 
         if not new_rating or not new_message:
             return JsonResponse(
@@ -258,6 +268,8 @@ def edit_review(request, review_id):
         result = repo.edit_review(
             review_id=review_id, new_rating=new_rating, new_message=new_message
         )
+        
+        
 
         # Check if there was an error in the repository response
         if "error" in result:

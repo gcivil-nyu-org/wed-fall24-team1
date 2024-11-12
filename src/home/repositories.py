@@ -296,7 +296,7 @@ class HomeRepository:
                     ":m": new_message,
                 },
             )
-            return {"success": True, "message": "Review updated successfully."}
+            return {"success": True, "message": "Review updated successfully.", 'original_review': original_review}
 
         except ClientError as e:
             print(f"Failed to edit review: {e.response['Error']['Message']}")
