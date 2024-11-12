@@ -38,6 +38,13 @@
                 <i class="fas fa-comments"></i>
                 <span>Forum</span>
             </a>
+            {% if user.is_authenticated and user.user_type == 'service_provider' %}
+                <a href="{% url 'services:dashboard' %}"
+                   class="hidden md:flex items-center space-x-2 text-gray-600 hover:text-blue-700 font-medium p-2 rounded-md hover:bg-gray-100">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Dashboard</span>
+                </a>
+            {% endif %}
 
             {% if user.is_superuser %}
                 <a href="{% url 'admin_only_view_new_listings' %}"
@@ -150,6 +157,11 @@
                    class="flex items-center space-x-2 text-gray-600 hover:text-blue-700 font-medium">
                     <i class="fas fa-home"></i>
                     <span>Home</span>
+                </a>
+                <a href="{% url 'services:dashboard' %}"
+                   class="flex items-center space-x-2 text-gray-600 hover:text-blue-700 font-medium">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Dashboard</span>
                 </a>
             {% else %}
                 <a href="{% url 'home' %}"
