@@ -205,6 +205,7 @@ class ForumFormsTest(TestCase):
         form = CommentForm(data=form_data)
         self.assertFalse(form.is_valid())
 
+
 class ForumDeleteCommentTest(TestCase):
     def setUp(self):
         self.client = Client()
@@ -229,23 +230,33 @@ class ForumDeleteCommentTest(TestCase):
 
     def test_delete_comment_authenticated_owner_post_request(self):
         self.client.login(username="testuser", password="testpass123")
-        response = self.client.post(reverse("forum:delete_comment", args=[self.comment.id]))
-        self.assertRedirects(response, reverse("forum:post_detail", args=[self.post.id]))
+        response = self.client.post(
+            reverse("forum:delete_comment", args=[self.comment.id])
+        )
+        self.assertRedirects(
+            response, reverse("forum:post_detail", args=[self.post.id])
+        )
         self.assertFalse(Comment.objects.filter(id=self.comment.id).exists())
 
     def test_delete_comment_authenticated_owner_get_request(self):
         self.client.login(username="testuser", password="testpass123")
-        response = self.client.get(reverse("forum:delete_comment", args=[self.comment.id]))
+        response = self.client.get(
+            reverse("forum:delete_comment", args=[self.comment.id])
+        )
         self.assertEqual(response.status_code, 403)  # Forbidden
 
     def test_delete_comment_authenticated_non_owner(self):
         self.client.login(username="otheruser", password="testpass123")
-        response = self.client.post(reverse("forum:delete_comment", args=[self.comment.id]))
+        response = self.client.post(
+            reverse("forum:delete_comment", args=[self.comment.id])
+        )
         self.assertEqual(response.status_code, 403)  # Forbidden
         self.assertTrue(Comment.objects.filter(id=self.comment.id).exists())
 
     def test_delete_comment_unauthenticated(self):
-        response = self.client.post(reverse("forum:delete_comment", args=[self.comment.id]))
+        response = self.client.post(
+            reverse("forum:delete_comment", args=[self.comment.id])
+        )
         self.assertEqual(response.status_code, 302)  # Redirect to login
         self.assertTrue(Comment.objects.filter(id=self.comment.id).exists())
 
@@ -288,11 +299,15 @@ class ForumNotificationsTest(TestCase):
 
     def test_mark_notification_read_authenticated_non_recipient(self):
         self.client.login(username="sender", password="testpass123")
-        response = self.client.post(reverse("forum:mark_notification_read", args=[self.notification.id]))
+        response = self.client.post(
+            reverse("forum:mark_notification_read", args=[self.notification.id])
+        )
         self.assertEqual(response.status_code, 404)  # Not found
 
     def test_mark_notification_read_unauthenticated(self):
-        response = self.client.post(reverse("forum:mark_notification_read", args=[self.notification.id]))
+        response = self.client.post(
+            reverse("forum:mark_notification_read", args=[self.notification.id])
+        )
         self.assertEqual(response.status_code, 302)  # Redirect to login
         self.notification.refresh_from_db()
         self.assertFalse(self.notification.is_read)
@@ -322,7 +337,10 @@ class ForumNotificationsTest(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content, {"status": "success"})
-        self.assertTrue(Notification.objects.filter(recipient=self.recipient, is_read=False).count() == 0)
+        self.assertTrue(
+            Notification.objects.filter(recipient=self.recipient, is_read=False).count()
+            == 0
+        )
 
     def test_mark_all_notifications_read_authenticated_non_ajax(self):
         # Create another unread notification
@@ -335,7 +353,10 @@ class ForumNotificationsTest(TestCase):
         self.client.login(username="recipient", password="testpass123")
         response = self.client.post(reverse("forum:mark_all_notifications_read"))
         self.assertEqual(response.status_code, 302)  # Redirect back
-        self.assertTrue(Notification.objects.filter(recipient=self.recipient, is_read=False).count() == 0)
+        self.assertTrue(
+            Notification.objects.filter(recipient=self.recipient, is_read=False).count()
+            == 0
+        )
 
     def test_mark_all_notifications_read_authenticated_invalid_method(self):
         self.client.login(username="recipient", password="testpass123")
@@ -358,16 +379,22 @@ class ForumNotificationsTest(TestCase):
 
     def test_delete_notification_authenticated_non_recipient(self):
         self.client.login(username="sender", password="testpass123")
-        response = self.client.post(reverse("forum:delete_notification", args=[self.notification.id]))
+        response = self.client.post(
+            reverse("forum:delete_notification", args=[self.notification.id])
+        )
         self.assertEqual(response.status_code, 404)  # Not found
         self.assertTrue(Notification.objects.filter(id=self.notification.id).exists())
 
     def test_delete_notification_unauthenticated(self):
-        response = self.client.post(reverse("forum:delete_notification", args=[self.notification.id]))
+        response = self.client.post(
+            reverse("forum:delete_notification", args=[self.notification.id])
+        )
         self.assertEqual(response.status_code, 302)  # Redirect to login
         self.assertTrue(Notification.objects.filter(id=self.notification.id).exists())
 
     def test_delete_notification_authenticated_invalid_method(self):
         self.client.login(username="recipient", password="testpass123")
-        response = self.client.get(reverse("forum:delete_notification", args=[self.notification.id]))
+        response = self.client.get(
+            reverse("forum:delete_notification", args=[self.notification.id])
+        )
         self.assertEqual(response.status_code, 403)  # Forbidden
