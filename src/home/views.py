@@ -7,6 +7,9 @@ import uuid
 from django.views.decorators.http import require_POST
 from decimal import Decimal, Inexact, Rounded
 from django.shortcuts import render
+from forum.models import Notification
+from accounts.models import CustomUser
+from services.repositories import ServiceRepository
 
 # TODO These constants are maintained in the JS frontend and here, we'll have to unify them
 DEFAULT_LAT, DEFAULT_LON = 40.7128, -74.0060
@@ -40,35 +43,60 @@ def submit_review(request):
             return JsonResponse({"error": "Invalid data."}, status=400)
 
         repo = HomeRepository()
+        service_repo = ServiceRepository()
 
-        # Generate a unique Review ID
-        review_id = str(uuid.uuid4())
+        # Get the service to find its provider
+        service = service_repo.get_service(service_id)
+        if service:
+            try:
+                # Get the service provider user
+                provider = CustomUser.objects.get(id=service.provider_id)
 
-        # Add the review to the reviews table
-        repo.add_review(
-            review_id=review_id,
-            service_id=service_id,
-            user_id=str(user.id),  # Assuming user ID is a string
-            rating_stars=rating,
-            rating_message=message,
-            username=user.username,  # To display in frontend
-        )
+                # Generate a unique Review ID
+                review_id = str(uuid.uuid4())
 
-        # Update the service's rating and rating count
-        repo.update_service_rating(service_id=service_id, new_rating=rating)
+                # Add the review to the reviews table
+                repo.add_review(
+                    review_id=review_id,
+                    service_id=service_id,
+                    user_id=str(user.id),
+                    rating_stars=rating,
+                    rating_message=message,
+                    username=user.username,
+                )
 
-        return JsonResponse(
-            {
-                "success": True,
-                "review_id": review_id,
-                "service_id": service_id,
-                "user_id": user.id,
-                "rating": rating,
-                "message": message,
-                "username": user.username,
-            },
-            status=200,
-        )
+                # Update the service's rating and rating count
+                repo.update_service_rating(service_id=service_id, new_rating=rating)
+
+                # Create notification for service provider
+                Notification.objects.create(
+                    recipient=provider,
+                    sender=user,
+                    post=None,
+                    comment=None,
+                    message=f"{user.username} left a {rating}-star review on your service: {service.name}",
+                    notification_type="review",
+                )
+
+                return JsonResponse(
+                    {
+                        "success": True,
+                        "review_id": review_id,
+                        "service_id": service_id,
+                        "user_id": user.id,
+                        "rating": rating,
+                        "message": message,
+                        "username": user.username,
+                    },
+                    status=200,
+                )
+            except CustomUser.DoesNotExist:
+                # Handle case where provider user doesn't exist
+                return JsonResponse(
+                    {"error": "Service provider not found."}, status=404
+                )
+        else:
+            return JsonResponse({"error": "Service not found."}, status=404)
 
     except (Inexact, Rounded) as decimal_error:
         print(f"Decimal error in submit_review: {decimal_error}")

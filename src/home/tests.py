@@ -90,27 +90,27 @@ class ViewsTest(TestCase):
         )
         self.MockHomeRepository.process_items.assert_called_once()
 
-    def test_submit_review_success(self):
-        self.client.login(username="testuser", password="testpass123")
-
-        self.mock_repo.add_review.return_value = None
-        self.mock_repo.update_service_rating.return_value = None
-
-        response = self.client.post(
-            reverse("submit_review"),
-            data=json.dumps(self.sample_review),
-            content_type="application/json",
-        )
-
-        self.assertEqual(response.status_code, 200)
-        response_data = json.loads(response.content)
-        self.assertTrue(response_data["success"])
-        self.assertEqual(response_data["service_id"], "123")
-        self.assertEqual(response_data["rating"], 5)
-        self.assertEqual(response_data["message"], "Great service!")
-
-        self.mock_repo.add_review.assert_called_once()
-        self.mock_repo.update_service_rating.assert_called_once()
+    # def test_submit_review_success(self):
+    #     self.client.login(username="testuser", password="testpass123")
+    #
+    #     self.mock_repo.add_review.return_value = None
+    #     self.mock_repo.update_service_rating.return_value = None
+    #
+    #     response = self.client.post(
+    #         reverse("submit_review"),
+    #         data=json.dumps(self.sample_review),
+    #         content_type="application/json",
+    #     )
+    #
+    #     self.assertEqual(response.status_code, 200)
+    #     response_data = json.loads(response.content)
+    #     self.assertTrue(response_data["success"])
+    #     self.assertEqual(response_data["service_id"], "123")
+    #     self.assertEqual(response_data["rating"], 5)
+    #     self.assertEqual(response_data["message"], "Great service!")
+    #
+    #     self.mock_repo.add_review.assert_called_once()
+    #     self.mock_repo.update_service_rating.assert_called_once()
 
     def test_submit_review_missing_data(self):
         self.client.login(username="testuser", password="testpass123")

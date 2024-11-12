@@ -54,9 +54,9 @@ body {
     }
 }
 
-/* Button Hover Effect */
-button:hover {
-    background-color: #2563EB; /* Example: darker blue on hover */
+a,
+button {
+    transition: color 0.3s ease, background-color 0.3s ease;
 }
 
 /* Link Hover Effect */
@@ -72,6 +72,10 @@ a:hover {
     margin-right: auto;
     padding-left: 1rem; /* px-4 */
     padding-right: 1rem; /* px-4 */
+}
+
+.notification-action-btn:hover {
+    background-color: transparent !important;
 }
 
 /* Base styles */

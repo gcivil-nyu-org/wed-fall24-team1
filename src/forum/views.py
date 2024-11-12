@@ -1,7 +1,7 @@
 from django.db.models import Q
 from django.http import HttpResponseForbidden, JsonResponse
 from django.contrib.auth.decorators import login_required
-from .models import Category, Post, Comment
+from .models import Category, Post, Comment, Notification
 from .forms import PostForm, CommentForm
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render, get_object_or_404, redirect
@@ -78,6 +78,15 @@ def post_detail(request, post_id):
             comment.post = post
             comment.author = request.user
             comment.save()
+            if comment.author != post.author:
+                Notification.objects.create(
+                    recipient=post.author,
+                    sender=comment.author,
+                    post=post,
+                    comment=comment,
+                    message=f"{comment.author.username} commented on your post: {post.title}",
+                )
+
             return redirect("forum:post_detail", post_id=post.id)
     else:
         comment_form = CommentForm()
@@ -179,3 +188,51 @@ def create_post(request, category_id):
         form = PostForm()
 
     return render(request, "create_post.html", {"form": form, "category": category})
+
+
+@login_required
+def mark_notification_read(request, notification_id):
+    notification = get_object_or_404(
+        Notification, id=notification_id, recipient=request.user
+    )
+    notification.is_read = True
+    notification.save()
+
+    # If it's an AJAX request, return JSON response
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return JsonResponse({"status": "success"})
+
+    # Otherwise, redirect back to the previous page
+    return redirect(request.META.get("HTTP_REFERER", "/"))
+
+
+@login_required
+def get_notifications_count(request):
+    count = Notification.objects.filter(recipient=request.user, is_read=False).count()
+    return JsonResponse({"count": count})
+
+
+@login_required
+def mark_all_notifications_read(request):
+    if request.method == "POST":
+        Notification.objects.filter(recipient=request.user, is_read=False).update(
+            is_read=True
+        )
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return JsonResponse({"status": "success"})
+        return redirect(request.META.get("HTTP_REFERER", "/"))
+    return HttpResponseForbidden("Invalid request method.")
+
+
+@login_required
+def delete_notification(request, notification_id):
+    if request.method == "POST":
+        notification = get_object_or_404(
+            Notification, id=notification_id, recipient=request.user
+        )
+        notification.delete()
+
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return JsonResponse({"status": "success"})
+        return redirect(request.META.get("HTTP_REFERER", "/"))
+    return HttpResponseForbidden("Invalid request method.")
