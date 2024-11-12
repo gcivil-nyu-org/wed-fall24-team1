@@ -143,6 +143,7 @@ def home_view(request):
             "Distance": item.get("Distance", "N/A"),
             "Description": convert_decimals(item.get("Description", {})),
             "IsBookmarked": item.get("Id") in user_bookmarks,
+            "IsActive": item.get("IsActive", True),
         }
         for item in page_obj
     ]

@@ -3,7 +3,12 @@ from decimal import Decimal
 from datetime import datetime, timedelta  # Removed 'timezone' from here
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.http import Http404, JsonResponse, HttpResponseNotAllowed
+from django.http import (
+    Http404,
+    JsonResponse,
+    HttpResponse,
+    HttpResponseNotAllowed,
+)
 from django.shortcuts import render, redirect
 from django.utils import timezone  # Ensure this is imported
 from home.repositories import HomeRepository
@@ -48,6 +53,7 @@ def service_create(request):
         if form.is_valid() and description_formset.is_valid():
             # Process the main form data
             service_data = form.cleaned_data
+            is_active = service_data.get("is_active", True)
 
             # Process the description formset
             description_data = {}
@@ -74,6 +80,7 @@ def service_create(request):
                 service_status=ServiceStatus.PENDING_APPROVAL.value,
                 service_created_timestamp=datetime.now(timezone.utc).isoformat(),
                 service_approved_timestamp="1900-01-01T00:00:00Z",
+                is_active=is_active,
             )
             if service_repo.create_service(service_dto):
                 return redirect("services:list")
@@ -116,8 +123,10 @@ def service_edit(request, service_id):
 
         if form.is_valid() and description_formset.is_valid():
             service_data = form.cleaned_data
+            new_is_active = service_data.get("is_active", True)
 
-            description_data = {}
+            # Collect new description data
+            new_description_data = {}
             for description_form in description_formset:
                 if (
                     description_form.cleaned_data
@@ -125,8 +134,26 @@ def service_edit(request, service_id):
                 ):
                     key = description_form.cleaned_data["key"]
                     value = description_form.cleaned_data["value"]
-                    description_data[key] = value
+                    new_description_data[key] = value
 
+            # Determine if any fields other than `is_active` have changed
+            status_should_remain_approved = (
+                service.name == service_data["name"]
+                and service.address == service_data["address"]
+                and service.latitude == service_data["latitude"]
+                and service.longitude == service_data["longitude"]
+                and service.category == service_data["category"]
+                and service.description == new_description_data
+            )
+
+            # Decide the `service_status` based on changes
+            new_service_status = (
+                ServiceStatus.APPROVED.value
+                if status_should_remain_approved
+                else ServiceStatus.PENDING_APPROVAL.value
+            )
+
+            # Prepare updated service DTO
             updated_service = ServiceDTO(
                 id=service_id,
                 name=service_data["name"],
@@ -134,14 +161,13 @@ def service_edit(request, service_id):
                 latitude=service_data["latitude"],
                 longitude=service_data["longitude"],
                 ratings=service.ratings,
-                description=description_data,
-                category=service_data[
-                    "category"
-                ],  # This is already translated in the form's clean method
+                description=new_description_data,
+                category=service_data["category"],
                 provider_id=str(request.user.id),
-                service_status=ServiceStatus.PENDING_APPROVAL.value,
-                service_created_timestamp=datetime.now(timezone.utc).isoformat(),
-                service_approved_timestamp="1900-01-01T00:00:00Z",
+                service_status=new_service_status,
+                service_created_timestamp=service.service_created_timestamp,
+                service_approved_timestamp=service.service_approved_timestamp,
+                is_active=new_is_active,
             )
 
             if service_repo.update_service(updated_service):
@@ -153,6 +179,7 @@ def service_edit(request, service_id):
             "category": category_reverse_translation.get(
                 service.category, service.category
             ),
+            "is_active": service.is_active,
         }
         form = ServiceForm(initial=initial_data)
 
@@ -189,13 +216,13 @@ def service_details(request, service_id):
         "latitude": float(service.latitude),
         "longitude": float(service.longitude),
         "description": service.description,
+        "is_active": service.is_active,
         "reviews": reviews,
     }
 
     return JsonResponse(data)
 
 
-@login_required
 def service_delete(request, service_id):
     try:
         _ = uuid.UUID(service_id)
@@ -210,7 +237,10 @@ def service_delete(request, service_id):
         raise PermissionDenied
 
     if request.method == "POST":
-        return redirect("services:list")
+        if service_repo.delete_service(service_id):
+            return redirect("services:list")
+        else:
+            return HttpResponse("Failed to delete service.", status=500)
 
     # If it's not a POST request, return a 405 Method Not Allowed
     return HttpResponseNotAllowed(["POST"])

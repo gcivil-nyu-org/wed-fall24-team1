@@ -25,6 +25,7 @@ class ServiceDTO:
     service_status: str
     service_created_timestamp: str
     service_approved_timestamp: str
+    is_active: bool
 
     @classmethod
     def from_dynamodb_item(cls, item: Dict[str, Any]) -> "ServiceDTO":
@@ -45,6 +46,7 @@ class ServiceDTO:
             service_status=ServiceStatus(service_status).value,
             service_created_timestamp=item.get("CreatedTimestamp", "NONE"),
             service_approved_timestamp=item.get("ApprovedTimestamp", "NONE"),
+            is_active=item.get("IsActive", True),
         )
 
     def to_dynamodb_item(self) -> Dict[str, Any]:
@@ -62,6 +64,7 @@ class ServiceDTO:
             "ServiceStatus": self.service_status,
             "CreatedTimestamp": self.service_created_timestamp,
             "ApprovedTimestamp": self.service_approved_timestamp,
+            "IsActive": self.is_active,
         }
 
 
