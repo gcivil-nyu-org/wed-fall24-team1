@@ -18,8 +18,8 @@ after_success:
   - coveralls
 
 before_deploy:
-  cd src
-  python manage.py collectstatic --noinput
+  - cd src
+  - python manage.py collectstatic --noinput
 
 deploy:
   - provider: elasticbeanstalk

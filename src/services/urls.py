@@ -15,4 +15,38 @@ urlpatterns = [
         views.respond_to_review,
         name="respond_to_review",
     ),
+    path("dashboard/", views.dashboard, name="dashboard"),
+    path(
+        "analytics/bookmarks_over_time/",
+        views.bookmarks_over_time,
+        name="bookmarks_over_time",
+    ),
+    path(
+        "analytics/reviews_over_time/",
+        views.reviews_over_time,
+        name="reviews_over_time",
+    ),
+    path(
+        "analytics/average_rating_over_time/",
+        views.average_rating_over_time,
+        name="average_rating_over_time",
+    ),
+    path(
+        "analytics/rating_distribution/",
+        views.rating_distribution,
+        name="rating_distribution",
+    ),
+    path("analytics/recent_reviews/", views.recent_reviews, name="recent_reviews"),
+    path("analytics/response_rate/", views.response_rate, name="response_rate"),
+    path(
+        "analytics/review_word_cloud/",
+        views.review_word_cloud,
+        name="review_word_cloud",
+    ),
+    path(
+        "analytics/service_category_distribution/",
+        views.service_category_distribution,
+        name="service_category_distribution",
+    ),
+    path("analytics/user_analytics/", views.user_analytics, name="user_analytics"),
 ]

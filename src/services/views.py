@@ -1,18 +1,22 @@
 import uuid
 from decimal import Decimal
-from datetime import datetime, timezone
+from datetime import datetime, timedelta  # Removed 'timezone' from here
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import Http404, JsonResponse, HttpResponseNotAllowed
 from django.shortcuts import render, redirect
+from django.utils import timezone  # Ensure this is imported
 from home.repositories import HomeRepository
 from public_service_finder.utils.enums.service_status import ServiceStatus
 from .forms import ServiceForm, DescriptionFormSet, ReviewResponseForm
 from .models import ServiceDTO
 from .repositories import ServiceRepository, ReviewRepository
+from collections import Counter
+import re
 
 service_repo = ServiceRepository()
 review_repo = ReviewRepository()
+home_repo = HomeRepository()
 
 
 @login_required
@@ -284,3 +288,259 @@ def get_service_by_id(service_id, provider_id):
     if service and service.provider_id == str(provider_id):
         return service
     return None
+
+
+@login_required
+def dashboard(request):
+    if request.user.user_type != "service_provider":
+        raise PermissionDenied
+
+    return render(request, "dashboard.html")
+
+
+@login_required
+def bookmarks_over_time(request):
+    if request.user.user_type != "service_provider":
+        return JsonResponse({"error": "Unauthorized"}, status=403)
+
+    services = service_repo.get_services_by_provider(request.user.id)
+    service_ids = [service.id for service in services]
+
+    bookmarks = home_repo.get_bookmarks_for_services(service_ids)
+
+    # Process bookmarks to get counts over the last 30 days
+    today = timezone.now().date()
+    dates = [today - timedelta(days=i) for i in range(29, -1, -1)]
+    date_strs = [date.isoformat() for date in dates]
+    bookmarks_over_time = {date_str: 0 for date_str in date_strs}
+
+    for bookmark in bookmarks:
+        timestamp = datetime.fromisoformat(bookmark["timestamp"]).date().isoformat()
+        if timestamp in bookmarks_over_time:
+            bookmarks_over_time[timestamp] += 1
+
+    data = {
+        "dates": date_strs,
+        "counts": [bookmarks_over_time[date_str] for date_str in date_strs],
+    }
+    return JsonResponse(data)
+
+
+@login_required
+def reviews_over_time(request):
+    if request.user.user_type != "service_provider":
+        return JsonResponse({"error": "Unauthorized"}, status=403)
+
+    services = service_repo.get_services_by_provider(request.user.id)
+    service_ids = [service.id for service in services]
+
+    reviews = home_repo.get_reviews_for_services(service_ids)
+
+    # Process reviews to get counts over the last 30 days
+    today = timezone.now().date()
+    dates = [today - timedelta(days=i) for i in range(29, -1, -1)]
+    date_strs = [date.isoformat() for date in dates]
+    reviews_over_time = {date_str: 0 for date_str in date_strs}
+
+    for review in reviews:
+        timestamp = datetime.fromisoformat(review["Timestamp"]).date().isoformat()
+        if timestamp in reviews_over_time:
+            reviews_over_time[timestamp] += 1
+
+    data = {
+        "dates": date_strs,
+        "counts": [reviews_over_time[date_str] for date_str in date_strs],
+    }
+
+    return JsonResponse(data)
+
+
+@login_required
+def average_rating_over_time(request):
+    if request.user.user_type != "service_provider":
+        return JsonResponse({"error": "Unauthorized"}, status=403)
+
+    services = service_repo.get_services_by_provider(request.user.id)
+    service_ids = [service.id for service in services]
+
+    reviews = home_repo.get_reviews_for_services(service_ids)
+
+    # Process reviews to get average rating over the last 30 days
+    today = timezone.now().date()
+    dates = [today - timedelta(days=i) for i in range(29, -1, -1)]
+    date_strs = [date.isoformat() for date in dates]
+    rating_over_time = {
+        date_str: {"total_rating": 0, "count": 0} for date_str in date_strs
+    }
+
+    for review in reviews:
+        timestamp = datetime.fromisoformat(review["Timestamp"]).date().isoformat()
+        if timestamp in rating_over_time:
+            rating_over_time[timestamp]["total_rating"] += int(review["RatingStars"])
+            rating_over_time[timestamp]["count"] += 1
+
+    avg_ratings = []
+    for date_str in date_strs:
+        data_point = rating_over_time[date_str]
+        if data_point["count"] > 0:
+            avg_rating = data_point["total_rating"] / data_point["count"]
+        else:
+            avg_rating = None  # Use None to represent missing data
+        avg_ratings.append(avg_rating)
+
+    data = {"dates": date_strs, "avg_ratings": avg_ratings}
+
+    return JsonResponse(data)
+
+
+@login_required
+def rating_distribution(request):
+    if request.user.user_type != "service_provider":
+        return JsonResponse({"error": "Unauthorized"}, status=403)
+
+    services = service_repo.get_services_by_provider(request.user.id)
+    service_ids = [service.id for service in services]
+
+    reviews = home_repo.get_reviews_for_services(service_ids)
+
+    # Calculate rating distribution
+    rating_counts = {str(i): 0 for i in range(1, 6)}
+    for review in reviews:
+        rating = str(review["RatingStars"])
+        rating_counts[rating] += 1
+
+    data = {
+        "ratings": list(rating_counts.keys()),
+        "counts": list(rating_counts.values()),
+    }
+
+    return JsonResponse(data)
+
+
+@login_required
+def recent_reviews(request):
+    if request.user.user_type != "service_provider":
+        return JsonResponse({"error": "Unauthorized"}, status=403)
+
+    services = service_repo.get_services_by_provider(request.user.id)
+    service_ids = [service.id for service in services]
+
+    reviews = home_repo.get_reviews_for_services(service_ids)
+
+    # Sort reviews by timestamp descending
+    reviews.sort(key=lambda x: x["Timestamp"], reverse=True)
+
+    # Take the top 5 recent reviews
+    recent_reviews = reviews[:5]
+
+    # Prepare data
+    data = {"reviews": recent_reviews}
+
+    return JsonResponse(data)
+
+
+@login_required
+def response_rate(request):
+    if request.user.user_type != "service_provider":
+        return JsonResponse({"error": "Unauthorized"}, status=403)
+
+    services = service_repo.get_services_by_provider(request.user.id)
+    service_ids = [service.id for service in services]
+
+    reviews = home_repo.get_reviews_for_services(service_ids)
+
+    total_reviews = len(reviews)
+    responded_reviews = sum(1 for review in reviews if review.get("ResponseText"))
+
+    response_rate = (
+        (responded_reviews / total_reviews) * 100 if total_reviews > 0 else 0
+    )
+
+    data = {
+        "total_reviews": total_reviews,
+        "responded_reviews": responded_reviews,
+        "response_rate": round(response_rate, 2),
+    }
+
+    return JsonResponse(data)
+
+
+@login_required
+def review_word_cloud(request):
+    if request.user.user_type != "service_provider":
+        return JsonResponse({"error": "Unauthorized"}, status=403)
+
+    services = service_repo.get_services_by_provider(request.user.id)
+    service_ids = [service.id for service in services]
+
+    reviews = home_repo.get_reviews_for_services(service_ids)
+
+    # Combine all review texts
+    text = " ".join(review["RatingMessage"] for review in reviews)
+
+    # Simple text processing
+    words = re.findall(r"\w+", text.lower())
+    stopwords = set(
+        [
+            "the",
+            "and",
+            "is",
+            "in",
+            "it",
+            "of",
+            "to",
+            "a",
+            "i",
+            "for",
+            "this",
+            "that",
+            "with",
+        ]
+    )
+    words = [word for word in words if word not in stopwords and len(word) > 2]
+
+    # Count word frequencies
+    word_counts = Counter(words)
+    most_common = word_counts.most_common(50)
+
+    # Prepare data
+    data = [{"text": word, "size": count} for word, count in most_common]
+
+    return JsonResponse({"words": data})
+
+
+@login_required
+def service_category_distribution(request):
+    if request.user.user_type != "service_provider":
+        return JsonResponse({"error": "Unauthorized"}, status=403)
+
+    services = service_repo.get_services_by_provider(request.user.id)
+
+    # Count services per category
+    category_counts = {}
+    for service in services:
+        category = service.category
+        category_counts[category] = category_counts.get(category, 0) + 1
+
+    data = {
+        "categories": list(category_counts.keys()),
+        "counts": list(category_counts.values()),
+    }
+
+    return JsonResponse(data)
+
+
+@login_required
+def user_analytics(request):
+    if request.user.user_type != "service_provider":
+        return JsonResponse({"error": "Unauthorized"}, status=403)
+
+    user_id = str(request.user.id)
+
+    # Compute user's metrics
+    user_metrics = home_repo.compute_user_metrics(user_id)
+
+    data = {
+        "user_metrics": user_metrics,
+    }
+    return JsonResponse(data)
