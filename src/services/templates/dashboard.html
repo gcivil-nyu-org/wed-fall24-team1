@@ -1,409 +1,422 @@
-<!-- services/templates/dashboard.html -->
-
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold mb-6">Analytics Dashboard</h1>
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 class="text-4xl font-extrabold text-gray-900 text-center mb-12">Analytics Dashboard</h1>
 
-    <!-- Row 1: Bookmarks Over Time & Reviews Over Time -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <!-- Bookmarks Over Time -->
-        <div>
-            <h2 class="text-xl font-semibold mb-4">Bookmarks Over Time</h2>
-            <canvas id="bookmarksChart"></canvas>
+        <!-- Row 1: Bookmarks Over Time & Reviews Over Time -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <div class="bg-white rounded-lg shadow-lg p-6 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Bookmarks Over Time</h2>
+                <canvas id="bookmarksChart"></canvas>
+            </div>
+            <div class="bg-white rounded-lg shadow-lg p-6 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Reviews Over Time</h2>
+                <canvas id="reviewsChart"></canvas>
+            </div>
         </div>
-        <!-- Reviews Over Time -->
-        <div>
-            <h2 class="text-xl font-semibold mb-4">Reviews Over Time</h2>
-            <canvas id="reviewsChart"></canvas>
-        </div>
-    </div>
 
-    <!-- Row 2: Average Rating Over Time & Rating Distribution -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
-        <!-- Average Rating Over Time -->
-        <div>
-            <h2 class="text-xl font-semibold mb-4">Average Rating Over Time</h2>
-            <canvas id="averageRatingChart"></canvas>
+        <!-- Row 2: Average Rating Over Time & Rating Distribution -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <div class="bg-white rounded-lg shadow-lg p-6 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Average Rating Over Time</h2>
+                <canvas id="averageRatingChart"></canvas>
+            </div>
+            <div class="bg-white rounded-lg shadow-lg p-6 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Rating Distribution</h2>
+                <canvas id="ratingDistributionChart"></canvas>
+            </div>
         </div>
-        <!-- Rating Distribution -->
-        <div>
-            <h2 class="text-xl font-semibold mb-4">Rating Distribution</h2>
-            <canvas id="ratingDistributionChart"></canvas>
-        </div>
-    </div>
 
-    <!-- Row 3: Category Distribution & Response Rate -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
-        <!-- Category Distribution -->
-        <div>
-            <h2 class="text-xl font-semibold mb-4">Service Category Distribution</h2>
-            <canvas id="categoryDistributionChart"></canvas>
+        <!-- Row 3: Category Distribution & Response Rate -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <div class="bg-white rounded-lg shadow-lg p-6 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Service Category Distribution</h2>
+                <canvas id="categoryDistributionChart"></canvas>
+            </div>
+            <div class="bg-white rounded-lg shadow-lg p-6 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Response Rate to Reviews</h2>
+                <div class="flex flex-col items-center">
+                    <p id="responseRateText" class="text-lg font-medium text-gray-600 mt-6 mb-4"></p>
+                    <div class="w-64 h-64">
+                        <canvas id="responseRateChart"></canvas>
+                    </div>
+                </div>
+            </div>
         </div>
-        <!-- Response Rate -->
-<!-- Response Rate -->
-<div>
-    <h2 class="text-xl font-semibold mb-4">Response Rate to Reviews</h2>
-    <div class="flex flex-col items-center">
-        <p id="responseRateText" class="text-lg mt-6 mb-4"></p>
-        <div class="w-64 h-64">
-            <canvas id="responseRateChart"></canvas>
+
+        <!-- Row 4: Recent Reviews -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-8 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Recent Reviews</h2>
+            <div id="reviewsContainer" class="space-y-4 max-h-96 overflow-y-auto pr-4"></div>
+        </div>
+
+        <!-- Row 5: Word Cloud -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-8 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Review Keywords Word Cloud</h2>
+            <div id="wordCloud" class="border-2 border-gray-200 rounded-lg p-4">
+                <svg width="100%" height="400"></svg>
+            </div>
+        </div>
+
+        <!-- Comparative Analytics -->
+        <div class="bg-white rounded-lg shadow-lg p-6 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">User Analytics</h2>
+            <canvas id="comparativeChart"></canvas>
         </div>
     </div>
 </div>
 
-
-    <!-- Row 4: Recent Reviews -->
-    <div class="mt-8">
-        <h2 class="text-xl font-semibold mb-4">Recent Reviews</h2>
-        <div id="reviewsContainer" class="space-y-4"></div>
-    </div>
-
-    <!-- Row 5: Word Cloud -->
-    <div class="mt-8">
-        <h2 class="text-xl font-semibold mb-4">Review Keywords Word Cloud</h2>
-        <div id="wordCloud" class="border p-4 rounded">
-            <svg width="100%" height="400"></svg>
-        </div>
-    </div>
-
-    <!-- Comparative Analytics -->
-    <div class="mt-8">
-        <h2 class="text-xl font-semibold mb-4">User Analytics</h2>
-        <canvas id="comparativeChart"></canvas>
-    </div>
-
-</div>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+    body {
+        font-family: 'Inter', sans-serif;
+    }
+    .chart-container {
+        position: relative;
+        margin: auto;
+    }
+    #reviewsContainer::-webkit-scrollbar {
+        width: 8px;
+    }
+    #reviewsContainer::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+    #reviewsContainer::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 10px;
+    }
+    #reviewsContainer::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+</style>
 {% endblock %}
 
 {% block scripts %}
-
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Bookmarks Over Time
-    fetch("{% url 'services:bookmarks_over_time' %}")
-    .then(response => response.json())
-    .then(data => {
-        const ctx = document.getElementById('bookmarksChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: data.dates, // Use date strings directly; Moment.js will parse them
-                datasets: [{
-                    label: 'Bookmarks',
-                    data: data.counts,
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                    tension: 0.1,
-                }]
-            },
-            options: {
-                scales: {
-                    x: {
-                        type: 'time',
-                        time: {
-                            unit: 'day',
-                            tooltipFormat: 'MMM DD, YYYY',
+    // The JavaScript code remains unchanged
+    document.addEventListener('DOMContentLoaded', function() {
+        // Bookmarks Over Time
+        fetch("{% url 'services:bookmarks_over_time' %}")
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('bookmarksChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.dates,
+                    datasets: [{
+                        label: 'Bookmarks',
+                        data: data.counts,
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                        tension: 0.1,
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'day',
+                                tooltipFormat: 'MMM DD, YYYY',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Date',
+                            },
                         },
-                        title: {
-                            display: true,
-                            text: 'Date',
-                        },
-                    },
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Number of Bookmarks',
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Bookmarks',
+                            },
                         },
                     },
                 },
-            },
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching bookmarks data:', error);
         });
-    })
-    .catch(error => {
-        console.error('Error fetching bookmarks data:', error);
-    });
-    // Reviews Over Time
-    fetch("{% url 'services:reviews_over_time' %}")
-    .then(response => response.json())
-    .then(data => {
-        const ctx = document.getElementById('reviewsChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: data.dates,
-                datasets: [{
-                    label: 'Reviews',
-                    data: data.counts,
-                    backgroundColor: 'rgba(255, 159, 64, 0.5)',
-                }]
-            },
-            options: {
-                scales: {
-                    x: {
-                        ticks: { autoSkip: true, maxTicksLimit: 10 },
-                        type: 'time',
-                        time: { unit: 'day' }
-                    },
-                    y: { beginAtZero: true }
-                }
-            }
-        });
-    });
 
-    // Average Rating Over Time
-    fetch("{% url 'services:average_rating_over_time' %}")
-    .then(response => response.json())
-    .then(data => {
-        const ctx = document.getElementById('averageRatingChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: data.dates,
-                datasets: [{
-                    label: 'Average Rating',
-                    data: data.avg_ratings,
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    fill: false,
-                    spanGaps: true,
-                    tension: 0.1
-                }]
-            },
-            options: {
-                scales: {
-                    y: { min: 0, max: 5 },
-                    x: {
-                        ticks: { autoSkip: true, maxTicksLimit: 10 },
-                        type: 'time',
-                        time: { unit: 'day' }
+        // Reviews Over Time
+        fetch("{% url 'services:reviews_over_time' %}")
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('reviewsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.dates,
+                    datasets: [{
+                        label: 'Reviews',
+                        data: data.counts,
+                        backgroundColor: 'rgba(245, 158, 11, 0.5)',
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            ticks: { autoSkip: true, maxTicksLimit: 10 },
+                            type: 'time',
+                            time: { unit: 'day' }
+                        },
+                        y: { beginAtZero: true }
                     }
                 }
-            }
+            });
         });
-    });
 
-    // Rating Distribution
-    fetch("{% url 'services:rating_distribution' %}")
-    .then(response => response.json())
-    .then(data => {
-        const ctx = document.getElementById('ratingDistributionChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: data.ratings,
-                datasets: [{
-                    label: 'Number of Reviews',
-                    data: data.counts,
-                    backgroundColor: 'rgba(153, 102, 255, 0.5)',
-                }]
-            },
-            options: {
-                scales: {
-                    x: { title: { display: true, text: 'Rating Stars' } },
-                    y: { beginAtZero: true }
-                }
-            }
-        });
-    });
-
-    // Category Distribution
-    fetch("{% url 'services:service_category_distribution' %}")
-    .then(response => response.json())
-    .then(data => {
-        const ctx = document.getElementById('categoryDistributionChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: data.categories,
-                datasets: [{
-                    data: data.counts,
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.5)',
-                        'rgba(54, 162, 235, 0.5)',
-                        'rgba(255, 206, 86, 0.5)',
-                        'rgba(75, 192, 192, 0.5)'
-                    ],
-                    hoverOffset: 4
-                }]
-            },
-            options: {
-                plugins: {
-                    legend: { position: 'right' }
-                }
-            }
-        });
-    });
-
-    // Response Rate
-    // Response Rate
-fetch("{% url 'services:response_rate' %}")
-.then(response => response.json())
-.then(data => {
-    // Update the text summary (optional)
-    const responseRateText = document.getElementById('responseRateText');
-    responseRateText.textContent = `You have responded to ${data.responded_reviews} out of ${data.total_reviews} reviews (${data.response_rate}%).`;
-
-    // Calculate values for the chart
-    const ctx = document.getElementById('responseRateChart').getContext('2d');
-    const responded = data.responded_reviews;
-    const notResponded = data.total_reviews - data.responded_reviews;
-
-    new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Responded', 'Not Responded'],
-            datasets: [{
-                data: [responded, notResponded],
-                backgroundColor: [
-                    'rgba(75, 192, 192, 0.7)', // Teal for responded
-                    'rgba(255, 99, 132, 0.7)'  // Pink for not responded
-                ],
-                hoverOffset: 4
-            }]
-        },
-        options: {
-            plugins: {
-                legend: {
-                    position: 'bottom',
+        // Average Rating Over Time
+        fetch("{% url 'services:average_rating_over_time' %}")
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('averageRatingChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.dates,
+                    datasets: [{
+                        label: 'Average Rating',
+                        data: data.avg_ratings,
+                        borderColor: 'rgba(16, 185, 129, 1)',
+                        fill: false,
+                        spanGaps: true,
+                        tension: 0.1
+                    }]
                 },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            const label = context.label || '';
-                            const value = context.raw;
-                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                            const percentage = ((value / total) * 100).toFixed(1);
-                            return `${label}: ${value} (${percentage}%)`;
+                options: {
+                    scales: {
+                        y: { min: 0, max: 5 },
+                        x: {
+                            ticks: { autoSkip: true, maxTicksLimit: 10 },
+                            type: 'time',
+                            time: { unit: 'day' }
                         }
                     }
                 }
-            },
-            // Optional: Add a title
-            title: {
-                display: true,
-                text: 'Response Rate'
-            },
-            maintainAspectRatio: false, // Allow chart to resize
-        }
-    });
-})
-.catch(error => {
-    console.error('Error fetching response rate data:', error);
-});
+            });
+        });
 
+        // Rating Distribution
+        fetch("{% url 'services:rating_distribution' %}")
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('ratingDistributionChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.ratings,
+                    datasets: [{
+                        label: 'Number of Reviews',
+                        data: data.counts,
+                        backgroundColor: 'rgba(124, 58, 237, 0.5)',
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: { title: { display: true, text: 'Rating Stars' } },
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        });
 
-    // Recent Reviews
-    fetch("{% url 'services:recent_reviews' %}")
-    .then(response => response.json())
-    .then(data => {
-        const container = document.getElementById('reviewsContainer');
-        data.reviews.forEach(review => {
-            const reviewDiv = document.createElement('div');
-            reviewDiv.classList.add('p-4', 'bg-white', 'rounded', 'shadow');
+        // Category Distribution
+        fetch("{% url 'services:service_category_distribution' %}")
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('categoryDistributionChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: data.categories,
+                    datasets: [{
+                        data: data.counts,
+                        backgroundColor: [
+                            'rgba(239, 68, 68, 0.5)',
+                            'rgba(59, 130, 246, 0.5)',
+                            'rgba(16, 185, 129, 0.5)',
+                            'rgba(245, 158, 11, 0.5)'
+                        ],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: { position: 'right' }
+                    }
+                }
+            });
+        });
 
-            // Convert rating to stars
-            const ratingStars = '★'.repeat(parseInt(review.RatingStars)) + '☆'.repeat(5 - parseInt(review.RatingStars));
+        // Response Rate
+        fetch("{% url 'services:response_rate' %}")
+        .then(response => response.json())
+        .then(data => {
+            const responseRateText = document.getElementById('responseRateText');
+            responseRateText.textContent = `You have responded to ${data.responded_reviews} out of ${data.total_reviews} reviews (${data.response_rate}%).`;
 
-            reviewDiv.innerHTML = `
-                <p><strong>User:</strong> ${review.Username}</p>
-                <p><strong>Rating:</strong> <span class="text-yellow-500">${ratingStars}</span></p>
-                <p><strong>Comment:</strong> ${review.RatingMessage}</p>
-                <p class="text-sm text-gray-500"><strong>Date:</strong> ${new Date(review.Timestamp).toLocaleDateString()}</p>
-            `;
-            container.appendChild(reviewDiv);
+            const ctx = document.getElementById('responseRateChart').getContext('2d');
+            const responded = data.responded_reviews;
+            const notResponded = data.total_reviews - data.responded_reviews;
+
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Responded', 'Not Responded'],
+                    datasets: [{
+                        data: [responded, notResponded],
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.7)',
+                            'rgba(239, 68, 68, 0.7)'
+                        ],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Response Rate'
+                    },
+                    maintainAspectRatio: false,
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching response rate data:', error);
+        });
+
+        // Recent Reviews
+        fetch("{% url 'services:recent_reviews' %}")
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('reviewsContainer');
+            data.reviews.forEach(review => {
+                const reviewDiv = document.createElement('div');
+                reviewDiv.classList.add('p-4', 'bg-gray-50', 'rounded-lg', 'shadow', 'hover:shadow-md', 'transition-shadow', 'duration-300');
+
+                const ratingStars = '★'.repeat(parseInt(review.RatingStars)) + '☆'.repeat(5 - parseInt(review.RatingStars));
+
+                reviewDiv.innerHTML = `
+                    <p class="font-semibold text-gray-700">${review.Username}</p>
+                    <p class="text-yellow-500">${ratingStars}</p>
+                    <p class="text-gray-600 mt-2">${review.RatingMessage}</p>
+                    <p class="text-sm text-gray-500 mt-2">${new Date(review.Timestamp).toLocaleDateString()}</p>
+                `;
+                container.appendChild(reviewDiv);
+            });
+        });
+
+        // Word Cloud
+        fetch("{% url 'services:review_word_cloud' %}")
+        .then(response => response.json())
+        .then(data => {
+            const words = data.words;
+
+            const layout = d3.layout.cloud()
+                .size([document.getElementById('wordCloud').offsetWidth, 400])
+                .words(words.map(function(d) {
+                    return {text: d.text, size: 10 + d.size * 2};
+                }))
+                .padding(5)
+                .rotate(function() { return ~~(Math.random() * 2) * 90; })
+                .fontSize(function(d) { return d.size; })
+                .on("end", draw);
+
+            layout.start();
+
+            function draw(words) {
+                d3.select("#wordCloud svg")
+                    .attr("width", layout.size()[0])
+                    .attr("height", layout.size()[1])
+                    .append("g")
+                    .attr("transform", "translate(" + layout.size()[0]/2 + "," + layout.size()[1]/2 + ")")
+                    .selectAll("text")
+                    .data(words)
+                    .enter().append("text")
+                    .style("font-size", function(d) { return d.size + "px"; })
+                    .style("font-family", "Inter, sans-serif")
+                    .style("fill", function() { return 'hsl(' + Math.random() * 360 + ',70%,50%)'; })
+                    .attr("text-anchor", "middle")
+                    .attr("transform", function(d) {
+                        return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+                    })
+                    .text(function(d) { return d.text; });
+            }
+        });
+
+        // User Analytics
+        fetch("{% url 'services:user_analytics' %}")
+        .then(response => response.json())
+        .then(data => {
+            const labels = ['Average Rating', 'Average Bookmarks per Service', 'Average Reviews per Service'];
+            const userMetrics = [
+                data.user_metrics.average_rating,
+                data.user_metrics.total_bookmarks / data.user_metrics.total_services || 0,
+                data.user_metrics.total_reviews / data.user_metrics.total_services || 0,
+            ];
+
+            const ctx = document.getElementById('comparativeChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Your Services',
+                            data: userMetrics,
+                            backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                        },
+                    ],
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Values',
+                            },
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Metrics',
+                            },
+                        },
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                    },
+                },
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching comparative analytics data:', error);
         });
     });
-
-    // Word Cloud
-    fetch("{% url 'services:review_word_cloud' %}")
-    .then(response => response.json())
-    .then(data => {
-        const words = data.words;
-
-        const layout = d3.layout.cloud()
-            .size([document.getElementById('wordCloud').offsetWidth, 400])
-            .words(words.map(function(d) {
-                return {text: d.text, size: 10 + d.size * 2};
-            }))
-            .padding(5)
-            .rotate(function() { return ~~(Math.random() * 2) * 90; })
-            .fontSize(function(d) { return d.size; })
-            .on("end", draw);
-
-        layout.start();
-
-        function draw(words) {
-            d3.select("#wordCloud svg")
-                .attr("width", layout.size()[0])
-                .attr("height", layout.size()[1])
-                .append("g")
-                .attr("transform", "translate(" + layout.size()[0]/2 + "," + layout.size()[1]/2 + ")")
-                .selectAll("text")
-                .data(words)
-                .enter().append("text")
-                .style("font-size", function(d) { return d.size + "px"; })
-                .style("fill", function() { return 'hsl(' + Math.random() * 360 + ',70%,50%)'; })
-                .attr("text-anchor", "middle")
-                .attr("transform", function(d) {
-                    return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
-                })
-                .text(function(d) { return d.text; });
-        }
-    });
-
-    // User Analytics
-fetch("{% url 'services:user_analytics' %}")
-.then(response => response.json())
-.then(data => {
-    const labels = ['Average Rating', 'Average Bookmarks per Service', 'Average Reviews per Service'];
-    const userMetrics = [
-        data.user_metrics.average_rating,
-        data.user_metrics.total_bookmarks / data.user_metrics.total_services || 0,
-        data.user_metrics.total_reviews / data.user_metrics.total_services || 0,
-    ];
-
-    const ctx = document.getElementById('comparativeChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [
-                {
-                    label: 'Your Services',
-                    data: userMetrics,
-                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                },
-            ],
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Values',
-                    },
-                },
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Metrics',
-                    },
-                },
-            },
-            plugins: {
-                legend: {
-                    position: 'top',
-                },
-            },
-        },
-    });
-})
-.catch(error => {
-    console.error('Error fetching comparative analytics data:', error);
-});
-});
 </script>
 {% endblock %}

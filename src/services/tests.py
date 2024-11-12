@@ -90,25 +90,25 @@ class ServiceViewsTestCase(TestCase):
             response.context["description_formset"], DescriptionFormSet
         )
 
-    # def test_service_create_view_post_success(self):
-    #     self.client.login(username="provider", password="testpass123")
-    #     data = {
-    #         "name": "New Service",
-    #         "address": "123 Test St",
-    #         "latitude": "40.7128",
-    #         "longitude": "-74.0060",
-    #         "category": "Mental Health Center",
-    #         "description-0-key": "hours",
-    #         "description-0-value": "9-5",
-    #         "description-TOTAL_FORMS": "1",
-    #         "description-INITIAL_FORMS": "0",
-    #         "description-MIN_NUM_FORMS": "0",
-    #         "description-MAX_NUM_FORMS": "1000",
-    #     }
-    #     with patch.object(ServiceRepository, "create_service") as mock_create:
-    #         mock_create.return_value = True
-    #         response = self.client.post(reverse("services:create"), data)
-    #         self.assertRedirects(response, reverse("services:list"))
+    def test_service_create_view_post_success(self):
+        self.client.login(username="provider", password="testpass123")
+        data = {
+            "name": "New Service",
+            "address": "123 Test St",
+            "latitude": "40.7128",
+            "longitude": "-74.0060",
+            "category": "Mental Health Center",
+            "description-0-key": "hours",
+            "description-0-value": "9-5",
+            "description-TOTAL_FORMS": "1",
+            "description-INITIAL_FORMS": "0",
+            "description-MIN_NUM_FORMS": "0",
+            "description-MAX_NUM_FORMS": "1000",
+        }
+        with patch.object(ServiceRepository, "create_service") as mock_create:
+            mock_create.return_value = True
+            response = self.client.post(reverse("services:create"), data)
+            self.assertRedirects(response, reverse("services:list"))
 
     def test_service_edit_view_get(self):
         self.client.login(username="provider", password="testpass123")
@@ -714,24 +714,512 @@ class ServiceViewsAdditionalTests(TestCase):
         self.assertFalse(response.context["form"].is_valid())
         self.assertTrue(response.context["description_formset"].is_valid())
 
-    # def test_review_list_view(self):
-    #     # Log in as service provider
-    #     self.client.login(username="provider", password="testpass123")
+class ServiceAnalyticsViewsTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.service_provider = User.objects.create_user(
+            username="provider_analytics",
+            email="provider_analytics@email.com",
+            password="testpass123",
+            user_type="service_provider",
+        )
+        self.regular_user = User.objects.create_user(
+            username="regular_analytics",
+            email="regular_analytics@email.com",
+            password="testpass123",
+            user_type="user",
+        )
+        self.service_repo = ServiceRepository()
+        self.review_repo = ReviewRepository()
 
-    #     with patch.object(ServiceRepository, "get_service") as mock_get_service, \
-    #         patch.object(ReviewRepository, "get_reviews_for_service") as mock_get_reviews:
-    #         # Mock the service and reviews to simulate database response
-    #             mock_get_service.return_value = self.sample_service
-    #             mock_get_reviews.return_value = [
-    #                 MagicMock(review_id="1", responseText="Great service!"),
-    #                 MagicMock(review_id="2", responseText="Would recommend!")
-    #             ]
+        # Sample service data
+        self.sample_service_id = str(uuid.uuid4())
+        self.sample_service = ServiceDTO(
+            id=self.sample_service_id,
+            name="Analytics Service",
+            address="456 Analytics Ave",
+            category="MENTAL",
+            provider_id=str(self.service_provider.id),
+            latitude=Decimal("40.7128"),
+            longitude=Decimal("-74.0060"),
+            ratings=Decimal("4.5"),
+            description={"hours": "8-6"},
+            service_created_timestamp="2023-01-01T12:00:00Z",
+            service_status=ServiceStatus.APPROVED.value,
+            service_approved_timestamp="2023-01-02T12:00:00Z",
+            is_active=True,
+        )
 
-    #             # Call the view
-    #             response = self.client.get(reverse("services:review_list", args=[self.sample_service_id]))
+    def tearDown(self):
+        super().tearDown()
+        User.objects.all().delete()
 
-    #             # Assert correct response and context data
-    #             self.assertEqual(response.status_code, 200)
-    #             self.assertTemplateUsed(response, "review_html.html")
-    #             self.assertIn("reviews", response.context)
-    #             self.assertEqual(len(response.context["reviews"]), 2)
+    # Helper methods
+    def login_as_provider(self):
+        self.client.login(username="provider_analytics", password="testpass123")
+
+    def login_as_regular(self):
+        self.client.login(username="regular_analytics", password="testpass123")
+
+    # 1. Test service_details view
+    @patch("services.views.service_repo.get_service")
+    def test_service_details_view_authenticated(self, mock_get_service):
+        self.login_as_regular()
+        mock_get_service.return_value = self.sample_service
+
+        response = self.client.get(reverse("services:service_details", args=[self.sample_service_id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'application/json')
+        expected_data = {
+            "id": self.sample_service.id,
+            "name": self.sample_service.name,
+            "category": self.sample_service.category,
+            "address": self.sample_service.address,
+            "latitude": float(self.sample_service.latitude),
+            "longitude": float(self.sample_service.longitude),
+            "description": self.sample_service.description,
+            "is_active": self.sample_service.is_active,
+            "reviews": [],  # Assuming no reviews are mocked
+        }
+        self.assertJSONEqual(response.content, expected_data)
+        mock_get_service.assert_called_once_with(self.sample_service_id)
+
+    # @patch("services.views.service_repo.get_service")
+    # def test_service_details_view_service_not_found(self, mock_get_service):
+    #     self.login_as_regular()
+    #     mock_get_service.return_value = None
+
+    #     response = self.client.get(reverse("services:service_details", args=[self.sample_service_id]))
+
+    #     self.assertEqual(response.status_code, 404)
+
+    def test_service_details_view_unauthenticated(self):
+        response = self.client.get(reverse("services:service_details", args=[self.sample_service_id]))
+        self.assertEqual(response.status_code, 302)  # Redirect to login
+        self.assertTrue(response.url.startswith("/accounts/login/"))
+
+    # 2. Test dashboard view
+    def test_dashboard_view_as_service_provider(self):
+        self.login_as_provider()
+        response = self.client.get(reverse("services:dashboard"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "dashboard.html")
+
+    def test_dashboard_view_as_regular_user(self):
+        self.login_as_regular()
+        response = self.client.get(reverse("services:dashboard"))
+        self.assertEqual(response.status_code, 403)
+
+    def test_dashboard_view_unauthenticated(self):
+        response = self.client.get(reverse("services:dashboard"))
+        self.assertEqual(response.status_code, 302)  # Redirect to login
+        self.assertTrue(response.url.startswith("/accounts/login/"))
+
+    # 3. Test bookmarks_over_time view
+    @patch("services.views.home_repo.get_bookmarks_for_services")
+    @patch("services.views.service_repo.get_services_by_provider")
+    def test_bookmarks_over_time_view_as_provider(self, mock_get_services, mock_get_bookmarks):
+        self.login_as_provider()
+        mock_get_services.return_value = [self.sample_service]
+        mock_get_bookmarks.return_value = [
+            {"timestamp": "2024-10-12T12:00:00Z"},
+            {"timestamp": "2024-10-13T12:00:00Z"},
+            # Add more mock bookmarks as needed
+        ]
+
+        response = self.client.get(reverse("services:bookmarks_over_time"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'application/json')
+        data = response.json()
+        self.assertIn("dates", data)
+        self.assertIn("counts", data)
+        mock_get_services.assert_called_once_with(self.service_provider.id)
+        mock_get_bookmarks.assert_called_once_with([self.sample_service_id])
+
+    def test_bookmarks_over_time_view_as_regular_user(self):
+        self.login_as_regular()
+        response = self.client.get(reverse("services:bookmarks_over_time"))
+        self.assertEqual(response.status_code, 403)
+
+    def test_bookmarks_over_time_view_unauthenticated(self):
+        response = self.client.get(reverse("services:bookmarks_over_time"))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith("/accounts/login/"))
+
+    # 4. Test bookmarks_over_time_view_no_bookmarks
+    @patch("services.views.home_repo.get_bookmarks_for_services")
+    @patch("services.views.service_repo.get_services_by_provider")
+    def test_bookmarks_over_time_view_no_bookmarks(self, mock_get_services, mock_get_bookmarks):
+        self.login_as_provider()
+        mock_get_services.return_value = [self.sample_service]
+        mock_get_bookmarks.return_value = []  # No bookmarks
+
+        response = self.client.get(reverse("services:bookmarks_over_time"))
+
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIn("dates", data)
+        self.assertIn("counts", data)
+        self.assertEqual(len(data["dates"]), 30)
+        self.assertEqual(len(data["counts"]), 30)
+        self.assertTrue(all(count == 0 for count in data["counts"]))
+
+        mock_get_services.assert_called_once_with(self.service_provider.id)
+        mock_get_bookmarks.assert_called_once_with([self.sample_service_id])
+
+    # 5. Test reviews_over_time view
+    @patch("services.views.home_repo.get_reviews_for_services")
+    @patch("services.views.service_repo.get_services_by_provider")
+    def test_reviews_over_time_view_as_provider(self, mock_get_services, mock_get_reviews):
+        self.login_as_provider()
+        mock_get_services.return_value = [self.sample_service]
+        mock_get_reviews.return_value = [
+            {"Timestamp": "2024-10-12T12:00:00Z"},
+            {"Timestamp": "2024-10-13T12:00:00Z"},
+            # Add more mock reviews as needed
+        ]
+
+        response = self.client.get(reverse("services:reviews_over_time"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'application/json')
+        data = response.json()
+        self.assertIn("dates", data)
+        self.assertIn("counts", data)
+        mock_get_services.assert_called_once_with(self.service_provider.id)
+        mock_get_reviews.assert_called_once_with([self.sample_service_id])
+
+    def test_reviews_over_time_view_as_regular_user(self):
+        self.login_as_regular()
+        response = self.client.get(reverse("services:reviews_over_time"))
+        self.assertEqual(response.status_code, 403)
+
+    def test_reviews_over_time_view_unauthenticated(self):
+        response = self.client.get(reverse("services:reviews_over_time"))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith("/accounts/login/"))
+
+    # 6. Test average_rating_over_time view
+    @patch("services.views.home_repo.get_reviews_for_services")
+    @patch("services.views.service_repo.get_services_by_provider")
+    def test_average_rating_over_time_view_as_provider(self, mock_get_services, mock_get_reviews):
+        self.login_as_provider()
+        mock_get_services.return_value = [self.sample_service]
+        mock_get_reviews.return_value = [
+            {"Timestamp": "2024-10-12T12:00:00Z", "RatingStars": "5"},
+            {"Timestamp": "2024-10-12T13:00:00Z", "RatingStars": "4"},
+            {"Timestamp": "2024-10-13T12:00:00Z", "RatingStars": "3"},
+            # Add more mock reviews as needed
+        ]
+
+        response = self.client.get(reverse("services:average_rating_over_time"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'application/json')
+        data = response.json()
+        self.assertIn("dates", data)
+        self.assertIn("avg_ratings", data)
+        mock_get_services.assert_called_once_with(self.service_provider.id)
+        mock_get_reviews.assert_called_once_with([self.sample_service_id])
+
+    def test_average_rating_over_time_view_as_regular_user(self):
+        self.login_as_regular()
+        response = self.client.get(reverse("services:average_rating_over_time"))
+        self.assertEqual(response.status_code, 403)
+
+    def test_average_rating_over_time_view_unauthenticated(self):
+        response = self.client.get(reverse("services:average_rating_over_time"))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith("/accounts/login/"))
+
+    # 7. Test rating_distribution view
+    @patch("services.views.home_repo.get_reviews_for_services")
+    @patch("services.views.service_repo.get_services_by_provider")
+    def test_rating_distribution_view_as_provider(self, mock_get_services, mock_get_reviews):
+        self.login_as_provider()
+        mock_get_services.return_value = [self.sample_service]
+        mock_get_reviews.return_value = [
+            {"RatingStars": "5"},
+            {"RatingStars": "4"},
+            {"RatingStars": "5"},
+            {"RatingStars": "3"},
+            # Add more mock reviews as needed
+        ]
+
+        response = self.client.get(reverse("services:rating_distribution"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'application/json')
+        data = response.json()
+        self.assertIn("ratings", data)
+        self.assertIn("counts", data)
+        mock_get_services.assert_called_once_with(self.service_provider.id)
+        mock_get_reviews.assert_called_once_with([self.sample_service_id])
+
+    def test_rating_distribution_view_as_regular_user(self):
+        self.login_as_regular()
+        response = self.client.get(reverse("services:rating_distribution"))
+        self.assertEqual(response.status_code, 403)
+
+    def test_rating_distribution_view_unauthenticated(self):
+        response = self.client.get(reverse("services:rating_distribution"))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith("/accounts/login/"))
+
+    # 8. Test recent_reviews view
+    @patch("services.views.home_repo.get_reviews_for_services")
+    @patch("services.views.service_repo.get_services_by_provider")
+    def test_recent_reviews_view_as_provider(self, mock_get_services, mock_get_reviews):
+        self.login_as_provider()
+        mock_get_services.return_value = [self.sample_service]
+        mock_get_reviews.return_value = [
+            {"ReviewId": "r1", "Timestamp": "2024-10-15T12:00:00Z"},
+            {"ReviewId": "r2", "Timestamp": "2024-10-14T12:00:00Z"},
+            {"ReviewId": "r3", "Timestamp": "2024-10-13T12:00:00Z"},
+            {"ReviewId": "r4", "Timestamp": "2024-10-12T12:00:00Z"},
+            {"ReviewId": "r5", "Timestamp": "2024-10-11T12:00:00Z"},
+            {"ReviewId": "r6", "Timestamp": "2024-10-10T12:00:00Z"},
+        ]
+
+        response = self.client.get(reverse("services:recent_reviews"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'application/json')
+        data = response.json()
+        self.assertIn("reviews", data)
+        self.assertEqual(len(data["reviews"]), 5)  # Top 5 recent reviews
+        mock_get_services.assert_called_once_with(self.service_provider.id)
+        mock_get_reviews.assert_called_once_with([self.sample_service_id])
+
+    def test_recent_reviews_view_as_regular_user(self):
+        self.login_as_regular()
+        response = self.client.get(reverse("services:recent_reviews"))
+        self.assertEqual(response.status_code, 403)
+
+    def test_recent_reviews_view_unauthenticated(self):
+        response = self.client.get(reverse("services:recent_reviews"))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith("/accounts/login/"))
+
+    # 9. Test response_rate view
+    @patch("services.views.home_repo.get_reviews_for_services")
+    @patch("services.views.service_repo.get_services_by_provider")
+    def test_response_rate_view_as_provider(self, mock_get_services, mock_get_reviews):
+        self.login_as_provider()
+        mock_get_services.return_value = [self.sample_service]
+        mock_get_reviews.return_value = [
+            {"ResponseText": "Thanks!"},
+            {"ResponseText": ""},
+            {"ResponseText": "We appreciate your feedback."},
+            {"ResponseText": ""},
+        ]
+
+        response = self.client.get(reverse("services:response_rate"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'application/json')
+        data = response.json()
+        self.assertIn("total_reviews", data)
+        self.assertIn("responded_reviews", data)
+        self.assertIn("response_rate", data)
+        self.assertEqual(data["total_reviews"], 4)
+        self.assertEqual(data["responded_reviews"], 2)
+        self.assertEqual(data["response_rate"], 50.0)
+        mock_get_services.assert_called_once_with(self.service_provider.id)
+        mock_get_reviews.assert_called_once_with([self.sample_service_id])
+
+    def test_response_rate_view_as_regular_user(self):
+        self.login_as_regular()
+        response = self.client.get(reverse("services:response_rate"))
+        self.assertEqual(response.status_code, 403)
+
+    def test_response_rate_view_unauthenticated(self):
+        response = self.client.get(reverse("services:response_rate"))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith("/accounts/login/"))
+
+    # 10. Test review_word_cloud view
+    @patch("services.views.home_repo.get_reviews_for_services")
+    @patch("services.views.service_repo.get_services_by_provider")
+    def test_review_word_cloud_view_as_provider(self, mock_get_services, mock_get_reviews):
+        self.login_as_provider()
+        mock_get_services.return_value = [self.sample_service]
+        mock_get_reviews.return_value = [
+            {"RatingMessage": "Great service and friendly staff."},
+            {"RatingMessage": "Excellent support and helpful."},
+            {"RatingMessage": "Good experience overall."},
+        ]
+
+        response = self.client.get(reverse("services:review_word_cloud"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'application/json')
+        data = response.json()
+        self.assertIn("words", data)
+        self.assertIsInstance(data["words"], list)
+        self.assertTrue(len(data["words"]) <= 50)
+        mock_get_services.assert_called_once_with(self.service_provider.id)
+        mock_get_reviews.assert_called_once_with([self.sample_service_id])
+
+    def test_review_word_cloud_view_as_regular_user(self):
+        self.login_as_regular()
+        response = self.client.get(reverse("services:review_word_cloud"))
+        self.assertEqual(response.status_code, 403)
+
+    def test_review_word_cloud_view_unauthenticated(self):
+        response = self.client.get(reverse("services:review_word_cloud"))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith("/accounts/login/"))
+
+    # 11. Test service_category_distribution view
+    @patch("services.views.service_repo.get_services_by_provider")
+    def test_service_category_distribution_view_as_provider(self, mock_get_services):
+        self.login_as_provider()
+        mock_get_services.return_value = [
+            self.sample_service,
+            ServiceDTO(
+                id=str(uuid.uuid4()),
+                name="Another Service",
+                address="789 Another St",
+                category="FOOD",
+                provider_id=str(self.service_provider.id),
+                latitude=Decimal("40.7128"),
+                longitude=Decimal("-74.0060"),
+                ratings=Decimal("4.0"),
+                description={"hours": "10-4"},
+                service_created_timestamp="2023-02-01T12:00:00Z",
+                service_status=ServiceStatus.APPROVED.value,
+                service_approved_timestamp="2023-02-02T12:00:00Z",
+                is_active=True,
+            ),
+        ]
+
+        response = self.client.get(reverse("services:service_category_distribution"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'application/json')
+        data = response.json()
+        self.assertIn("categories", data)
+        self.assertIn("counts", data)
+        self.assertEqual(data["categories"], ["MENTAL", "FOOD"])
+        self.assertEqual(data["counts"], [1, 1])
+        mock_get_services.assert_called_once_with(self.service_provider.id)
+
+    def test_service_category_distribution_view_as_regular_user(self):
+        self.login_as_regular()
+        response = self.client.get(reverse("services:service_category_distribution"))
+        self.assertEqual(response.status_code, 403)
+
+    def test_service_category_distribution_view_unauthenticated(self):
+        response = self.client.get(reverse("services:service_category_distribution"))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith("/accounts/login/"))
+
+    # 12. Test user_analytics view
+    @patch("services.views.home_repo.compute_user_metrics")
+    def test_user_analytics_view_as_provider(self, mock_compute_metrics):
+        self.login_as_provider()
+        mock_compute_metrics.return_value = {
+            "total_services": 5,
+            "total_reviews": 20,
+            "average_rating": 4.2,
+            # Add more metrics as needed
+        }
+
+        response = self.client.get(reverse("services:user_analytics"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'application/json')
+        data = response.json()
+        self.assertIn("user_metrics", data)
+        self.assertEqual(data["user_metrics"], mock_compute_metrics.return_value)
+        mock_compute_metrics.assert_called_once_with(str(self.service_provider.id))
+
+    def test_user_analytics_view_as_regular_user(self):
+        self.login_as_regular()
+        response = self.client.get(reverse("services:user_analytics"))
+        self.assertEqual(response.status_code, 403)
+
+    def test_user_analytics_view_unauthenticated(self):
+        response = self.client.get(reverse("services:user_analytics"))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith("/accounts/login/"))
+
+    # 13. Additional Edge Case Tests
+
+    @patch("services.views.home_repo.get_bookmarks_for_services")
+    @patch("services.views.service_repo.get_services_by_provider")
+    def test_bookmarks_over_time_view_no_bookmarks(self, mock_get_services, mock_get_bookmarks):
+        self.login_as_provider()
+        mock_get_services.return_value = [self.sample_service]
+        mock_get_bookmarks.return_value = []  # No bookmarks
+
+        response = self.client.get(reverse("services:bookmarks_over_time"))
+
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIn("dates", data)
+        self.assertIn("counts", data)
+        self.assertEqual(len(data["dates"]), 30)
+        self.assertEqual(len(data["counts"]), 30)
+        self.assertTrue(all(count == 0 for count in data["counts"]))
+
+        mock_get_services.assert_called_once_with(self.service_provider.id)
+        mock_get_bookmarks.assert_called_once_with([self.sample_service_id])
+
+    @patch("services.views.home_repo.get_reviews_for_services")
+    @patch("services.views.service_repo.get_services_by_provider")
+    def test_average_rating_over_time_view_no_reviews(self, mock_get_services, mock_get_reviews):
+        self.login_as_provider()
+        mock_get_services.return_value = [self.sample_service]
+        mock_get_reviews.return_value = []  # No reviews
+
+        response = self.client.get(reverse("services:average_rating_over_time"))
+
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIn("avg_ratings", data)
+        self.assertEqual(len(data["avg_ratings"]), 30)
+        self.assertTrue(all(rating is None for rating in data["avg_ratings"]))
+
+    @patch("services.views.home_repo.get_reviews_for_services")
+    @patch("services.views.service_repo.get_services_by_provider")
+    def test_response_rate_view_no_reviews(self, mock_get_services, mock_get_reviews):
+        self.login_as_provider()
+        mock_get_services.return_value = [self.sample_service]
+        mock_get_reviews.return_value = []  # No reviews
+
+        response = self.client.get(reverse("services:response_rate"))
+
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["total_reviews"], 0)
+        self.assertEqual(data["responded_reviews"], 0)
+        self.assertEqual(data["response_rate"], 0)
+    
+    @patch("services.views.service_repo.get_services_by_provider")
+    def test_service_category_distribution_view_no_services(self, mock_get_services):
+        self.login_as_provider()
+        mock_get_services.return_value = []  # No services
+
+        response = self.client.get(reverse("services:service_category_distribution"))
+
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["categories"], [])
+        self.assertEqual(data["counts"], [])
+
+    @patch("services.views.home_repo.compute_user_metrics")
+    def test_user_analytics_view_no_metrics(self, mock_compute_metrics):
+        self.login_as_provider()
+        mock_compute_metrics.return_value = {}  # No metrics
+
+        response = self.client.get(reverse("services:user_analytics"))
+
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIn("user_metrics", data)
+        self.assertEqual(data["user_metrics"], mock_compute_metrics.return_value)
+        mock_compute_metrics.assert_called_once_with(str(self.service_provider.id))
