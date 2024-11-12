@@ -5,14 +5,6 @@ function toggleEdit() {
     editSection.classList.toggle('hidden');
 }
 
-const itemsData = JSON.parse('{{ serialized_bookmarks|escapejs }}');
-let userIsAuthenticated;
-if (authStatus === 'true') {
-    userIsAuthenticated = true;
-} else {
-    userIsAuthenticated = false;
-}
-
 document.addEventListener('DOMContentLoaded', () => {
     function formatTimestamp(timestamp) {
         return new Date(timestamp).toLocaleString();
@@ -236,7 +228,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 fetchAndDisplayReviews(serviceId, 1);
                 document.getElementById('reviewRating').value = '';
                 document.getElementById('reviewText').value = '';
-                alert('Review submitted successfully.');
             } else {
                 const error = await response.json();
                 alert(error.error || "Failed to submit review.");

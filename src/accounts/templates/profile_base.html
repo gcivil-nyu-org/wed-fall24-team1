@@ -170,7 +170,11 @@
 
 <div class="h-32"></div>
 {% endblock %}
-
 {% block scripts %}
+<script>
+    // Pass Django template variables to JS
+    const itemsData = JSON.parse('{{ serialized_bookmarks|escapejs }}');
+    const userIsAuthenticated = {{ user.is_authenticated|lower }};
+</script>
 <script src="{% static 'js/profile.js' %}"></script>
 {% endblock %}
