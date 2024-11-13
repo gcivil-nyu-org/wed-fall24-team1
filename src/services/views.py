@@ -139,21 +139,29 @@ def service_edit(request, service_id):
                     new_description_data[key] = value
 
             # Determine if any fields other than `is_active` have changed
-            status_should_remain_approved = (
-                service.name == service_data["name"]
-                and service.address == service_data["address"]
-                and service.latitude == service_data["latitude"]
-                and service.longitude == service_data["longitude"]
-                and service.category == service_data["category"]
-                and service.description == new_description_data
+            fields_changed = (
+                service.name != service_data["name"]
+                or service.address != service_data["address"]
+                or service.latitude != service_data["latitude"]
+                or service.longitude != service_data["longitude"]
+                or service.category != service_data["category"]
+                or service.description != new_description_data
             )
 
+            # Check if `is_active` was toggled
+            is_active_toggled = service.is_active != new_is_active
+
             # Decide the `service_status` based on changes
-            new_service_status = (
-                ServiceStatus.APPROVED.value
-                if status_should_remain_approved
-                else ServiceStatus.PENDING_APPROVAL.value
-            )
+            if not fields_changed and is_active_toggled:
+                # Retain the approved status if previously approved
+                new_service_status = (
+                    ServiceStatus.APPROVED.value
+                    if service.service_status == ServiceStatus.APPROVED.value
+                    else ServiceStatus.PENDING_APPROVAL.value
+                )
+            else:
+                # Default to pending approval if any other field changes
+                new_service_status = ServiceStatus.PENDING_APPROVAL.value
 
             # Prepare updated service DTO
             updated_service = ServiceDTO(
