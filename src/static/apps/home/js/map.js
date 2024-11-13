@@ -155,6 +155,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const clearFiltersBtn = document.getElementById('clear-filters');
     if (clearFiltersBtn) {
         clearFiltersBtn.addEventListener('click', function() {
+
             // Reset form fields
             document.getElementById('search').value = '';
             document.getElementById('location').value = '';
@@ -187,14 +188,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             serviceMarkers = {};
 
-            // Re-initialize service markers and service list
-            initializeServiceMarkers();
-            updateServiceList();
-
             // Reset filter select to default
             if (filterSelect) {
                 filterSelect.value = 'distance';
             }
+
+            // Reload the page to the default URL (without any query parameters)
+            window.location.href = window.location.pathname;
         });
     }
 
