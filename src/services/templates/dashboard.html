@@ -1,19 +1,19 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12">
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-transparent py-12">
+    <div class="container mx-auto px-2 sm:px-4 lg:px-6">
         <h1 class="text-4xl font-extrabold text-gray-900 text-center mb-12">Analytics Dashboard</h1>
 
         <!-- Row 1: Bookmarks Over Time & Reviews Over Time -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             <div class="bg-white rounded-lg shadow-lg p-6 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
                 <h2 class="text-2xl font-bold text-gray-800 mb-4">Bookmarks Over Time</h2>
-                <canvas id="bookmarksChart"></canvas>
+                <canvas id="bookmarksChart" class="w-full"></canvas>
             </div>
             <div class="bg-white rounded-lg shadow-lg p-6 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
                 <h2 class="text-2xl font-bold text-gray-800 mb-4">Reviews Over Time</h2>
-                <canvas id="reviewsChart"></canvas>
+                <canvas id="reviewsChart" class="w-full"></canvas>
             </div>
         </div>
 
@@ -21,11 +21,11 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             <div class="bg-white rounded-lg shadow-lg p-6 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
                 <h2 class="text-2xl font-bold text-gray-800 mb-4">Average Rating Over Time</h2>
-                <canvas id="averageRatingChart"></canvas>
+                <canvas id="averageRatingChart" class="w-full"></canvas>
             </div>
             <div class="bg-white rounded-lg shadow-lg p-6 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
                 <h2 class="text-2xl font-bold text-gray-800 mb-4">Rating Distribution</h2>
-                <canvas id="ratingDistributionChart"></canvas>
+                <canvas id="ratingDistributionChart" class="w-full"></canvas>
             </div>
         </div>
 
@@ -33,13 +33,13 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             <div class="bg-white rounded-lg shadow-lg p-6 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
                 <h2 class="text-2xl font-bold text-gray-800 mb-4">Service Category Distribution</h2>
-                <canvas id="categoryDistributionChart"></canvas>
+                <canvas id="categoryDistributionChart" class="w-full"></canvas>
             </div>
             <div class="bg-white rounded-lg shadow-lg p-6 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
                 <h2 class="text-2xl font-bold text-gray-800 mb-4">Response Rate to Reviews</h2>
                 <div class="flex flex-col items-center">
                     <p id="responseRateText" class="text-lg font-medium text-gray-600 mt-6 mb-4"></p>
-                    <div class="w-64 h-64">
+                    <div class="w-80 h-80">
                         <canvas id="responseRateChart"></canvas>
                     </div>
                 </div>
@@ -63,7 +63,7 @@
         <!-- Comparative Analytics -->
         <div class="bg-white rounded-lg shadow-lg p-6 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
             <h2 class="text-2xl font-bold text-gray-800 mb-4">User Analytics</h2>
-            <canvas id="comparativeChart"></canvas>
+            <canvas id="comparativeChart" class="w-full"></canvas>
         </div>
     </div>
 </div>
