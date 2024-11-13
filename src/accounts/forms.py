@@ -223,6 +223,8 @@ class ServiceSeekerForm(forms.ModelForm):
         }
 
 
+# Note: We're maintaining two different forms (even though they're the same) for seekers and providers to future-proof our code.
+# We *might* add additional fields for service providers soon.
 class ServiceProviderForm(forms.ModelForm):
     class Meta:
         model = CustomUser
@@ -231,12 +233,14 @@ class ServiceProviderForm(forms.ModelForm):
             "username": forms.TextInput(
                 attrs={
                     "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
+                    "readonly": "readonly",  # Make username non-editable
                     "placeholder": "Username",
                 }
             ),
             "email": forms.EmailInput(
                 attrs={
                     "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
+                    "readonly": "readonly",  # Make email non-editable
                     "placeholder": "Email Address",
                 }
             ),
@@ -252,5 +256,5 @@ class ServiceProviderForm(forms.ModelForm):
                     "placeholder": "Last Name",
                 }
             ),
-            # Add placeholders for any other fields if added in the future
         }
+        # Add any other basic fields you want to include for service providers
