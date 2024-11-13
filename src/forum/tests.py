@@ -4,7 +4,7 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.auth import get_user_model
-from .models import Category, Post, Comment
+from .models import Category, Notification, Post, Comment
 from .forms import PostForm, CommentForm
 
 
@@ -204,3 +204,197 @@ class ForumFormsTest(TestCase):
         form_data = {"content": ""}  # Content is required
         form = CommentForm(data=form_data)
         self.assertFalse(form.is_valid())
+
+
+class ForumDeleteCommentTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = get_user_model().objects.create_user(
+            username="testuser", email="test@example.com", password="testpass123"
+        )
+        self.other_user = get_user_model().objects.create_user(
+            username="otheruser", email="other@example.com", password="testpass123"
+        )
+        self.category = Category.objects.create(
+            name="Test Category", description="Test Description"
+        )
+        self.post = Post.objects.create(
+            title="Test Post",
+            content="Test Content",
+            author=self.user,
+            category=self.category,
+        )
+        self.comment = Comment.objects.create(
+            post=self.post, author=self.user, content="Test Comment"
+        )
+
+    def test_delete_comment_authenticated_owner_post_request(self):
+        self.client.login(username="testuser", password="testpass123")
+        response = self.client.post(
+            reverse("forum:delete_comment", args=[self.comment.id])
+        )
+        self.assertRedirects(
+            response, reverse("forum:post_detail", args=[self.post.id])
+        )
+        self.assertFalse(Comment.objects.filter(id=self.comment.id).exists())
+
+    def test_delete_comment_authenticated_owner_get_request(self):
+        self.client.login(username="testuser", password="testpass123")
+        response = self.client.get(
+            reverse("forum:delete_comment", args=[self.comment.id])
+        )
+        self.assertEqual(response.status_code, 403)  # Forbidden
+
+    def test_delete_comment_authenticated_non_owner(self):
+        self.client.login(username="otheruser", password="testpass123")
+        response = self.client.post(
+            reverse("forum:delete_comment", args=[self.comment.id])
+        )
+        self.assertEqual(response.status_code, 403)  # Forbidden
+        self.assertTrue(Comment.objects.filter(id=self.comment.id).exists())
+
+    def test_delete_comment_unauthenticated(self):
+        response = self.client.post(
+            reverse("forum:delete_comment", args=[self.comment.id])
+        )
+        self.assertEqual(response.status_code, 302)  # Redirect to login
+        self.assertTrue(Comment.objects.filter(id=self.comment.id).exists())
+
+
+class ForumNotificationsTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.recipient = get_user_model().objects.create_user(
+            username="recipient", email="recipient@example.com", password="testpass123"
+        )
+        self.sender = get_user_model().objects.create_user(
+            username="sender", email="sender@example.com", password="testpass123"
+        )
+        self.category = Category.objects.create(
+            name="Test Category", description="Test Description"
+        )
+        self.post = Post.objects.create(
+            title="Test Post",
+            content="Test Content",
+            author=self.recipient,
+            category=self.category,
+        )
+        self.notification = Notification.objects.create(
+            recipient=self.recipient,
+            sender=self.sender,
+            post=self.post,
+            message="Test Notification",
+        )
+
+    def test_mark_notification_read_authenticated_ajax(self):
+        self.client.login(username="recipient", password="testpass123")
+        response = self.client.post(
+            reverse("forum:mark_notification_read", args=[self.notification.id]),
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.notification.refresh_from_db()
+        self.assertTrue(self.notification.is_read)
+        self.assertJSONEqual(response.content, {"status": "success"})
+
+    def test_mark_notification_read_authenticated_non_recipient(self):
+        self.client.login(username="sender", password="testpass123")
+        response = self.client.post(
+            reverse("forum:mark_notification_read", args=[self.notification.id])
+        )
+        self.assertEqual(response.status_code, 404)  # Not found
+
+    def test_mark_notification_read_unauthenticated(self):
+        response = self.client.post(
+            reverse("forum:mark_notification_read", args=[self.notification.id])
+        )
+        self.assertEqual(response.status_code, 302)  # Redirect to login
+        self.notification.refresh_from_db()
+        self.assertFalse(self.notification.is_read)
+
+    def test_get_notifications_count_authenticated(self):
+        self.client.login(username="recipient", password="testpass123")
+        response = self.client.get(reverse("forum:get_notifications_count"))
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(response.content, {"count": 1})
+
+    def test_get_notifications_count_unauthenticated(self):
+        response = self.client.get(reverse("forum:get_notifications_count"))
+        self.assertEqual(response.status_code, 302)  # Redirect to login
+
+    def test_mark_all_notifications_read_authenticated_ajax(self):
+        # Create another unread notification
+        Notification.objects.create(
+            recipient=self.recipient,
+            sender=self.sender,
+            post=self.post,
+            message="Another Test Notification",
+        )
+        self.client.login(username="recipient", password="testpass123")
+        response = self.client.post(
+            reverse("forum:mark_all_notifications_read"),
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(response.content, {"status": "success"})
+        self.assertTrue(
+            Notification.objects.filter(recipient=self.recipient, is_read=False).count()
+            == 0
+        )
+
+    def test_mark_all_notifications_read_authenticated_non_ajax(self):
+        # Create another unread notification
+        Notification.objects.create(
+            recipient=self.recipient,
+            sender=self.sender,
+            post=self.post,
+            message="Another Test Notification",
+        )
+        self.client.login(username="recipient", password="testpass123")
+        response = self.client.post(reverse("forum:mark_all_notifications_read"))
+        self.assertEqual(response.status_code, 302)  # Redirect back
+        self.assertTrue(
+            Notification.objects.filter(recipient=self.recipient, is_read=False).count()
+            == 0
+        )
+
+    def test_mark_all_notifications_read_authenticated_invalid_method(self):
+        self.client.login(username="recipient", password="testpass123")
+        response = self.client.get(reverse("forum:mark_all_notifications_read"))
+        self.assertEqual(response.status_code, 403)  # Forbidden
+
+    def test_mark_all_notifications_read_unauthenticated(self):
+        response = self.client.post(reverse("forum:mark_all_notifications_read"))
+        self.assertEqual(response.status_code, 302)  # Redirect to login
+
+    def test_delete_notification_authenticated_ajax(self):
+        self.client.login(username="recipient", password="testpass123")
+        response = self.client.post(
+            reverse("forum:delete_notification", args=[self.notification.id]),
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(response.content, {"status": "success"})
+        self.assertFalse(Notification.objects.filter(id=self.notification.id).exists())
+
+    def test_delete_notification_authenticated_non_recipient(self):
+        self.client.login(username="sender", password="testpass123")
+        response = self.client.post(
+            reverse("forum:delete_notification", args=[self.notification.id])
+        )
+        self.assertEqual(response.status_code, 404)  # Not found
+        self.assertTrue(Notification.objects.filter(id=self.notification.id).exists())
+
+    def test_delete_notification_unauthenticated(self):
+        response = self.client.post(
+            reverse("forum:delete_notification", args=[self.notification.id])
+        )
+        self.assertEqual(response.status_code, 302)  # Redirect to login
+        self.assertTrue(Notification.objects.filter(id=self.notification.id).exists())
+
+    def test_delete_notification_authenticated_invalid_method(self):
+        self.client.login(username="recipient", password="testpass123")
+        response = self.client.get(
+            reverse("forum:delete_notification", args=[self.notification.id])
+        )
+        self.assertEqual(response.status_code, 403)  # Forbidden

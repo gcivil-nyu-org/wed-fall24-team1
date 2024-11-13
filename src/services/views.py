@@ -1,6 +1,6 @@
 import uuid
 from decimal import Decimal
-from datetime import datetime, timedelta  # Removed 'timezone' from here
+from datetime import datetime, timedelta, timezone
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import (
@@ -10,8 +10,7 @@ from django.http import (
     HttpResponseNotAllowed,
 )
 from django.shortcuts import render, redirect
-from django.utils import timezone  # Ensure this is imported
-
+from django.utils import timezone as timezone2  # Ensure this is imported
 from forum.models import Notification
 from home.repositories import HomeRepository
 from public_service_finder.utils.enums.service_status import ServiceStatus
@@ -359,7 +358,7 @@ def bookmarks_over_time(request):
     bookmarks = home_repo.get_bookmarks_for_services(service_ids)
 
     # Process bookmarks to get counts over the last 30 days
-    today = timezone.now().date()
+    today = timezone2.now().date()
     dates = [today - timedelta(days=i) for i in range(29, -1, -1)]
     date_strs = [date.isoformat() for date in dates]
     bookmarks_over_time = {date_str: 0 for date_str in date_strs}
@@ -387,7 +386,7 @@ def reviews_over_time(request):
     reviews = home_repo.get_reviews_for_services(service_ids)
 
     # Process reviews to get counts over the last 30 days
-    today = timezone.now().date()
+    today = timezone2.now().date()
     dates = [today - timedelta(days=i) for i in range(29, -1, -1)]
     date_strs = [date.isoformat() for date in dates]
     reviews_over_time = {date_str: 0 for date_str in date_strs}
@@ -416,7 +415,7 @@ def average_rating_over_time(request):
     reviews = home_repo.get_reviews_for_services(service_ids)
 
     # Process reviews to get average rating over the last 30 days
-    today = timezone.now().date()
+    today = timezone2.now().date()
     dates = [today - timedelta(days=i) for i in range(29, -1, -1)]
     date_strs = [date.isoformat() for date in dates]
     rating_over_time = {

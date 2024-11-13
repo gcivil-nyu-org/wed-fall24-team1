@@ -144,3 +144,4 @@ GitHub.sublime-settings
 .env
 ps_env
 .aider*
+src/staticfiles
