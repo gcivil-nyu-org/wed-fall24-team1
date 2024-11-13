@@ -25,6 +25,8 @@ class HomeRepository:
     ):
         filter_expression = None
 
+        search_query = search_query.lower() if search_query else None
+
         # Create filter based on search query and category
         if search_query and category_filter:
             filter_expression = And(
