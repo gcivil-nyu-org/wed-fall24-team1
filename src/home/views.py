@@ -6,7 +6,7 @@ from django.http import JsonResponse
 import uuid
 from django.views.decorators.http import require_POST
 from decimal import Decimal, Inexact, Rounded
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from forum.models import Notification
 from accounts.models import CustomUser
 from services.repositories import ServiceRepository
@@ -115,6 +115,9 @@ def submit_review(request):
 
 
 def home_view(request):
+    if request.user.is_authenticated and request.user.user_type == "service_provider":
+        return redirect("services:list")
+
     repo = HomeRepository()
     user = request.user if request.user.is_authenticated else None
 
