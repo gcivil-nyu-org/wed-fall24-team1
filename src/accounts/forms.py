@@ -9,20 +9,107 @@ from .models import CustomUser
 
 
 class UserRegisterForm(UserCreationForm):
+    username = forms.CharField(
+        max_length=150,
+        required=True,
+        widget=forms.TextInput(
+            attrs={
+                "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
+                "placeholder": "Username",
+            }
+        ),
+    )
+    email = forms.EmailField(
+        required=True,
+        widget=forms.EmailInput(
+            attrs={
+                "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
+                "placeholder": "Email Address",
+            }
+        ),
+    )
+    first_name = forms.CharField(
+        max_length=30,
+        required=True,
+        widget=forms.TextInput(
+            attrs={
+                "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
+                "placeholder": "First Name",
+            }
+        ),
+    )
+    last_name = forms.CharField(
+        max_length=30,
+        required=True,
+        widget=forms.TextInput(
+            attrs={
+                "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
+                "placeholder": "Last Name",
+            }
+        ),
+    )
+
+    password1 = forms.CharField(
+        label="Password",
+        widget=forms.PasswordInput(
+            attrs={
+                "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
+                "placeholder": "Enter Password",
+            }
+        ),
+        required=True,
+    )
+    password2 = forms.CharField(
+        label="Confirm Password",
+        widget=forms.PasswordInput(
+            attrs={
+                "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
+                "placeholder": "Confirm Password",
+            }
+        ),
+        required=True,
+    )
+
+    user_type = forms.ChoiceField(
+        choices=CustomUser.USER_TYPE_CHOICES,
+        required=True,
+        widget=forms.Select(
+            attrs={
+                "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
+                "placeholder": "Select User Type",
+            }
+        ),
+    )
+
     class Meta:
         model = CustomUser
-        fields = ["username", "email", "password1", "password2", "user_type"]
+        fields = [
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "password1",
+            "password2",
+            "user_type",
+        ]
 
 
 class UserLoginForm(AuthenticationForm):
     username = forms.CharField(
-        label="Username",
-        widget=forms.TextInput(attrs={"class": "form-control"}),
+        label="Username or Email",
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Enter your username or email",
+            }
+        ),
         required=True,
     )
     password = forms.CharField(
         label="Password",
-        widget=forms.PasswordInput(attrs={"class": "form-control"}),
+        widget=forms.PasswordInput(
+            attrs={"class": "form-control", "placeholder": "Enter your password"}
+        ),
         required=True,
     )
 
@@ -53,12 +140,16 @@ class UserLoginForm(AuthenticationForm):
 class ServiceProviderLoginForm(AuthenticationForm):
     email = forms.EmailField(
         label="Email",
-        widget=forms.EmailInput(attrs={"class": "form-control"}),
+        widget=forms.EmailInput(
+            attrs={"class": "form-control", "placeholder": "Enter your email"}
+        ),
         required=True,
     )
     password = forms.CharField(
         label="Password",
-        widget=forms.PasswordInput(attrs={"class": "form-control"}),
+        widget=forms.PasswordInput(
+            attrs={"class": "form-control", "placeholder": "Enter your password"}
+        ),
         required=True,
     )
 
@@ -107,22 +198,26 @@ class ServiceSeekerForm(forms.ModelForm):
                 attrs={
                     "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
                     "readonly": "readonly",  # Make username non-editable
+                    "placeholder": "Username",
                 }
             ),
             "email": forms.EmailInput(
                 attrs={
                     "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
                     "readonly": "readonly",  # Make email non-editable
+                    "placeholder": "Email Address",
                 }
             ),
             "first_name": forms.TextInput(
                 attrs={
                     "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
+                    "placeholder": "First Name",
                 }
             ),
             "last_name": forms.TextInput(
                 attrs={
                     "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
+                    "placeholder": "Last Name",
                 }
             ),
         }
@@ -132,4 +227,30 @@ class ServiceProviderForm(forms.ModelForm):
     class Meta:
         model = CustomUser
         fields = ["username", "email", "first_name", "last_name"]
-        # Add any other basic fields you want to include for service providers
+        widgets = {
+            "username": forms.TextInput(
+                attrs={
+                    "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
+                    "placeholder": "Username",
+                }
+            ),
+            "email": forms.EmailInput(
+                attrs={
+                    "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
+                    "placeholder": "Email Address",
+                }
+            ),
+            "first_name": forms.TextInput(
+                attrs={
+                    "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
+                    "placeholder": "First Name",
+                }
+            ),
+            "last_name": forms.TextInput(
+                attrs={
+                    "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
+                    "placeholder": "Last Name",
+                }
+            ),
+            # Add placeholders for any other fields if added in the future
+        }

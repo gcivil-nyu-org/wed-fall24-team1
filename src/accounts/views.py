@@ -32,15 +32,14 @@ def register(request):
     if request.method == "POST":
         form = UserRegisterForm(request.POST)
         if form.is_valid():
-            user = form.save()
+            user = form.save(commit=False)  # Don't save to DB yet
+            user.first_name = form.cleaned_data.get("first_name")
+            user.last_name = form.cleaned_data.get("last_name")
+            user.save()  # Now save to DB
             login(request, user, backend="django.contrib.auth.backends.ModelBackend")
             if user.user_type == "service_provider":
                 return redirect("services:list")
             else:
-                # CustomUser.objects.create(
-                #     username=user.username, email=user.email,
-                #     first_name="John", last_name="Doe"
-                # )
                 return redirect("home")
     else:
         form = UserRegisterForm()
