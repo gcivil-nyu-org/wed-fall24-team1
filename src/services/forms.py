@@ -61,7 +61,7 @@ class DescriptionItemForm(forms.Form):
     value = forms.CharField(widget=forms.Textarea(attrs={"rows": 3}))
 
 
-DescriptionFormSet = formset_factory(DescriptionItemForm, extra=1, can_delete=True)
+DescriptionFormSet = formset_factory(DescriptionItemForm, extra=0, can_delete=True)
 
 
 class ReviewResponseForm(forms.Form):
