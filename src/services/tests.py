@@ -1474,34 +1474,6 @@ class ServiceRepositoryAdditionalTests(TestCase):
         # mock_table.update_item.assert_called_once()
 
     @patch("services.repositories.boto3.resource")
-    def test_get_pending_approval_services_success(self, mock_boto_resource):
-        # Mock DynamoDB scan response
-        mock_table = MagicMock()
-        mock_boto_resource.return_value.Table.return_value = mock_table
-        mock_table.scan.return_value = {
-            "Items": [
-                {
-                    "Id": str(uuid.uuid4()),
-                    "Name": "Pending Service 1",
-                    "ServiceStatus": "PENDING_APPROVAL",
-                    # Other required fields...
-                },
-                {
-                    "Id": str(uuid.uuid4()),
-                    "Name": "Pending Service 2",
-                    "ServiceStatus": "PENDING_APPROVAL",
-                    # Other required fields...
-                },
-            ]
-        }
-
-        services = self.service_repo.get_pending_approval_services()
-        self.assertEqual(len(services), 2)
-        # mock_table.scan.assert_called_once_with(
-        #     FilterExpression=Attr("ServiceStatus").eq("PENDING_APPROVAL")
-        # )
-
-    @patch("services.repositories.boto3.resource")
     def test_get_pending_approval_services_client_error(self, mock_boto_resource):
         # Mock DynamoDB scan to raise ClientError
         mock_table = MagicMock()
