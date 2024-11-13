@@ -110,6 +110,25 @@ document.addEventListener('DOMContentLoaded', function() {
             map.invalidateSize();
         }, 100);
     }
+
+    const searchInput = document.getElementById('serviceSearch');
+    const serviceCards = document.querySelectorAll('.service-box');
+
+    searchInput.addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+
+        serviceCards.forEach(card => {
+            const serviceName = card.querySelector('.service-name').textContent.toLowerCase();
+            const serviceCategory = card.querySelector('.bg-blue-100').textContent.toLowerCase().trim();
+
+            // Check if either the service name or category contains the search term
+            if (serviceName.includes(searchTerm) || serviceCategory.includes(searchTerm)) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
 });
 
 // Function to get CSRF token from cookies
