@@ -35,6 +35,8 @@ class UserRegisterFormTest(TestCase):
         form_data = {
             "username": "newuser",
             "email": "newuser@example.com",
+            "first_name": "new",
+            "last_name": "user",
             "password1": "Testpassword123!",
             "password2": "Testpassword123!",
             "user_type": "user",
@@ -58,19 +60,6 @@ class UserRegisterFormTest(TestCase):
 
 # ---------- View Tests ----------
 class RegisterViewTest(TestCase):
-    # def test_register_view_post_valid_data(self):
-    #     response = self.client.post(
-    #         reverse("register"),
-    #         {
-    #             "username": "testuser",
-    #             "email": "testuser@example.com",
-    #             "password1": "Testpassword123!",
-    #             "password2": "Testpassword123!",
-    #             "user_type": "user",
-    #         },
-    #     )
-    #     self.assertEqual(response.status_code, 302)
-    #     self.assertRedirects(response, reverse("home"))
 
     def test_register_view_post_valid_data(self):
         """Test POST request with valid data to the registration page."""
@@ -79,6 +68,8 @@ class RegisterViewTest(TestCase):
             {
                 "username": "testuser",
                 "email": "testuser@example.com",
+                "first_name": "test",
+                "last_name": "user",
                 "password1": "Testpassword123!",
                 "password2": "Testpassword123!",
                 "user_type": "user",
@@ -127,13 +118,6 @@ class UserLoginViewTest(TestCase):
         )
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse("home"))
-
-    # def test_login_view_get(self):
-    #     """Test the login page loads correctly with a GET request."""
-    #     response = self.client.get(reverse("user_login"))
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertTemplateUsed(response, "user_login.html")
-    #     self.assertIsInstance(response.context["form"], UserLoginForm)
 
 
 class LogoutViewTest(TestCase):
@@ -195,6 +179,8 @@ class UserTypeRedirectTest(TestCase):
             {
                 "username": "user1",
                 "email": "user1@example.com",
+                "first_name": "test",
+                "last_name": "user",
                 "password1": "Testpassword123!",
                 "password2": "Testpassword123!",
                 "user_type": "user",
