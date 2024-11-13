@@ -130,6 +130,11 @@ def service_edit(request, service_id):
             # Collect new description data
             new_description_data = {}
             for description_form in description_formset:
+                if description_form.cleaned_data and not description_form.cleaned_data.get("DELETE", False):
+                    key = description_form.cleaned_data.get("key")
+                    value = description_form.cleaned_data.get("value")
+                    if key and value:  # Only add if both key and value are present
+                        new_description_data[key] = value
                 if (
                     description_form.cleaned_data
                     and not description_form.cleaned_data.get("DELETE", False)
