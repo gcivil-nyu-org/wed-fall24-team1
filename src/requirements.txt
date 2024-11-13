@@ -55,7 +55,7 @@ pycodestyle==2.12.1
 pycparser==2.22
 pyflakes==3.2.0
 pygments==2.18.0
-pyjwt==1.7.1
+pyjwt==2.9.0
 python-dateutil==2.9.0.post0
 python-decouple==3.8
 pytz==2024.2
