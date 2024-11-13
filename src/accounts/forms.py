@@ -100,7 +100,7 @@ class UserLoginForm(AuthenticationForm):
         widget=forms.TextInput(
             attrs={
                 "class": "form-control",
-                "placeholder": "Enter your username or email",
+                "placeholder": "Enter your username",
             }
         ),
         required=True,
