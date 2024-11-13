@@ -96,7 +96,7 @@ class UserRegisterForm(UserCreationForm):
 
 class UserLoginForm(AuthenticationForm):
     username = forms.CharField(
-        label="Username or Email",
+        label="Username",
         widget=forms.TextInput(
             attrs={
                 "class": "form-control",
