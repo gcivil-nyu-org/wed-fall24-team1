@@ -6,9 +6,21 @@ function toggleEdit() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    function formatTimestamp(timestamp) {
-        return new Date(timestamp).toLocaleString();
-    }
+    function formatTimestamp(utcTimestamp) {
+    // Ensure we're parsing the UTC timestamp correctly
+    const date = new Date(utcTimestamp + 'Z'); // Append 'Z' to ensure UTC interpretation
+
+    const options = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+    };
+
+    return date.toLocaleString(undefined, options);
+}
 
     async function fetchAndDisplayReviews(serviceId, page = 1) {
         try {
