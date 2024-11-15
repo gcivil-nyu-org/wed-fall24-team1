@@ -3,18 +3,23 @@
 <head>
     <link href="{% static 'css/styles.css' %}" rel="stylesheet">
     <!-- Include Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+          integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
     <style>
         #serviceDetails {
             font-family: Arial, sans-serif;
         }
+
         #serviceDetails .flex {
             align-items: center;
         }
+
         #serviceDetails h2 {
             margin: 0;
             flex-grow: 1;
         }
+
         #serviceDetails .bookmark-label {
             display: flex;
             align-items: center;
@@ -22,31 +27,38 @@
             color: #4a5568;
             margin-right: 1rem;
         }
+
         #serviceDetails .bookmark-label input[type="checkbox"] {
             display: none;
         }
+
         #serviceDetails .bookmark-icon {
             cursor: pointer;
             font-size: 1.5rem;
             color: #cbd5e0;
             transition: color 0.3s ease;
         }
+
         #serviceDetails .bookmark-label input[type="checkbox"]:checked + .bookmark-icon {
             color: #4299e1;
         }
+
         #serviceDetails .space-y-1 p {
             margin-bottom: 0.5rem;
         }
+
         #serviceDetails #getDirections {
             display: inline-block;
             margin-top: 1rem;
             text-decoration: none;
         }
+
         #serviceDetails #reviewRating,
         #serviceDetails #reviewText {
             width: 100%;
             margin-bottom: 0.5rem;
         }
+
         #serviceDetails #submitReview {
             cursor: pointer;
         }
@@ -69,16 +81,17 @@
             <span id="serviceAvailability" class="font-semibold hidden">Currently Unavailable</span>
 
             {% if user.is_authenticated %}
-            <label class="bookmark-label">
-                <input type="checkbox" id="bookmarkCheckbox">
-                <i class="bookmark-icon fas fa-bookmark"></i>
-            </label>
+                <label class="bookmark-label">
+                    <input type="checkbox" id="bookmarkCheckbox">
+                    <i class="bookmark-icon fas fa-bookmark"></i>
+                </label>
             {% endif %}
         </div>
 
         <button id="closeDetails" class="text-gray-500 hover:text-gray-700">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                 stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
             </svg>
         </button>
     </div>
@@ -89,7 +102,8 @@
         <p class="text-sm"><strong>Type:</strong> <span id="serviceType">Homeless</span></p>
         <p class="text-sm"><strong>Rating:</strong> <span id="serviceRating">4.5</span></p>
         <p class="text-sm"><strong>Distance:</strong> <span id="serviceDistance">1.2 miles</span></p>
-        <a id="getDirections" href="#" target="_blank" rel="noopener noreferrer" class="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-2">Get Directions</a>
+        <a id="getDirections" href="#" target="_blank" rel="noopener noreferrer"
+           class="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-2">Get Directions</a>
         <div class="space-y-1 mb-4">
             <div id="serviceDescription" class="text-sm mt-2"></div>
         </div>
@@ -127,7 +141,7 @@
                     throw new Error(`Failed to fetch reviews. Status: ${response.status}`);
                 }
 
-                const { reviews, has_next, has_previous, current_page } = await response.json();
+                const {reviews, has_next, has_previous, current_page} = await response.json();
 
                 const reviewsContainer = document.getElementById('reviewsContainer');
                 reviewsContainer.innerHTML = '';
@@ -183,7 +197,7 @@
                     }
 
                     reviewsContainer.appendChild(reviewDiv);
-        });
+                });
 
                 // Pagination controls
                 const paginationDiv = document.createElement('div');
@@ -255,7 +269,7 @@
 
 
                 // Add event listener to the bookmark checkbox
-                bookmarkCheckbox.onchange = function() {
+                bookmarkCheckbox.onchange = function () {
                     const action = bookmarkCheckbox.checked ? 'add' : 'remove';
                     const serviceId = service.Id;
 
@@ -270,22 +284,22 @@
                             'action': action,
                         }),
                     })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            service.IsBookmarked = bookmarkCheckbox.checked;
-                        } else {
-                            // Revert the checkbox state if the request failed
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                service.IsBookmarked = bookmarkCheckbox.checked;
+                            } else {
+                                // Revert the checkbox state if the request failed
+                                bookmarkCheckbox.checked = !bookmarkCheckbox.checked;
+                                alert(data.error || 'Failed to toggle bookmark.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error toggling bookmark:', error);
+                            // Revert the checkbox state if an error occurred
                             bookmarkCheckbox.checked = !bookmarkCheckbox.checked;
-                            alert(data.error || 'Failed to toggle bookmark.');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error toggling bookmark:', error);
-                        // Revert the checkbox state if an error occurred
-                        bookmarkCheckbox.checked = !bookmarkCheckbox.checked;
-                        alert('An error occurred. Please try again.');
-                    });
+                            alert('An error occurred. Please try again.');
+                        });
                 };
             } else if (bookmarkCheckbox) {
                 // Hide the bookmark checkbox if the user is not authenticated
@@ -396,6 +410,8 @@
                 if (response.ok) {
                     const result = await response.json();
                     fetchAndDisplayReviews(serviceId, 1);
+                    document.getElementById('reviewRating').value = '';
+                    document.getElementById('reviewText').value = '';
                 } else {
                     const error = await response.json();
                     alert(error.error || "Failed to submit review.");
