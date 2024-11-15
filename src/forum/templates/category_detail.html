@@ -1,83 +1,99 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block title %}{{ category.name }} - Forum{% endblock %}
 
 {% block content %}
-<!--TODO again, no MORE inline styles. this is TEMPORARY. we have filed a ticket -->
-<div class="container mx-auto px-6 py-12" style="min-width:1000px; ">
+    <!--TODO again, no MORE inline styles. this is TEMPORARY. we have filed a ticket -->
+    <div class="container mx-auto px-6 py-12" style="min-width:1000px; ">
 
-    <div class="mb-10 text-center mt-16">
-        <h1 class="text-4xl font-bold text-gray-800 mb-3">{{ category.name }}</h1>
-        <p class="text-gray-600 text-lg">{{ category.description }}</p>
-    </div>
+        <div class="mb-10 text-center mt-16">
+            <h1 class="text-4xl font-bold text-gray-800 mb-3">{{ category.name }}</h1>
+            <p class="text-gray-600 text-lg">{{ category.description }}</p>
+        </div>
 
-    <!-- Search and Create Post Section -->
-    <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0 w-full">
-        <!-- Search Form -->
-        <form method="get" class="w-full sm:w-3/4 lg:w-4/5 sm:mr-4"> <!-- Increased width -->
-            <div class="relative">
-                <input type="text"
-                       name="search"
-                       placeholder="Search posts..."
-                       value="{{ search_query }}"
-                       class="w-full px-4 py-3 pr-20 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                <!-- ... rest of the search input ... -->
-            </div>
-        </form>
+        <!-- Search and Create Post Section -->
+        <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0 w-full">
+            <!-- Search Form -->
+            <form method="get" class="w-full sm:w-3/4 lg:w-4/5 sm:mr-4"> <!-- Increased width -->
+                <div class="relative">
+                    <input type="text"
+                           name="search"
+                           placeholder="Search posts..."
+                           value="{{ search_query }}"
+                           class="w-full px-4 py-3 pr-20 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                </div>
+            </form>
 
-        <!-- Create Post Button -->
-        <a href="{% url 'forum:create_post' category.id %}"
-           class="bg-blue-500 text-white px-6 py-3 rounded-md hover:bg-blue-600 transition-colors duration-300 whitespace-nowrap">
-            Create New Post
-        </a>
-    </div>
+            <!-- Create Post Button -->
+            <a href="{% url 'forum:create_post' category.id %}"
+               class="bg-blue-500 text-white px-6 py-3 rounded-md hover:bg-blue-600 transition-colors duration-300 whitespace-nowrap">
+                Create New Post
+            </a>
+        </div>
 
-    <!-- Posts List -->
-    <div class="space-y-6 w-full"> <!-- Added w-full -->
-        {% for post in posts %}
-        <div class="bg-white rounded-lg shadow-md p-8 hover:shadow-lg transition-shadow duration-300" style="min-width: 100%;">
-            <div class="flex justify-between items-start gap-4"> <!-- Added gap-4 -->
-                <div class="flex-1"> <!-- Use flex-1 instead of flex-grow -->
-                    <h2 class="text-xl font-semibold text-blue-700">
-                        <a href="{% url 'forum:post_detail' post.id %}" class="hover:underline">
-                            {{ post.title }}
-                        </a>
-                    </h2>
-                    {% if post.author.user_type == "service_provider" %}
-                    <span class="inline-block bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full mt-2">
+        <!-- Posts List -->
+        <div class="space-y-6 w-full"> <!-- Added w-full -->
+            {% for post in posts %}
+                <div class="bg-white rounded-lg shadow-md p-8 hover:shadow-lg transition-shadow duration-300"
+                     style="min-width: 100%;">
+                    <div class="flex justify-between items-start gap-4"> <!-- Added gap-4 -->
+                        <div class="flex-1"> <!-- Use flex-1 instead of flex-grow -->
+                            <h2 class="text-xl font-semibold text-blue-700">
+                                <a href="{% url 'forum:post_detail' post.id %}" class="hover:underline">
+                                    {{ post.title }}
+                                </a>
+                            </h2>
+                            {% if post.author.user_type == "service_provider" %}
+                                <span class="inline-block bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full mt-2">
                         <i class="fas fa-building mr-1"></i> Service Provider
                     </span>
-                    {% endif %}
-                </div>
-                {% if post.is_closed %}
-                <span class="bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm whitespace-nowrap">
+                            {% endif %}
+                        </div>
+                        {% if post.is_closed %}
+                            <span class="bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm whitespace-nowrap">
                     Closed
                 </span>
-                {% endif %}
-            </div>
-            <div class="mt-3 text-gray-600 line-clamp-2">{{ post.content|truncatewords:50 }}</div>
-            <div class="mt-4 flex justify-between items-center text-sm text-gray-500">
-                <span>Posted by {{ post.author.username }} on {{ post.created_at|date:"M d, Y" }}</span>
-                <span class="flex items-center">
-                    <i class="fas fa-comment-alt mr-1"></i>
-                    {{ post.comments.count }}
-                </span>
-            </div>
+                        {% endif %}
+                    </div>
+                    <div class="mt-3 text-gray-600 line-clamp-2">{{ post.content|truncatewords:50 }}</div>
+                    <div class="mt-4 flex justify-between items-center text-sm text-gray-500">
+                        <span>Posted by {{ post.author.username }} on <span
+                                data-timestamp="{{ post.created_at.isoformat }}"></span></span> <span
+                            class="flex items-center">
+                            <i class="fas fa-comment-alt mr-1"></i>
+                                {{ post.comments.count }}
+                        </span>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-8 text-gray-500">
+                    {% if search_query %}
+                        No posts found matching your search.
+                    {% else %}
+                        No posts in this category yet.
+                    {% endif %}
+                </div>
+            {% endfor %}
         </div>
-        {% empty %}
-        <div class="text-center py-8 text-gray-500">
-            {% if search_query %}
-            No posts found matching your search.
-            {% else %}
-            No posts in this category yet.
-            {% endif %}
-        </div>
-        {% endfor %}
+
+        {% with page_obj=posts %}
+            {% include 'partials/_pagination.html' %}
+        {% endwith %}
     </div>
 
-    {% with page_obj=posts %}
-    {% include 'partials/_pagination.html' %}
-    {% endwith %}
-</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script src="{% static 'js/forum_common.js' %}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Convert all timestamps
+            document.querySelectorAll('[data-timestamp]').forEach(element => {
+                const timestamp = element.getAttribute('data-timestamp');
+                element.textContent = formatDateTime(timestamp);
+            });
+        });
+    </script>
 {% endblock %}
