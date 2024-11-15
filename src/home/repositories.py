@@ -356,3 +356,51 @@ class HomeRepository:
             "total_reviews": total_reviews,
             "total_services": total_services_with_metrics,
         }
+
+    def delete_review(self, review_id):
+        try:
+            # Retrieve the review item before deletion to get necessary details for rating update
+            response = self.reviews_table.get_item(Key={"ReviewId": review_id})
+            review = response.get("Item")
+
+            if not review:
+                raise ValueError("Review not found")
+
+            # Delete the review from the table
+            self.reviews_table.delete_item(Key={"ReviewId": review_id})
+
+            return review  # Return the review details for further processing
+        except ClientError as e:
+            print(f"Failed to delete review: {e.response['Error']['Message']}")
+            raise e
+
+    def edit_review(self, review_id, new_rating, new_message):
+        try:
+            # Fetch the original review
+            original_review = self.reviews_table.get_item(
+                Key={"ReviewId": review_id}
+            ).get("Item")
+
+            if not original_review:
+                raise ValueError("Review not found")
+
+            # Update the review in the database
+            self.reviews_table.update_item(
+                Key={"ReviewId": review_id},
+                UpdateExpression="SET RatingStars = :r, RatingMessage = :m",
+                ExpressionAttributeValues={
+                    ":r": new_rating,
+                    ":m": new_message,
+                },
+            )
+            return {
+                "success": True,
+                "message": "Review updated successfully.",
+                "original_review": original_review,
+            }
+
+        except ClientError as e:
+            print(f"Failed to edit review: {e.response['Error']['Message']}")
+            raise e
+        except ValueError as ve:
+            return {"error": str(ve)}
