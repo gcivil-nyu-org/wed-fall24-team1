@@ -236,6 +236,9 @@
                 console.error(`Service with index ${index} not found.`);
                 return;
             }
+            
+            document.getElementById('reviewRating').value = '';
+            document.getElementById('reviewText').value = '';
 
             // Populate basic service details
             document.getElementById('serviceId').textContent = service.Id || 'No ID';
@@ -244,8 +247,6 @@
             document.getElementById('serviceType').textContent = service.Category || 'Unknown';
             document.getElementById('serviceRating').textContent = service.Ratings && service.Ratings !== 0 ? parseFloat(service.Ratings).toFixed(2) : 'N/A';
             document.getElementById('serviceDistance').textContent = service.Distance ? parseFloat(service.Distance).toFixed(2) + ' miles' : 'N/A';
-
-            console.log(service)
 
             const serviceAvailability = document.getElementById('serviceAvailability');
             if (service.IsActive === false) {
