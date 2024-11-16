@@ -81,8 +81,7 @@
                             <p class="font-semibold text-gray-800">{{ review.ServiceName }}</p>
                             <p class="text-gray-600">Rating: {{ review.RatingStars }} stars</p>
                             <p class="text-gray-600">{{ review.RatingMessage }}</p>
-                            <p class="text-sm text-gray-500">{{ review.Timestamp|date:"M d, Y" }}</p>
-                        </div>
+                            <p class="text-sm text-gray-500" data-timestamp="{{ review.Timestamp.isoformat }}"></p>                        </div>
                     {% endfor %}
                 </div>
             {% else %}
@@ -177,4 +176,13 @@
     const userIsAuthenticated = {{ user.is_authenticated|lower }};
 </script>
 <script src="{% static 'js/profile.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Convert all timestamps
+        document.querySelectorAll('[data-timestamp]').forEach(element => {
+            const timestamp = element.getAttribute('data-timestamp');
+            element.textContent = formatTimestamp(timestamp);
+        });
+    });
+</script>
 {% endblock %}
