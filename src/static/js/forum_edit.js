@@ -4,6 +4,35 @@ document.addEventListener('DOMContentLoaded', function() {
     const editPostForm = document.getElementById('editPostForm');
     const editPostButtons = document.querySelectorAll('[data-edit-post]');
 
+    // Add form validation for posts
+    editPostForm.addEventListener('submit', function(e) {
+        const title = document.getElementById('editPostTitle').value.trim();
+        const content = document.getElementById('editPostContent').value.trim();
+        let isValid = true;
+
+        // Clear previous error messages if any
+        clearErrors();
+
+        // Title validation
+        if (!title) {
+            showError('editPostTitle', 'Title cannot be empty');
+            isValid = false;
+        } else if (title.length > 100) {
+            showError('editPostTitle', 'Title must not exceed 100 characters');
+            isValid = false;
+        }
+
+        // Content validation
+        if (!content) {
+            showError('editPostContent', 'Content cannot be empty');
+            isValid = false;
+        }
+
+        if (!isValid) {
+            e.preventDefault();
+        }
+    });
+
     editPostButtons.forEach(button => {
         button.addEventListener('click', async (e) => {
             const postId = button.dataset.editPost;
@@ -27,6 +56,25 @@ document.addEventListener('DOMContentLoaded', function() {
     const editCommentForm = document.getElementById('editCommentForm');
     const editCommentButtons = document.querySelectorAll('[data-edit-comment]');
 
+    // Add form validation for comments
+    editCommentForm.addEventListener('submit', function(e) {
+        const content = document.getElementById('editCommentContent').value.trim();
+        let isValid = true;
+
+        // Clear previous error messages if any
+        clearErrors();
+
+        // Content validation
+        if (!content) {
+            showError('editCommentContent', 'Comment cannot be empty');
+            isValid = false;
+        }
+
+        if (!isValid) {
+            e.preventDefault();
+        }
+    });
+
     editCommentButtons.forEach(button => {
         button.addEventListener('click', async (e) => {
             const commentId = button.dataset.editComment;
@@ -43,6 +91,19 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    // Helper functions for validation
+    function showError(fieldId, message) {
+        const field = document.getElementById(fieldId);
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message text-red-500 text-sm mt-1';
+        errorDiv.textContent = message;
+        field.parentNode.appendChild(errorDiv);
+    }
+
+    function clearErrors() {
+        document.querySelectorAll('.error-message').forEach(error => error.remove());
+    }
 
     // Close modals
     document.querySelectorAll('[data-modal-close]').forEach(button => {

@@ -5,11 +5,38 @@ function toggleEdit() {
     editSection.classList.toggle('hidden');
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    function formatTimestamp(timestamp) {
-        return new Date(timestamp).toLocaleString();
+function formatTimestamp(utcTimestamp) {
+    if (!utcTimestamp) {
+        return 'N/A';
     }
 
+    try {
+        // Remove the timezone offset if it exists
+        const cleanTimestamp = utcTimestamp.replace(/([+-]\d{2}:\d{2}|Z)$/, '');
+        const date = new Date(cleanTimestamp + 'Z');
+
+        if (isNaN(date.getTime())) {
+            console.log('Invalid date created for:', utcTimestamp);
+            return 'Invalid Date';
+        }
+
+        const options = {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true,
+        };
+
+        return date.toLocaleString(undefined, options);
+    } catch (error) {
+        console.error('Error formatting date:', error);
+        return 'Error formatting date';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
     async function fetchAndDisplayReviews(serviceId, page = 1) {
         try {
             const response = await fetch(`/home/get_reviews/${serviceId}/?page=${page}`);
@@ -17,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(`Failed to fetch reviews. Status: ${response.status}`);
             }
 
-            const { reviews, has_next, has_previous, current_page } = await response.json();
+            const {reviews, has_next, has_previous, current_page} = await response.json();
 
             const reviewsContainer = document.getElementById('reviewsContainer');
             reviewsContainer.innerHTML = '';
@@ -64,6 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     responseDiv.appendChild(responseText);
 
                     const respondedAt = formatTimestamp(review.RespondedAt);
+                    console.log(review.RespondedAt)
                     const responseMeta = document.createElement('p');
                     responseMeta.classList.add('text-xs', 'text-gray-500');
                     responseMeta.textContent = `Responded on ${respondedAt}`;
@@ -243,7 +271,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Add event listeners for bookmark checkboxes
     const bookmarkCheckboxes = document.querySelectorAll('.bookmark-checkbox');
     bookmarkCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', async function() {
+        checkbox.addEventListener('change', async function () {
             const serviceId = this.dataset.serviceId;
             const action = this.checked ? 'add' : 'remove';
 
