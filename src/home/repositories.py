@@ -25,14 +25,19 @@ class HomeRepository:
     ):
         filter_expression = None
 
+        search_query = search_query.lower() if search_query else None
         # Create filter based on search query and category
         if search_query and category_filter:
             filter_expression = And(
-                Attr("Name").contains(search_query),
-                Attr("Category").contains(category_filter),
+                Attr("NormalizedName").contains(
+                    search_query
+                ),  # Assuming data is stored in lowercase in "NormalizedName"
+                Attr("Category").contains(
+                    category_filter
+                ),  # Assuming data is stored in lowercase in "NormalizedCategory"
             )
         elif search_query:
-            filter_expression = Attr("Name").contains(search_query)
+            filter_expression = Attr("NormalizedName").contains(search_query)
         elif category_filter:
             filter_expression = Attr("Category").contains(category_filter)
 
