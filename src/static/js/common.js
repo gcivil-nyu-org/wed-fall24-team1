@@ -1,6 +1,5 @@
 // static/js/forum.js
 function formatDateTime(utcTimestamp) {
-    console.log('Input timestamp:', utcTimestamp); // Keep this for debugging
 
     try {
         let date = new Date(utcTimestamp);

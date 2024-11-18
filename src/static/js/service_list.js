@@ -1,13 +1,13 @@
 // service_list.js
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const servicesGrid = document.getElementById('servicesGrid');
     const serviceModal = document.getElementById('serviceModal');
     const closeModal = document.getElementById('closeModal');
     let map = null;
 
     // Service name click event
-    servicesGrid.addEventListener('click', function(e) {
+    servicesGrid.addEventListener('click', function (e) {
         if (e.target.classList.contains('service-name')) {
             const serviceId = e.target.dataset.serviceId;
             openServiceModal(serviceId);
@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Close modal event
-    closeModal.addEventListener('click', function() {
+    closeModal.addEventListener('click', function () {
         serviceModal.classList.add('hidden');
     });
 
@@ -50,11 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         const hasResponseText = review.ResponseText && review.ResponseText.trim() !== "";
                         let respondedAtDate = "Responded just now";
                         if (review.RespondedAt) {
-                            const date = new Date(review.RespondedAt);
-                            const day = String(date.getDate()).padStart(2, '0');
-                            const month = date.toLocaleString('default', { month: 'long' });
-                            const year = date.getFullYear();
-                            respondedAtDate = `${day} ${month} ${year}`;
+                            respondedAtDate = formatDateTime(review.RespondedAt);
                         }
 
                         reviewsContainer.innerHTML += `
@@ -65,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     <div class="mt-3 p-3 bg-blue-50 rounded" id="reviewResponse-${review.ReviewId}">
                                         <p class="font-semibold">Provider Response:</p>
                                         <p>${review.ResponseText}</p>
-                                        <p class="text-sm text-gray-600">Responded at: ${respondedAtDate}</p>
+                                        <p class="text-sm text-gray-600">Responded on ${respondedAtDate}</p>
                                     </div>
                                 ` : `
                                     <button class="respond-button bg-blue-500 text-white py-1 px-3 rounded mt-2" 
@@ -114,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('serviceSearch');
     const serviceCards = document.querySelectorAll('.service-box');
 
-    searchInput.addEventListener('input', function(e) {
+    searchInput.addEventListener('input', function (e) {
         const searchTerm = e.target.value.toLowerCase();
 
         serviceCards.forEach(card => {
@@ -178,13 +174,13 @@ function sendResponse(serviceId, reviewId) {
             'Content-Type': 'application/x-www-form-urlencoded',
             'X-CSRFToken': csrfToken,
         },
-        body: new URLSearchParams({ responseText: responseText }),
+        body: new URLSearchParams({responseText: responseText}),
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === "success") {
-            // Update the response container
-            responseContainer.innerHTML = `
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "success") {
+                // Update the response container
+                responseContainer.innerHTML = `
                 <div class="mt-3 p-3 bg-blue-50 rounded">
                     <p class="font-semibold">Provider Response:</p>
                     <p>${responseText}</p>
@@ -192,16 +188,16 @@ function sendResponse(serviceId, reviewId) {
                 </div>
             `;
 
-            const form = document.getElementById(`responseForm-${reviewId}`);
-            if (form) {
-                form.remove();
+                const form = document.getElementById(`responseForm-${reviewId}`);
+                if (form) {
+                    form.remove();
+                }
+            } else {
+                alert(`Failed to send response: ${data.message}`);
             }
-        } else {
-            alert(`Failed to send response: ${data.message}`);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert(error.message);
-    });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert(error.message);
+        });
 }
