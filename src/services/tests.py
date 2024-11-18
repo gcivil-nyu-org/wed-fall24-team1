@@ -1484,7 +1484,7 @@ class ServiceRepositoryAdditionalTests(TestCase):
         mock_table.scan.side_effect = ClientError(error_response, "Scan")
 
         services = self.service_repo.get_pending_approval_services()
-        self.assertNotEqual(services, [])
+        self.assertEqual(services, [])
         # mock_table.scan.assert_called_once_with(
         #     FilterExpression=Attr("ServiceStatus").eq("PENDING_APPROVAL")
         # )
