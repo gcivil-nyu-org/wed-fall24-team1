@@ -144,6 +144,11 @@
 
             return date.toLocaleString(undefined, options);
         }
+        function sanitizeHTML(str) {
+            const tempDiv = document.createElement('div');
+            tempDiv.textContent = str; // Escapes the string
+            return tempDiv.innerHTML;  // Returns the escaped string
+}
 
         async function fetchAndDisplayReviews(serviceId, page = 1) {
 
@@ -176,7 +181,7 @@
 
                     const reviewText = document.createElement('p');
                     reviewText.classList.add('text-sm');
-                    reviewText.textContent = review.RatingMessage;
+                    reviewText.innerHTML = sanitizeHTML(review.RatingMessage).replace(/\n/g, '<br>');
                     reviewDiv.appendChild(reviewText);
 
                     const timestamp = formatTimestamp(review.Timestamp);
@@ -196,7 +201,7 @@
 
                         const responseText = document.createElement('p');
                         responseText.classList.add('text-sm');
-                        responseText.textContent = review.ResponseText;
+                        responseText.innerHTML = sanitizeHTML(review.ResponseText).replace(/\n/g, '<br>');
                         responseDiv.appendChild(responseText);
 
                         const respondedAt = formatTimestamp(review.RespondedAt);
