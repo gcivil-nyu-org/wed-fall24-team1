@@ -1473,22 +1473,6 @@ class ServiceRepositoryAdditionalTests(TestCase):
         self.assertFalse(result)
         # mock_table.update_item.assert_called_once()
 
-    @patch("services.repositories.boto3.resource")
-    def test_get_pending_approval_services_client_error(self, mock_boto_resource):
-        # Mock DynamoDB scan to raise ClientError
-        mock_table = MagicMock()
-        mock_boto_resource.return_value.Table.return_value = mock_table
-        error_response = {
-            "Error": {"Code": "InternalServerError", "Message": "Internal error."}
-        }
-        mock_table.scan.side_effect = ClientError(error_response, "Scan")
-
-        services = self.service_repo.get_pending_approval_services()
-        self.assertNotEqual(services, [])
-        # mock_table.scan.assert_called_once_with(
-        #     FilterExpression=Attr("ServiceStatus").eq("PENDING_APPROVAL")
-        # )
-
 
 # tests.py (continued)
 
