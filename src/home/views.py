@@ -10,6 +10,7 @@ from django.shortcuts import render, redirect
 from forum.models import Notification
 from accounts.models import CustomUser
 from services.repositories import ServiceRepository
+from better_profanity import profanity
 
 # TODO These constants are maintained in the JS frontend and here, we'll have to unify them
 DEFAULT_LAT, DEFAULT_LON = 40.7128, -74.0060
@@ -33,10 +34,12 @@ def convert_decimals(obj):
 @require_POST
 def submit_review(request):
     try:
+        profanity.load_censor_words()
         data = json.loads(request.body)
         service_id = data.get("service_id")
         rating = data.get("rating")
         message = data.get("message")
+        message = profanity.censor(message)
         user = request.user
 
         if not service_id or not rating or not message:

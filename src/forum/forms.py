@@ -1,8 +1,22 @@
 from django import forms
 from .models import Post, Comment
+from better_profanity import profanity
 
 
-class PostForm(forms.ModelForm):
+class ProfanityFilteredFormMixin:
+    def clean(self):
+        cleaned_data = super().clean()
+        profanity.load_censor_words()
+
+        # Filter profanity from all text fields
+        for field_name, value in cleaned_data.items():
+            if isinstance(value, str):
+                cleaned_data[field_name] = profanity.censor(value)
+
+        return cleaned_data
+
+
+class PostForm(ProfanityFilteredFormMixin, forms.ModelForm):
     class Meta:
         model = Post
         fields = ["title", "content"]
@@ -10,8 +24,16 @@ class PostForm(forms.ModelForm):
             "content": forms.Textarea(attrs={"rows": 5}),
         }
 
+    def clean(self):
+        cleaned_data = super().clean()
+        # Additional specific filtering for post title if needed
+        if "title" in cleaned_data:
+            profanity.load_censor_words()
+            cleaned_data["title"] = profanity.censor(cleaned_data["title"])
+        return cleaned_data
 
-class CommentForm(forms.ModelForm):
+
+class CommentForm(ProfanityFilteredFormMixin, forms.ModelForm):
     class Meta:
         model = Comment
         fields = ["content"]

@@ -1163,3 +1163,161 @@ class HomeRepositoryComputeUserMetricsTests(TestCase):
         self.assertEqual(result["total_bookmarks"], 0)
         self.assertEqual(result["total_reviews"], 0)
         self.assertEqual(result["total_services"], 0)
+
+
+class SubmitReviewProfanityTests(TestCase):
+    def setUp(self):
+        # Create a test client
+        self.client = Client()
+
+        # Create a test user with email
+        self.user = CustomUser.objects.create_user(
+            username="testuser", email="testuser@example.com", password="testpass123"
+        )
+
+        # Create a test service provider with email
+        self.provider = CustomUser.objects.create_user(
+            username="provider",
+            email="provider@example.com",
+            password="providerpass123",
+        )
+
+        # Sample review data
+        self.review_data = {
+            "service_id": "test-service-123",
+            "rating": 5,
+            "message": "Clean review message",
+        }
+
+        # Set up patches
+        self.home_repo_patcher = patch("home.views.HomeRepository")
+        self.service_repo_patcher = patch("home.views.ServiceRepository")
+
+        # Start patches
+        self.MockHomeRepository = self.home_repo_patcher.start()
+        self.MockServiceRepository = self.service_repo_patcher.start()
+
+        # Set up mock repository instances
+        self.mock_home_repo = self.MockHomeRepository.return_value
+        self.mock_service_repo = self.MockServiceRepository.return_value
+
+        # Mock service - using the provider's actual ID
+        self.mock_service = MagicMock()
+        self.mock_service.provider_id = str(self.provider.id)
+        self.mock_service.name = "Test Service"
+        self.mock_service_repo.get_service.return_value = self.mock_service
+
+    def tearDown(self):
+        self.home_repo_patcher.stop()
+        self.service_repo_patcher.stop()
+
+    def test_submit_review_with_profanity(self):
+        """Test that profanity in review messages is censored"""
+        self.client.login(username="testuser", password="testpass123")
+
+        # Review with profanity
+        review_with_profanity = self.review_data.copy()
+        review_with_profanity["message"] = "This is a bad shit review"
+
+        response = self.client.post(
+            reverse("submit_review"),
+            data=json.dumps(review_with_profanity),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        response_data = json.loads(response.content)
+
+        # Check that profanity was censored
+        self.assertIn("****", response_data["message"])
+        self.assertNotIn("shit", response_data["message"])
+
+        # Verify the censored message was saved
+        self.mock_home_repo.add_review.assert_called_once()
+        call_kwargs = self.mock_home_repo.add_review.call_args[1]
+        self.assertIn("****", call_kwargs["rating_message"])
+        self.assertNotIn("shit", call_kwargs["rating_message"])
+
+    def test_submit_review_without_profanity(self):
+        """Test that clean review messages are not modified"""
+        self.client.login(username="testuser", password="testpass123")
+
+        # Clean review
+        clean_review = self.review_data.copy()
+        clean_review["message"] = "This is a great service!"
+
+        response = self.client.post(
+            reverse("submit_review"),
+            data=json.dumps(clean_review),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        response_data = json.loads(response.content)
+
+        # Check that clean message was not modified
+        self.assertEqual(response_data["message"], "This is a great service!")
+
+        # Verify the original message was saved
+        self.mock_home_repo.add_review.assert_called_once()
+        call_kwargs = self.mock_home_repo.add_review.call_args[1]
+        self.assertEqual(call_kwargs["rating_message"], "This is a great service!")
+
+    def test_submit_review_multiple_profanities(self):
+        """Test that multiple profanities in a message are all censored"""
+        self.client.login(username="testuser", password="testpass123")
+
+        # Review with multiple profanities
+        review_multi_profanity = self.review_data.copy()
+        review_multi_profanity["message"] = (
+            "This damn service is shit and the staff is an asshole"
+        )
+
+        response = self.client.post(
+            reverse("submit_review"),
+            data=json.dumps(review_multi_profanity),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        response_data = json.loads(response.content)
+
+        # Check that all profanities were censored
+        censored_message = response_data["message"]
+        self.assertNotIn("damn", censored_message)
+        self.assertNotIn("shit", censored_message)
+        self.assertNotIn("asshole", censored_message)
+
+        # Verify all profanities were censored in saved message
+        call_kwargs = self.mock_home_repo.add_review.call_args[1]
+        saved_message = call_kwargs["rating_message"]
+        self.assertNotIn("damn", saved_message)
+        self.assertNotIn("shit", saved_message)
+        self.assertNotIn("asshole", saved_message)
+
+    def test_submit_review_profanity_case_insensitive(self):
+        """Test that profanity filtering is case-insensitive"""
+        self.client.login(username="testuser", password="testpass123")
+
+        # Review with mixed-case profanity
+        review_case_profanity = self.review_data.copy()
+        review_case_profanity["message"] = "This is a ShIt review"
+
+        response = self.client.post(
+            reverse("submit_review"),
+            data=json.dumps(review_case_profanity),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        response_data = json.loads(response.content)
+
+        # Check that profanity was censored regardless of case
+        self.assertIn("****", response_data["message"])
+        self.assertNotIn("ShIt", response_data["message"])
+        self.assertNotIn("shit", response_data["message"])
+
+        # Verify censoring in saved message
+        call_kwargs = self.mock_home_repo.add_review.call_args[1]
+        self.assertIn("****", call_kwargs["rating_message"])
+        self.assertNotIn("ShIt", call_kwargs["rating_message"])
