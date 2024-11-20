@@ -68,12 +68,8 @@
                         <!-- Description Section -->
                         <div class="pt-6">
                             <h2 class="text-xl font-semibold text-gray-900 mb-4">Description Items</h2>
-                            <div class="ml-2 block text-sm text-gray-700">
-                                             Note: Any blank key-value pairs will be ignored.
-                            </div>
-
                             {{ description_formset.management_form }}
-                            <div id="description-formset" class="[&>*:not(:first-child)]:mt-4">
+                            <div id="description-formset" class="space-y-4">
                                 {% for form in description_formset %}
                                     <div class="description-form p-4 bg-gray-50 rounded-lg border border-gray-200 relative">
                                         {% if form.instance.pk %}
