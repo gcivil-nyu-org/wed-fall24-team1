@@ -398,3 +398,186 @@ class ForumNotificationsTest(TestCase):
             reverse("forum:delete_notification", args=[self.notification.id])
         )
         self.assertEqual(response.status_code, 403)  # Forbidden
+
+
+class ForumProfanityFilterTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = get_user_model().objects.create_user(
+            username="testuser", email="test@example.com", password="testpass123"
+        )
+        self.category = Category.objects.create(
+            name="Test Category", description="Test Description"
+        )
+
+    def test_post_form_profanity_filter(self):
+        """Test that profanity is filtered in both title and content of posts"""
+        form_data = {
+            "title": "This is a shit title",
+            "content": "This damn post content with asshole words",
+        }
+        form = PostForm(data=form_data)
+        self.assertTrue(form.is_valid())
+        cleaned_data = form.cleaned_data
+
+        # Check title is censored
+        self.assertIn("****", cleaned_data["title"])
+        self.assertNotIn("shit", cleaned_data["title"])
+
+        # Check content is censored
+        self.assertIn("****", cleaned_data["content"])
+        self.assertNotIn("damn", cleaned_data["content"])
+        self.assertNotIn("asshole", cleaned_data["content"])
+
+    def test_comment_form_profanity_filter(self):
+        """Test that profanity is filtered in comment content"""
+        form_data = {"content": "This is a shit comment with damn bad words"}
+        form = CommentForm(data=form_data)
+        self.assertTrue(form.is_valid())
+        cleaned_data = form.cleaned_data
+
+        self.assertIn("****", cleaned_data["content"])
+        self.assertNotIn("shit", cleaned_data["content"])
+        self.assertNotIn("damn", cleaned_data["content"])
+
+    def test_post_creation_with_profanity(self):
+        """Test that profanity is filtered when creating a new post"""
+        self.client.login(username="testuser", password="testpass123")
+
+        post_data = {"title": "A shit title", "content": "Some damn content"}
+
+        response = self.client.post(
+            reverse("forum:create_post", args=[self.category.id]), post_data
+        )
+
+        # Check if post was created and redirected
+        self.assertEqual(response.status_code, 302)
+
+        # Get the created post
+        post = Post.objects.latest("created_at")
+
+        # Verify profanity was filtered
+        self.assertIn("****", post.title)
+        self.assertNotIn("shit", post.title)
+        self.assertIn("****", post.content)
+        self.assertNotIn("damn", post.content)
+
+    def test_comment_creation_with_profanity(self):
+        """Test that profanity is filtered when creating a new comment"""
+        self.client.login(username="testuser", password="testpass123")
+
+        # Create a post first
+        post = Post.objects.create(
+            title="Test Post",
+            content="Test Content",
+            author=self.user,
+            category=self.category,
+        )
+
+        comment_data = {"content": "This is a shit comment"}
+
+        response = self.client.post(
+            reverse("forum:post_detail", args=[post.id]), comment_data
+        )
+
+        # Check if comment was created and redirected
+        self.assertEqual(response.status_code, 302)
+
+        # Get the created comment
+        comment = Comment.objects.latest("created_at")
+
+        # Verify profanity was filtered
+        self.assertIn("****", comment.content)
+        self.assertNotIn("shit", comment.content)
+
+    def test_post_form_mixed_case_profanity(self):
+        """Test that profanity filtering is case-insensitive"""
+        form_data = {"title": "A ShIt TiTlE", "content": "Some DaMn CoNtEnT"}
+
+        form = PostForm(data=form_data)
+        self.assertTrue(form.is_valid())
+        cleaned_data = form.cleaned_data
+
+        # Check title is censored regardless of case
+        self.assertIn("****", cleaned_data["title"])
+        self.assertNotIn("ShIt", cleaned_data["title"])
+
+        # Check content is censored regardless of case
+        self.assertIn("****", cleaned_data["content"])
+        self.assertNotIn("DaMn", cleaned_data["content"])
+
+    def test_post_form_no_profanity(self):
+        """Test that clean content remains unchanged"""
+        form_data = {"title": "A clean title", "content": "Some clean content"}
+
+        form = PostForm(data=form_data)
+        self.assertTrue(form.is_valid())
+        cleaned_data = form.cleaned_data
+
+        # Check content remains unchanged
+        self.assertEqual(cleaned_data["title"], "A clean title")
+        self.assertEqual(cleaned_data["content"], "Some clean content")
+
+    def test_edit_post_with_profanity(self):
+        """Test that profanity is filtered when editing a post"""
+        self.client.login(username="testuser", password="testpass123")
+
+        # Create a clean post first
+        post = Post.objects.create(
+            title="Clean Title",
+            content="Clean Content",
+            author=self.user,
+            category=self.category,
+        )
+
+        # Try to edit with profanity
+        edit_data = {"title": "A shit title", "content": "Some damn content"}
+
+        response = self.client.post(
+            reverse("forum:edit_post", args=[post.id]), edit_data
+        )
+
+        # Check if post was updated and redirected
+        self.assertEqual(response.status_code, 302)
+
+        # Get the updated post
+        post.refresh_from_db()
+
+        # Verify profanity was filtered
+        self.assertIn("****", post.title)
+        self.assertNotIn("shit", post.title)
+        self.assertIn("****", post.content)
+        self.assertNotIn("damn", post.content)
+
+    def test_edit_comment_with_profanity(self):
+        """Test that profanity is filtered when editing a comment"""
+        self.client.login(username="testuser", password="testpass123")
+
+        # Create a post and clean comment first
+        post = Post.objects.create(
+            title="Test Post",
+            content="Test Content",
+            author=self.user,
+            category=self.category,
+        )
+
+        comment = Comment.objects.create(
+            post=post, author=self.user, content="Clean comment"
+        )
+
+        # Try to edit with profanity
+        edit_data = {"content": "This is a shit comment"}
+
+        response = self.client.post(
+            reverse("forum:edit_comment", args=[comment.id]), edit_data
+        )
+
+        # Check if comment was updated and redirected
+        self.assertEqual(response.status_code, 302)
+
+        # Get the updated comment
+        comment.refresh_from_db()
+
+        # Verify profanity was filtered
+        self.assertIn("****", comment.content)
+        self.assertNotIn("shit", comment.content)
