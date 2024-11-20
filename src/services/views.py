@@ -66,9 +66,15 @@ def service_create(request):
                 ):
                     key = description_form.cleaned_data["key"]
                     value = description_form.cleaned_data["value"]
-                    description_data[key] = value
-            # Create ServiceDTO with processed data
+                    if key in description_data:
+                        if isinstance(description_data[key], list):
+                            description_data[key].append(value)
+                        else:
+                            description_data[key] = [description_data[key], value]
+                    else:
+                        description_data[key] = value
 
+            # Create ServiceDTO with processed data
             service_dto = ServiceDTO(
                 id=str(uuid.uuid4()),
                 name=service_data["name"],
@@ -86,6 +92,16 @@ def service_create(request):
             )
             if service_repo.create_service(service_dto):
                 return redirect("services:list")
+        else:
+            return render(
+                request,
+                "service_form.html",
+                {
+                    "form": form,
+                    "description_formset": description_formset,
+                    "action": "Create",
+                },
+            )
     else:
         form = ServiceForm()
         description_formset = DescriptionFormSet(prefix="description")
@@ -190,6 +206,19 @@ def service_edit(request, service_id):
 
             if service_repo.update_service(updated_service):
                 return redirect("services:list")
+
+        else:
+            return render(
+                request,
+                "service_form.html",
+                {
+                    "form": form,
+                    "description_formset": description_formset,
+                    "action": "Edit",
+                    "service": service,
+                },
+            )
+
     else:
         initial_data = {
             "name": service.name,

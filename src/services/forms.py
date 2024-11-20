@@ -5,6 +5,7 @@ from django import forms
 from django.forms import formset_factory
 from geopy import Nominatim
 from geopy.exc import GeocoderTimedOut, GeocoderServiceError
+from django.forms import BaseFormSet
 
 
 class ServiceForm(forms.Form):
@@ -61,7 +62,59 @@ class DescriptionItemForm(forms.Form):
     value = forms.CharField(widget=forms.Textarea(attrs={"rows": 3}))
 
 
-DescriptionFormSet = formset_factory(DescriptionItemForm, extra=0, can_delete=True)
+class CustomDescriptionFormSet(BaseFormSet):
+    def clean(self):
+        """
+        Adds validation to check for duplicate keys in the formset.
+        """
+        if any(self.errors):
+            return
+
+        keys = []
+        duplicate_keys = set()
+
+        # First pass: collect all keys and identify duplicates
+        for form in self.forms:
+            if self.can_delete and self._should_delete_form(form):
+                continue
+
+            if form.cleaned_data:
+                key = form.cleaned_data.get("key")
+                if key:
+                    print(f"Processing key: {key}")  # Debug print
+                    if key in keys:
+                        duplicate_keys.add(key)
+                    keys.append(key)
+
+        # Second pass: add errors to all forms with duplicate keys
+        if duplicate_keys:
+            for form in self.forms:
+                if self.can_delete and self._should_delete_form(form):
+                    continue
+
+                if form.cleaned_data:
+                    key = form.cleaned_data.get("key")
+                    if key in duplicate_keys:
+                        form.add_error(
+                            "key",
+                            f"Duplicate key detected: '{key}'. Each key must be unique.",
+                        )
+
+            # Raise the validation error with all duplicate keys listed
+            raise forms.ValidationError(
+                f"Duplicate keys found: {', '.join(duplicate_keys)}. Each key must be unique."
+            )
+
+        print(f"All keys found: {keys}")  # Debug print for all keys
+        return self.cleaned_data
+
+
+DescriptionFormSet = formset_factory(
+    DescriptionItemForm,
+    formset=CustomDescriptionFormSet,
+    extra=0,
+    can_delete=True,
+)
 
 
 class ReviewResponseForm(forms.Form):
