@@ -4,6 +4,7 @@
 {% if request.path != '/services/dashboard/' %}
 {% if request.path != '/accounts/profile/' %}
 {% if request.path != '/home/' %}
+{% if request.path != '/admin-only-view-new-listings/' %}
 {% if 'login' not in request.path %}
 {% if 'register' not in request.path %}
 
@@ -115,6 +116,7 @@
         </div>
     </div>
 </div>
+{% endif %}
 {% endif %}
 {% endif %}
 {% endif %}
