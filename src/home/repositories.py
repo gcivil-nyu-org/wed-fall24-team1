@@ -29,7 +29,7 @@ class HomeRepository:
         # Create filter based on search query and category
         if search_query and category_filter:
             filter_expression = And(
-                Attr("NormalizedName").contains(
+                Attr("Name").contains(
                     search_query
                 ),  # Assuming data is stored in lowercase in "NormalizedName"
                 Attr("Category").contains(
@@ -37,7 +37,7 @@ class HomeRepository:
                 ),  # Assuming data is stored in lowercase in "NormalizedCategory"
             )
         elif search_query:
-            filter_expression = Attr("NormalizedName").contains(search_query)
+            filter_expression = Attr("Name").contains(search_query)
         elif category_filter:
             filter_expression = Attr("Category").contains(category_filter)
 
