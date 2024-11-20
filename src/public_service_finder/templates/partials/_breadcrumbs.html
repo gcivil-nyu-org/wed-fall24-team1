@@ -30,7 +30,7 @@
                                 </div>
                             </li>
                         {% endif %}
-                        
+
                         {% if 'post' in request.path and post %}
                             <li>
                                 <div class="flex items-center">
@@ -49,7 +49,7 @@
                                 </div>
                             </li>
                         {% endif %}
-                        
+
                         {% if 'create_post' in request.path %}
                             <li>
                                 <div class="flex items-center">
@@ -61,6 +61,55 @@
                             </li>
                         {% endif %}
                     {% endif %}
+                    {% if 'services' in request.path %}
+                        <li>
+                            <div class="flex items-center">
+                                <i class="fas fa-building text-gray-400 mr-2"></i>
+                                <a href="{% url 'services:list' %}" class="text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors duration-200">My Services</a>
+                            </div>
+                        </li>
+
+                        {% if 'create' in request.path %}
+                            <li>
+                                <div class="flex items-center">
+                                    <svg class="h-5 w-5 text-gray-300 mx-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <span class="text-sm font-medium text-blue-600">Create Service</span>
+                                </div>
+                            </li>
+                        {% endif %}
+
+                        {% if 'edit' in request.path and service %}
+                            <li>
+                                <div class="flex items-center">
+                                    <svg class="h-5 w-5 text-gray-300 mx-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <a href="{% url 'services:list' %}" class="text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors duration-200">{{ service.name }}</a>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="flex items-center">
+                                    <svg class="h-5 w-5 text-gray-300 mx-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <span class="text-sm font-medium text-blue-600">Edit Service</span>
+                                </div>
+                            </li>
+                        {% endif %}
+
+                        {% if 'details' in request.path and service %}
+                            <li>
+                                <div class="flex items-center">
+                                    <svg class="h-5 w-5 text-gray-300 mx-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <span class="text-sm font-medium text-blue-600">{{ service.name }}</span>
+                                </div>
+                            </li>
+                        {% endif %}
+                {% endif %}
                 </ol>
             </nav>
         </div>
