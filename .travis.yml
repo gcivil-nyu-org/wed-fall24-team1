@@ -8,12 +8,6 @@ dist: focal
 install:
   - pip install -r src/requirements.txt
 
-env:
-  global:
-    - COVERALLS_FLAG_NAME="Unit Tests"
-    - COVERALLS_PARALLEL=true
-    - COVERALLS_SERVICE_NAME=travis-ci
-
 script:
   - python src/manage.py makemigrations --check --dry-run
   - black . --check
@@ -21,18 +15,7 @@ script:
   - PYTHONPATH=. coverage run --source='.' src/manage.py test accounts home public_service_finder services forum
 
 after_success:
-  - coveralls debug
-  - |
-    if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
-      echo "Submitting coverage for Pull Request"
-      COVERALLS_SERVICE_JOB_ID=$TRAVIS_JOB_ID \
-      COVERALLS_SERVICE_BUILD_URL=https://travis-ci.org/$TRAVIS_REPO_SLUG/builds/$TRAVIS_BUILD_ID \
-      COVERALLS_SERVICE_PULL_REQUEST=$TRAVIS_PULL_REQUEST \
-      coveralls
-    else
-      echo "Submitting coverage for branch build"
-      coveralls
-    fi
+  - coveralls
 
 before_deploy:
   - cd src
