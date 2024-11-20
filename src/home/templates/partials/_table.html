@@ -62,6 +62,28 @@
         #serviceDetails #submitReview {
             cursor: pointer;
         }
+        /* Parent flex container */
+.flex-container {
+    display: flex;
+    align-items: baseline; /* Align items (rating and icons) on the same baseline */
+    justify-content: space-between; /* Ensure proper spacing between rating and icons */
+    gap: 16px; /* Optional: Add space between rating and icons */
+}
+
+/* Rating element styling */
+.rating-element {
+    margin: 0;
+    padding: 0;
+    line-height: 1.5; /* Ensure consistent line height */
+}
+
+/* Icon container styling */
+.icon-container {
+    display: flex;
+    gap: 8px; /* Space between icons */
+    align-items: center; /* Align icons vertically */
+}
+
     </style>
 </head>
 
@@ -158,7 +180,7 @@
                     throw new Error(`Failed to fetch reviews. Status: ${response.status}`);
                 }
 
-                const {reviews, has_next, has_previous, current_page} = await response.json();
+                const {reviews, has_next, has_previous, current_page, username} = await response.json();
 
                 const reviewsContainer = document.getElementById('reviewsContainer');
                 reviewsContainer.innerHTML = '';
@@ -174,10 +196,44 @@
 
                     const rating = parseFloat(review.RatingStars).toFixed(2);
 
+                    const flexContainer = document.createElement('div');
+                    flexContainer.classList.add('flex-container'); // Add custom class for styling
+                    
+                    // Create and configure the rating element
                     const ratingElement = document.createElement('p');
-                    ratingElement.classList.add('text-yellow-400', 'font-semibold');
+                    ratingElement.classList.add('text-yellow-400', 'font-semibold', 'rating-element');
                     ratingElement.textContent = `${rating} ★`;
-                    reviewDiv.appendChild(ratingElement);
+                    
+                    // Append the rating element to the flex container
+                    flexContainer.appendChild(ratingElement);
+                    
+                    // Check if username matches
+                    if (username === review.Username) {
+                        // Create a container for the icons
+                        const iconContainer = document.createElement('div');
+                        iconContainer.classList.add('icon-container'); // Add custom class for styling
+                        
+                        if(!review.ResponseText){
+                            const editIcon = document.createElement('i');
+                            editIcon.classList.add('fas', 'fa-edit', 'text-blue-500', 'cursor-pointer');
+                            editIcon.title = "Edit Review";
+                            editIcon.onclick = () => handleEditReview(review);
+                            iconContainer.appendChild(editIcon);
+                        }
+                        // Delete icon
+                        const deleteIcon = document.createElement('i');
+                        deleteIcon.classList.add('fas', 'fa-trash', 'text-red-500', 'cursor-pointer');
+                        deleteIcon.title = "Delete Review";
+                        deleteIcon.onclick = () => handleDeleteReview(review);
+                        iconContainer.appendChild(deleteIcon);
+                    
+                        // Append the icon container to the flex container
+                        flexContainer.appendChild(iconContainer);
+                    }
+                    
+                    // Append the flex container to the reviewDiv
+                    reviewDiv.appendChild(flexContainer);
+
 
                     const reviewText = document.createElement('p');
                     reviewText.classList.add('text-sm');
@@ -397,6 +453,82 @@
                 serviceDetailsDiv.classList.remove('block');
             }
         });
+
+        async function handleEditReview(review) {
+            try {
+              const newRating = prompt(
+                "Enter a new rating (1-5):",
+                review.RatingStars
+              );
+      
+              // Validate the rating input
+              const ratingRegex = /^[1-5]$/; // Only allows values from 1 to 5
+      
+              if (!newRating || !ratingRegex.test(newRating)) {
+                alert("Please enter a valid rating between 1 and 5.");
+                return;
+              }
+      
+              const newMessage = prompt("Enter a new message:", review.RatingMessage);
+              if (!newMessage.trim()) {
+                alert("A message is required.");
+                return;
+              }
+      
+              const response = await fetch(
+                `/home/edit_review/${review["ReviewId"]}/`,
+                {
+                  method: "PUT",
+                  headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCsrfToken(),
+                  },
+                  body: JSON.stringify({
+                    username: review.Username,
+                    rating: parseInt(newRating),
+                    message: newMessage,
+                  }),
+                }
+              );
+      
+              const data = await response.json();
+      
+              if (response.ok && data.success) {
+                fetchAndDisplayReviews(review.ServiceId, 1); // Refresh the reviews
+              } else {
+                alert(data.error || "Failed to edit review.");
+              }
+            } catch (error) {
+              console.error("Error editing review:", error);
+              alert("An error occurred. Please try again.");
+            }
+          }
+          function handleDeleteReview(review) {
+            if (confirm("Are you sure you want to delete this review?")) {
+              fetch(`/home/delete_review/${review["ReviewId"]}/`, {
+                method: "DELETE",
+                headers: {
+                  "X-CSRFToken": getCsrfToken(),
+                },
+                body: JSON.stringify({
+                  username: review.Username,
+                }),
+              })
+                .then((response) => response.json())
+                .then((data) => {
+                  if (data.success) {
+                    // console.log("fetching again after delete " + review.ServiceId);
+                    fetchAndDisplayReviews(review.ServiceId, 1); // Refresh the reviews
+                  } else {
+                    alert(data.error || "Failed to delete review.");
+                  }
+                })
+                .catch((error) => {
+                  console.error("Error deleting review:", error);
+                  alert("An error occurred. Please try again.");
+                });
+            }
+          }
 
         // Event listener for submitReview button
         document.getElementById('submitReview').addEventListener('click', async () => {

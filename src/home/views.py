@@ -11,6 +11,7 @@ from forum.models import Notification
 from accounts.models import CustomUser
 from services.repositories import ServiceRepository
 from better_profanity import profanity
+from django.views.decorators.http import require_http_methods
 
 # TODO These constants are maintained in the JS frontend and here, we'll have to unify them
 DEFAULT_LAT, DEFAULT_LON = 40.7128, -74.0060
@@ -18,6 +19,7 @@ DEFAULT_RADIUS = 5.0
 
 decimal.getcontext().traps[decimal.Inexact] = False
 decimal.getcontext().traps[decimal.Rounded] = False
+profanity.load_censor_words()
 
 
 def convert_decimals(obj):
@@ -34,7 +36,6 @@ def convert_decimals(obj):
 @require_POST
 def submit_review(request):
     try:
-        profanity.load_censor_words()
         data = json.loads(request.body)
         service_id = data.get("service_id")
         rating = data.get("rating")
@@ -206,6 +207,7 @@ def get_reviews(request, service_id):
 
         # Fetch all reviews for the given service ID
         reviews = repo.fetch_reviews_for_service(service_id)
+        user = request.user
 
         # Paginate the reviews (5 reviews per page)
         paginator = Paginator(reviews, 5)  # 5 reviews per page
@@ -217,6 +219,7 @@ def get_reviews(request, service_id):
             "has_next": page_obj.has_next(),
             "has_previous": page_obj.has_previous(),
             "current_page": page_obj.number,
+            "username": user.username,
         }
 
         return JsonResponse(response_data, status=200)
@@ -257,3 +260,56 @@ def toggle_bookmark(request):
         return JsonResponse(
             {"error": "An error occurred while toggling the bookmark."}, status=500
         )
+
+
+@require_http_methods(["DELETE"])
+def delete_review(request, review_id):
+    try:
+        repo = HomeRepository()
+        data = json.loads(request.body)
+        if data.get("username") != request.user.username:
+            return JsonResponse(
+                {"error": "You are not authorized to edit this review."}, status=403
+            )
+        # Delete the review
+        repo.delete_review(review_id)
+        return JsonResponse(
+            {"success": True, "message": "Review deleted successfully."}, status=200
+        )
+
+    except Exception as e:
+        print(f"Error deleting review: {e}")
+        return JsonResponse({"error": "Failed to delete review."}, status=500)
+
+
+@require_http_methods(["PUT"])
+def edit_review(request, review_id):
+    try:
+        data = json.loads(request.body)
+        new_rating = data.get("rating")
+        new_message = data.get("message")
+        new_message = profanity.censor(new_message)
+        if data.get("username") != request.user.username:
+            return JsonResponse(
+                {"error": "You are not authorized to edit this review."}, status=403
+            )
+        if not new_rating or not new_message:
+            return JsonResponse(
+                {"error": "Rating and message are required."}, status=400
+            )
+
+        repo = HomeRepository()
+
+        result = repo.edit_review(
+            review_id=review_id, new_rating=new_rating, new_message=new_message
+        )
+
+        # Check if there was an error in the repository response
+        if "error" in result:
+            return JsonResponse(result, status=404)
+
+        return JsonResponse(result, status=200)
+
+    except Exception as e:
+        print(f"Error editing review: {e}")
+        return JsonResponse({"error": "Failed to edit review."}, status=500)
