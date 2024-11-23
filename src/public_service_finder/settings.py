@@ -92,8 +92,8 @@ LOGOUT_REDIRECT_URL = "user_login"  # Redirect to user login after logout
 # DEFAULT_FROM_EMAIL = 'noreply@yourdomain.com'
 # settings.py
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-DEFAULT_FROM_EMAIL = 'noreply@yourdomain.com'
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+DEFAULT_FROM_EMAIL = "noreply@yourdomain.com"
 
 
 LANGUAGE_CODE = "en-us"
