@@ -92,8 +92,9 @@ if (notificationsDropdown) {
                     // Remove all unread styling
                     const unreadNotifications = notificationsDropdown.querySelectorAll('.bg-blue-50');
                     unreadNotifications.forEach(notification => {
-                        notification.classList.remove('bg-blue-50');
-                    });
+                        notification.classList.remove('bg-gray-700');
+                        notification.classList.add('bg-gray-800');
+                                        });
                     // Update the notification count
                     updateNotificationCount();
                 }

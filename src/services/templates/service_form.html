@@ -2,22 +2,22 @@
 {% load static %}
 
 {% block content %}
-  <div class="min-h-screen py-12">
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="max-w-3xl mx-auto">
-        <!-- Header -->
-        <div class="mb-8">
-          <h1 class="text-3xl font-bold text-gray-900 leading-tight">
-            {{ action }} Service
-          </h1>
-          <p class="mt-2 text-sm text-gray-600">
-            Fill in the details below to {{ action|lower }} your service.
-          </p>
-        </div>
+    <div class="min-h-screen py-12 bg-gray-900">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-3xl mx-auto">
+                <!-- Header -->
+                <div class="mb-8">
+                    <h1 class="text-3xl font-bold text-gray-100 leading-tight">
+                        {{ action }} Service
+                    </h1>
+                    <p class="mt-2 text-sm text-gray-400">
+                        Fill in the details below to {{ action|lower }} your service.
+                    </p>
+                </div>
 
-        <!-- Main Form -->
-        <form method="post" class="bg-white shadow-lg rounded-xl overflow-hidden">
-          {% csrf_token %}
+                <!-- Main Form -->
+                <form method="post" class="bg-gray-800 shadow-lg rounded-xl overflow-hidden">
+                    {% csrf_token %}
 
           <!-- Main Fields Section -->
           <div class="p-8 space-y-6">
@@ -81,17 +81,17 @@
               </div>
             {% endfor %}
 
-            <!-- Description Section -->
-            <div class="pt-6">
-              <h2 class="text-xl font-semibold text-gray-900 mb-4">Description Items</h2>
-              {{ description_formset.management_form }}
-              <div id="description-formset" class="space-y-4">
-                {% for form in description_formset %}
-                  <div class="description-form p-4 bg-gray-50 rounded-lg border border-gray-200 relative">
-                    {% if form.instance.pk %}
-                      <input type="hidden" name="{{ form.prefix }}-id"
-                             value="{{ form.instance.pk }}">
-                    {% endif %}
+                        <!-- Description Section -->
+                        <div class="pt-6">
+                            <h2 class="text-xl font-semibold text-gray-100 mb-4">Description Items</h2>
+                            {{ description_formset.management_form }}
+                            <div id="description-formset" class="space-y-4">
+                                {% for form in description_formset %}
+                                    <div class="description-form p-4 bg-gray-700 rounded-lg border border-gray-600 relative">
+                                        {% if form.instance.pk %}
+                                            <input type="hidden" name="{{ form.prefix }}-id"
+                                                   value="{{ form.instance.pk }}">
+                                        {% endif %}
 
                     <!-- Hidden DELETE field -->
                     <input type="checkbox" name="{{ form.prefix }}-DELETE"
@@ -187,23 +187,21 @@
             </div>
           </div>
 
-          <!-- Move this inside the p-8 space-y-6 div, after the main fields and before description section -->
-
-          <!-- Form Actions -->
-          <div class="px-8 py-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3">
-            <a href="{% url 'services:list' %}"
-               class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-              Cancel
-            </a>
-            <button type="submit"
-                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-              {{ action }} Service
-            </button>
-          </div>
-        </form>
-      </div>
+                    <!-- Form Actions -->
+                    <div class="px-8 py-4 bg-gray-700 border-t border-gray-600 flex justify-end space-x-3">
+                        <a href="{% url 'services:list' %}"
+                           class="inline-flex items-center px-4 py-2 border border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-300 bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            Cancel
+                        </a>
+                        <button type="submit"
+                                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            {{ action }} Service
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-  </div>
 
   {% block scripts %}
     <script src="{% static 'js/service_form.js' %}"></script>

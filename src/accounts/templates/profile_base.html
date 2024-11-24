@@ -10,34 +10,33 @@
 {% endblock %}
 
 {% block content %}
-  <div class="container mx-auto px-6 py-12 pb-32 mb-32 max-w-7xl" style="min-width: 1200px;">
+<div class="container mx-auto px-6 py-12 pb-32 mb-32 max-w-7xl bg-gray-900" style="min-width: 1000px;">
     <div class="mb-10 text-center mt-16">
-      <h1 class="text-4xl font-bold text-gray-800 mb-3">Profile</h1>
-      <p class="text-gray-600 text-lg">Manage your account information</p>
+        <h1 class="text-4xl font-bold text-gray-100 mb-3">Profile</h1>
+        <p class="text-gray-400 text-lg">Manage your account information</p>
     </div>
 
     <!-- Profile View Section -->
-    <div id="view-profile" class="bg-white rounded-lg shadow-md p-6 w-full">
-      <div class="flex justify-between items-start mb-6">
-        <!-- Grouped Profile Picture and Information -->
-        <div class="flex items-center">
-          <div class="w-24 h-24 rounded-full bg-blue-500 text-white flex items-center justify-center text-4xl font-bold mr-6 uppercase">
-            {{ profile.username|first }}
-          </div>
-          <div>
-            <h2 class="text-xl font-semibold text-blue-700 mb-2">Profile Information</h2>
-            <p class="text-gray-600"><strong>Username:</strong> {{ profile.username }}</p>
-            <p class="text-gray-600"><strong>Email:</strong> {{ profile.email }}</p>
-            <p class="text-gray-600"><strong>First Name:</strong> {{ profile.first_name }}</p>
-            <p class="text-gray-600"><strong>Last Name:</strong> {{ profile.last_name }}</p>
-          </div>
+    <div id="view-profile" class="bg-gray-800 rounded-lg shadow-md p-6">
+        <div class="flex justify-between items-start mb-6">
+            <!-- Grouped Profile Picture and Information -->
+            <div class="flex items-center">
+                <div class="w-24 h-24 rounded-full bg-blue-600 text-white flex items-center justify-center text-4xl font-bold mr-6 uppercase">
+                    {{ profile.username|first }}
+                </div>
+                <div>
+                    <h2 class="text-xl font-semibold text-blue-400 mb-2">Profile Information</h2>
+                    <p class="text-gray-300"><strong>Username:</strong> {{ profile.username }}</p>
+                    <p class="text-gray-300"><strong>Email:</strong> {{ profile.email }}</p>
+                    <p class="text-gray-300"><strong>First Name:</strong> {{ profile.first_name }}</p>
+                    <p class="text-gray-300"><strong>Last Name:</strong> {{ profile.last_name }}</p>
+                </div>
+            </div>
+            <!-- Edit Profile Button -->
+            <button onclick="toggleEdit()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300 mt-4 sm:mt-0">
+                Edit Profile
+            </button>
         </div>
-        <!-- Edit Profile Button -->
-        <button onclick="toggleEdit()"
-                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300 mt-4 sm:mt-0">
-          Edit Profile
-        </button>
-      </div>
 
       {% if not is_service_provider %}
         <div class="mb-8 border-b border-gray-200 w-full">
@@ -201,40 +200,39 @@
 
 
     <!-- Profile Edit Form Section -->
-    <div id="edit-profile" class="bg-white rounded-lg shadow-md p-6 hidden w-full ">
-      <h2 class="text-xl font-semibold text-blue-700 mb-4">Edit Profile</h2>
-      <form method="POST" class="space-y-4">
-        {% csrf_token %}
-        {% for field in form %}
-          <div>
-            <label class="block text-gray-700 font-medium mb-2" for="{{ field.id_for_label }}">
-              {{ field.label }}
-            </label>
-            {{ field }}
-            {% if field.errors %}
-              {% for error in field.errors %}
-                <p class="text-red-500 text-sm mt-1">{{ error }}</p>
-              {% endfor %}
-            {% endif %}
-          </div>
-        {% endfor %}
+    <div id="edit-profile" class="bg-gray-800 rounded-lg shadow-md p-6 hidden">
+        <h2 class="text-xl font-semibold text-blue-400 mb-4">Edit Profile</h2>
+        <form method="POST" class="space-y-4">
+            {% csrf_token %}
+            {% for field in form %}
+            <div>
+                <label class="block text-gray-300 font-medium mb-2" for="{{ field.id_for_label }}">
+                    {{ field.label }}
+                </label>
+                {{ field }}
+                {% if field.errors %}
+                    {% for error in field.errors %}
+                        <p class="text-red-400 text-sm mt-1">{{ error }}</p>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            {% endfor %}
 
-        <div class="flex justify-between mt-6">
-          <button type="submit"
-                  class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300">
-            Save Changes
-          </button>
-          <button type="button" onclick="toggleEdit()"
-                  class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300">
-            Cancel
-          </button>
-        </div>
-      </form>
+            <div class="flex justify-between mt-6">
+                <button type="submit"
+                        class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300">
+                    Save Changes
+                </button>
+                <button type="button" onclick="toggleEdit()"
+                        class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300">
+                    Cancel
+                </button>
+            </div>
+        </form>
     </div>
   </div>
 
-  <!-- Modal HTML -->
-
+<!-- Modal HTML -->
   <div id="deleteConfirmModal"
        class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50 flex items-center justify-center">
     <div class="bg-white rounded-lg shadow-xl p-5 w-80"> <!-- Made width smaller and reduced padding -->
@@ -255,54 +253,45 @@
       </div>
     </div>
   </div>
-  <div id="serviceDetails" class="fixed inset-0 bg-gray-600 bg-opacity-75 hidden overflow-y-auto h-full w-full z-50">
-    <div class="relative top-20 mx-auto p-6 border w-11/12 md:w-3/4 lg:w-1/2 shadow-xl rounded-xl bg-white">
-      <div class="absolute top-0 right-0 pt-4 pr-4">
-        <button id="closeDetails" class="text-gray-400 hover:text-gray-500 transition-colors duration-200">
-          <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
-      </div>
-      <div class="mt-3">
-        <h2 id="serviceName" class="text-xl font-semibold text-gray-900 mb-4">Service Name</h2>
-        <div id="serviceMap" class="w-full h-64 rounded-lg overflow-hidden mb-6"></div>
-        <div id="serviceAnnouncement" class="mb-4 hidden">
-          <div class="p-3 bg-blue-50 rounded-md">
-            <div class="flex items-center">
-              <i class="fas fa-bullhorn text-blue-600 mr-2"></i>
-              <p class="text-sm text-blue-800"></p>
+<div id="serviceDetails"
+     class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-6 border w-11/12 md:w-3/4 lg:w-1/2 shadow-xl rounded-xl bg-gray-800">
+        <div class="absolute top-0 right-0 pt-4 pr-4">
+            <button id="closeDetails" class="text-gray-500 hover:text-gray-400 transition-colors duration-200">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div class="mt-3">
+            <h2 id="serviceName" class="text-xl font-semibold text-gray-100 mb-4">Service Name</h2>
+            <div id="serviceMap" class="w-full h-64 rounded-lg overflow-hidden mb-6"></div>
+            <div class="space-y-1 mb-4">
+                <p class="text-sm text-gray-300"><strong>Address:</strong> <span id="serviceAddress">123 Main St</span></p>
+                <p class="text-sm text-gray-300"><strong>Type:</strong> <span id="serviceType">Homeless</span></p>
+                <p class="text-sm text-gray-300"><strong>Rating:</strong> <span id="serviceRating">4.5</span></p>
+                <a id="getDirections" href="#" target="_blank" rel="noopener noreferrer"
+                   class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mt-2">Get Directions</a>
+                <div class="space-y-1 mb-4">
+                    <div id="serviceDescription" class="text-sm mt-2 text-gray-400"></div>
+                </div>
             </div>
-          </div>
-        </div>
-        <div class="space-y-1 mb-4">
-          <p class="text-sm"><strong>Address:</strong> <span id="serviceAddress">123 Main St</span></p>
-          <p class="text-sm"><strong>Type:</strong> <span id="serviceType">Homeless</span></p>
-          <p class="text-sm"><strong>Rating:</strong> <span id="serviceRating">4.5</span></p>
-          <a id="getDirections" href="#" target="_blank" rel="noopener noreferrer"
-             class="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-2">Get
-            Directions</a>
-          <div class="space-y-1 mb-4">
-            <div id="serviceDescription" class="text-sm mt-2"></div>
-          </div>
-        </div>
 
-
-        <h3 class="text-lg font-semibold mb-2">Leave a Review</h3>
-        <div class="space-y-2 mb-4">
-          <select id="reviewRating" class="w-full p-2 border rounded">
-            <option value="">Select a rating</option>
-            <option value="1">1 Star</option>
-            <option value="2">2 Stars</option>
-            <option value="3">3 Stars</option>
-            <option value="4">4 Stars</option>
-            <option value="5">5 Stars</option>
-          </select>
-          <textarea id="reviewText" class="w-full p-2 border rounded"
-                    placeholder="Write your review here..."></textarea>
-          <button id="submitReview" class="bg-blue-500 text-white px-4 py-2 rounded">Submit Review</button>
-        </div>
+            <h3 class="text-lg font-semibold mb-2 text-gray-100">Leave a Review</h3>
+            <div class="space-y-2 mb-4">
+                <select id="reviewRating" class="w-full p-2 border rounded bg-gray-700 text-gray-100">
+                    <option value="">Select a rating</option>
+                    <option value="1">1 Star</option>
+                    <option value="2">2 Stars</option>
+                    <option value="3">3 Stars</option>
+                    <option value="4">4 Stars</option>
+                    <option value="5">5 Stars</option>
+                </select>
+                <textarea id="reviewText" class="w-full p-2 border rounded bg-gray-700 text-gray-100"
+                          placeholder="Write your review here..."></textarea>
+                <button id="submitReview" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Submit Review</button>
+            </div>
 
         <div id="reviewsContainer" class="space-y-4"></div>
       </div>

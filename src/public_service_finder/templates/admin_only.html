@@ -2,46 +2,46 @@
 {% block title %}Admin Only Page{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-transparent-50">
+<div class="min-h-screen bg-gray-900">
     <div class="container mx-auto px-4 py-8 max-w-[1400px] min-w-[1000px]">
         <!-- Header section -->
         <div class="flex flex-col items-center mb-8 mt-16">
-            <h1 class="text-4xl font-bold text-gray-900">Admin Dashboard</h1>
+            <h1 class="text-4xl font-bold text-gray-100">Admin Dashboard</h1>
         </div>
 
         <!-- Pending Services Section -->
         {% if pending_services %}
-        <div class="overflow-x-auto bg-white rounded-xl shadow-sm p-8"> <!-- Increased padding -->
-            <table class="min-w-full text-base"> <!-- Increased base text size -->
+        <div class="overflow-x-auto bg-gray-800 rounded-xl shadow-sm p-8">
+            <table class="min-w-full text-base">
                 <thead>
-                    <tr class="bg-gray-100">
-                        <th class="px-8 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Service Name</th>
-                        <th class="px-8 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Description</th>
-                        <th class="px-8 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Address</th>
-                        <th class="px-8 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Status</th>
-                        <th class="px-8 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider">Actions</th>
+                    <tr class="bg-gray-700">
+                        <th class="px-8 py-4 text-left text-sm font-bold text-gray-300 uppercase tracking-wider">Service Name</th>
+                        <th class="px-8 py-4 text-left text-sm font-bold text-gray-300 uppercase tracking-wider">Description</th>
+                        <th class="px-8 py-4 text-left text-sm font-bold text-gray-300 uppercase tracking-wider">Address</th>
+                        <th class="px-8 py-4 text-left text-sm font-bold text-gray-300 uppercase tracking-wider">Status</th>
+                        <th class="px-8 py-4 text-center text-sm font-bold text-gray-300 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody class="bg-gray-800 divide-y divide-gray-700">
                     {% for service in pending_services %}
-                    <tr id="service-row-{{ service.id }}" class="hover:bg-gray-50 transition-colors duration-200">
-                        <td class="px-8 py-6 whitespace-nowrap text-base font-medium text-gray-900">{{ service.name }}</td> <!-- Increased padding and text size -->
-                        <td class="px-8 py-6 text-base text-gray-600">{{ service.description }}</td> <!-- Darkened text -->
-                        <td class="px-8 py-6 text-base text-gray-600">{{ service.address }}</td>
+                    <tr id="service-row-{{ service.id }}" class="hover:bg-gray-700 transition-colors duration-200">
+                        <td class="px-8 py-6 whitespace-nowrap text-base font-medium text-gray-100">{{ service.name }}</td>
+                        <td class="px-8 py-6 text-base text-gray-300">{{ service.description }}</td>
+                        <td class="px-8 py-6 text-base text-gray-300">{{ service.address }}</td>
                         <td class="px-8 py-6">
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800"> <!-- Increased badge size -->
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-800 text-yellow-200">
                                 {{ service.service_status }}
                             </span>
                         </td>
                         <td class="px-8 py-6 text-center">
-                            <form action="{% url 'admin_update_listing' service.id %}" method="post" class="inline-flex gap-3"> <!-- Increased gap -->
+                            <form action="{% url 'admin_update_listing' service.id %}" method="post" class="inline-flex gap-3">
                                 {% csrf_token %}
                                 <button type="submit" name="status" value="approve"
-                                    class="inline-flex items-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors duration-200 text-base"> <!-- Increased button size -->
+                                    class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 text-base">
                                     Approve
                                 </button>
                                 <button type="submit" name="status" value="reject"
-                                    class="inline-flex items-center px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200 text-base">
+                                    class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 text-base">
                                     Reject
                                 </button>
                             </form>
@@ -52,8 +52,8 @@
             </table>
         </div>
         {% else %}
-        <div class="bg-white rounded-xl shadow-sm p-8 text-center">
-            <p class="text-gray-500 text-lg">No pending listings at the moment.</p>
+        <div class="bg-gray-800 rounded-xl shadow-sm p-8 text-center">
+            <p class="text-gray-400 text-lg">No pending listings at the moment.</p>
         </div>
         {% endif %}
     </div>

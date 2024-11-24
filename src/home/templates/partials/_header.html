@@ -1,28 +1,27 @@
-<header class="mb-4 mt-2 bg-blue-10 text-white p-6">
+<header class="mb-4 mt-2 bg-gray-800 text-gray-100 p-6">
     <div class="container mx-auto px-4">
         <form method="get" action="" class="flex flex-wrap items-start gap-6">
             <!-- Search by Name -->
             <div class="flex flex-col w-full sm:w-40">
                 <label for="search" class="mb-1 text-sm font-medium">Search by Name</label>
                 <input type="text" id="search" name="search" placeholder="Search by Name" value="{{ search_query }}" 
-                       class="w-full p-2 rounded bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-300 h-12 border border-gray-300">
+                       class="w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600">
             </div>
 
             <!-- Location Input -->
             <div class="flex flex-col w-full sm:w-40">
                 <label for="location" class="mb-1 text-sm font-medium">Location</label>
                 <input type="text" id="location" name="location" placeholder="Enter Location" value="{{ location_value }}"
-                       class="w-full p-2 rounded bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-300 h-12 border border-gray-300">
+                       class="w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600">
             </div>
 
             <!-- Use Current Location Icon Button -->
             <div class="flex flex-col w-full sm:w-auto">
-                <label class="mb-1 text-sm font-medium invisible">Use Location</label> <!-- Invisible label for alignment -->
+                <label class="mb-1 text-sm font-medium invisible">Use Location</label>
                 <button type="button" id="current-location"
-                        class="w-full sm:w-auto bg-white text-blue-500 px-4 py-2 rounded hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-300 h-12 border border-gray-300 flex items-center justify-center"
+                        class="w-full sm:w-auto bg-gray-700 text-blue-400 px-4 py-2 rounded hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600 flex items-center justify-center"
                         onclick="getCurrentLocation()">
-                    <!-- Location Icon SVG -->
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 2C8.134 2 5 5.134 5 9c0 4.568 7 13 7 13s7-8.432 7-13c0-3.866-3.134-7-7-7z" />
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 11.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z" />
                     </svg>
@@ -33,7 +32,7 @@
             <div class="flex flex-col w-full sm:w-auto">
                 <label for="type" class="mb-1 text-sm font-medium">Category</label>
                 <select id="type" name="type"
-                        class="w-full p-2 rounded bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-300 h-12 border border-gray-300">
+                        class="w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600">
                     <option value="" {% if service_type_dropdown == '' %}selected{% endif %}>All Types</option>
                     <option value="FOOD" {% if service_type_dropdown == 'FOOD' %}selected{% endif %}>Food</option>
                     <option value="MENTAL" {% if service_type_dropdown == 'MENTAL' %}selected{% endif %}>Mental Health</option>
@@ -45,12 +44,12 @@
             <!-- Radius Slider -->
             <div class="flex flex-col w-full sm:w-auto">
                 <label for="radius" class="mb-1 text-sm font-medium">Radius</label>
-                <div class="flex items-center bg-white p-2 rounded h-12 border border-gray-300">
-                    <span class="text-gray-800 mr-2">Radius:</span>
+                <div class="flex items-center bg-gray-700 p-2 rounded h-12 border border-gray-600">
+                    <span class="text-gray-300 mr-2">Radius:</span>
                     <input type="range" id="radius" name="radius" min="1" max="20" value="{% if radius == '' %}5{% else %}{{ radius }}{% endif %}"
-                           class="flex-grow slider bg-gray-300 rounded-lg">
-                    <span id="radiusValue" class="ml-2 text-gray-800 w-5 text-right">{% if radius == '' %}5{% else %}{{ radius }}{% endif %}</span>
-                    <span class="ml-2 text-gray-800 text-right">Miles</span>
+                           class="flex-grow slider bg-gray-600 rounded-lg">
+                    <span id="radiusValue" class="ml-2 text-gray-300 w-5 text-right">{% if radius == '' %}5{% else %}{{ radius }}{% endif %}</span>
+                    <span class="ml-2 text-gray-300 text-right">Miles</span>
                 </div>
             </div>
 
@@ -60,18 +59,17 @@
 
             <!-- Apply Filters and Clear Filters Buttons -->
             <div class="flex flex-col w-full sm:w-40">
-                <label class="mb-1 text-sm font-medium invisible">Actions</label> <!-- Invisible label for alignment -->
+                <label class="mb-1 text-sm font-medium invisible">Actions</label>
                 <div class="flex">
                     <!-- Apply Filters Button -->
                     <button type="submit" id="apply-filters"
-                            class="w-full sm:w-auto bg-white text-blue-500 px-4 py-2 rounded hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-300 h-12 border border-gray-300">
+                            class="w-full sm:w-auto bg-blue-600 text-gray-100 px-4 py-2 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-blue-700">
                         Search
                     </button>
                     <!-- Clear Filters Button (with margin-left) -->
                     <button type="button" id="clear-filters"
-                            class="w-full sm:w-auto bg-white text-red-500 px-4 py-2 rounded hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-300 h-12 border border-gray-300 ml-2"> <!-- Added ml-2 here -->
-                        <!-- X Icon SVG -->
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            class="w-full sm:w-auto bg-red-600 text-gray-100 px-4 py-2 rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 h-12 border border-red-700 ml-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-100 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
                         <span class="sr-only">Clear Filters</span>

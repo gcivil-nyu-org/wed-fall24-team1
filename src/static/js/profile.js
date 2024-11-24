@@ -52,13 +52,13 @@ document.addEventListener('DOMContentLoaded', () => {
             reviewsContainer.innerHTML = '';
 
             if (reviews.length === 0) {
-                reviewsContainer.innerHTML = '<p class="text-sm text-gray-500">No reviews yet.</p>';
+                reviewsContainer.innerHTML = '<p class="bg-gray-800 p-4 rounded shadow mb-4">No reviews yet.</p>';
                 return;
             }
 
             reviews.forEach(review => {
                 const reviewDiv = document.createElement('div');
-                reviewDiv.classList.add('bg-white', 'rounded-lg', 'shadow', 'p-2', 'mb-2');
+                reviewDiv.classList.add('bg-gray-800', 'rounded', 'shadow', 'p-4', 'mb-4');
 
                 const rating = parseFloat(review.RatingStars).toFixed(2);
 
@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const timestamp = formatTimestamp(review.Timestamp);
                 const meta = document.createElement('p');
-                meta.classList.add('text-xs', 'text-gray-500');
+                meta.classList.add('text-xm', 'text-gray-400');
                 meta.textContent = `By ${review.Username} on ${timestamp}`;
                 reviewDiv.appendChild(meta);
 

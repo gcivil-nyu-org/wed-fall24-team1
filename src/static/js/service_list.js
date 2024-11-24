@@ -40,12 +40,12 @@ document.addEventListener('DOMContentLoaded', function () {
                       </div>
                     ` : ''}
                     <div class="mt-4">
-                        <h4 class="font-semibold">Description:</h4>
+                        <h4 class="font-semibold text-gray-100">Description:</h4>
                         <dl class="mt-2 space-y-1">
                             ${Object.entries(data.description).map(([key, value]) => `
                                 <div class="flex">
-                                    <dt class="text-sm font-medium text-gray-500 w-1/3">${key}:</dt>
-                                    <dd class="text-sm text-gray-900 ml-2">${value}</dd>
+                                    <dt class="text-sm font-medium text-gray-400 w-1/3">${key}:</dt>
+                                    <dd class="text-sm text-gray-300 ml-2">${value}</dd>
                                 </div>
                             `).join('')}
                         </dl>
@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 // Populate reviews
                 const reviewsContainer = document.getElementById('modalReviews');
-                reviewsContainer.innerHTML = '<h4 class="font-semibold mt-4">Reviews:</h4>';
+                reviewsContainer.innerHTML = '<h4 class="font-semibold mt-4 text-gray-100">Reviews:</h4>';
 
                 if (data.reviews && data.reviews.length > 0) {
                     data.reviews.forEach(review => {
@@ -65,23 +65,23 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
 
                         reviewsContainer.innerHTML += `
-                            <div class="review mb-2 p-2 bg-gray-100 rounded">
-                                <p><strong>${review.Username}</strong> - ${review.RatingStars} stars</p>
-                                <p class="text-sm text-gray-600">${review.RatingMessage}</p>
+                            <div class="review mb-2 p-2 bg-gray-700 rounded">
+                                <p class="text-gray-100"><strong>${review.Username}</strong> - ${review.RatingStars} stars</p>
+                                <p class="text-sm text-gray-300">${review.RatingMessage}</p>
                                 ${hasResponseText ? `
-                                    <div class="mt-3 p-3 bg-blue-50 rounded" id="reviewResponse-${review.ReviewId}">
-                                        <p class="font-semibold">Provider Response:</p>
-                                        <p>${review.ResponseText}</p>
-                                        <p class="text-sm text-gray-600">Responded on ${respondedAtDate}</p>
+                                    <div class="mt-3 p-3 bg-gray-600 rounded" id="reviewResponse-${review.ReviewId}">
+                                        <p class="font-semibold text-gray-100">Provider Response:</p>
+                                        <p class="text-gray-300">${review.ResponseText}</p>
+                                        <p class="text-sm text-gray-400">Responded on ${respondedAtDate}</p>
                                     </div>
                                 ` : `
-                                    <button class="respond-button bg-blue-500 text-white py-1 px-3 rounded mt-2" 
+                                    <button class="respond-button bg-blue-600 text-white py-1 px-3 rounded mt-2 hover:bg-blue-700" 
                                             onclick="showResponseForm('${serviceId}', '${review.ReviewId}')">
                                         Respond
                                     </button>
                                     <div id="responseForm-${review.ReviewId}" class="response-form hidden mt-2">
-                                        <textarea id="responseText-${review.ReviewId}" class="w-full p-2 border rounded" rows="2" placeholder="Write your response here..."></textarea>
-                                        <button class="send-response bg-green-500 text-white py-1 px-3 rounded mt-2" 
+                                        <textarea id="responseText-${review.ReviewId}" class="w-full p-2 border rounded bg-gray-600 text-gray-100 border-gray-500" rows="2" placeholder="Write your response here..."></textarea>
+                                        <button class="send-response bg-green-600 text-white py-1 px-3 rounded mt-2 hover:bg-green-700" 
                                                 onclick="sendResponse('${serviceId}', '${review.ReviewId}')">
                                             Send Response
                                         </button>
@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         `;
                     });
                 } else {
-                    reviewsContainer.innerHTML += '<p>No reviews yet.</p>';
+                    reviewsContainer.innerHTML += '<p class="text-gray-400">No reviews yet.</p>';
                 }
 
                 serviceModal.classList.remove('hidden');
@@ -126,7 +126,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         serviceCards.forEach(card => {
             const serviceName = card.querySelector('.service-name').textContent.toLowerCase();
-            const serviceCategory = card.querySelector('.bg-blue-100').textContent.toLowerCase().trim();
+            const serviceCategory = card.querySelector('.bg-blue-900').textContent.toLowerCase().trim();
 
             // Check if either the service name or category contains the search term
             if (serviceName.includes(searchTerm) || serviceCategory.includes(searchTerm)) {
@@ -192,10 +192,10 @@ function sendResponse(serviceId, reviewId) {
             if (data.status === "success") {
                 // Update the response container
                 responseContainer.innerHTML = `
-                <div class="mt-3 p-3 bg-blue-50 rounded">
-                    <p class="font-semibold">Provider Response:</p>
-                    <p>${responseText}</p>
-                    <p class="text-sm text-gray-600">Responded just now</p>
+                <div class="mt-3 p-3 bg-gray-600 rounded">
+                    <p class="font-semibold text-gray-100">Provider Response:</p>
+                    <p class="text-gray-300">${responseText}</p>
+                    <p class="text-sm text-gray-400">Responded just now</p>
                 </div>
             `;
 

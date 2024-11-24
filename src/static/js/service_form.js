@@ -31,7 +31,7 @@ if (!window.serviceFormInitialized) {
             totalForms.value = formCount;
 
             // Attach delete event listener to the new delete button
-            const deleteButton = newForm.querySelector('.delete-description');
+            const deleteButton = newForm.querySelector('.delete-description').add('bg-red-600', 'hover:bg-red-700', 'text-white');
             deleteButton.addEventListener('click', function() {
                 markFormForDeletion(this);
             });
