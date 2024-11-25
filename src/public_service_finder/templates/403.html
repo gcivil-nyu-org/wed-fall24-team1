@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}403 Forbidden{% endblock %}
+
+{% block content %}
+<div class="min-h-[80vh] flex items-center justify-center px-4 my-10">
+    <div class="text-center">
+        <!-- Error Icon -->
+        <div class="mb-8">
+            <i class="fas fa-lock text-8xl text-red-500"></i>
+        </div>
+        
+        <!-- Error Message -->
+        <h1 class="mb-4 text-6xl font-semibold text-red-500">403</h1>
+        <h2 class="mb-4 text-3xl font-bold text-gray-800">Access Denied</h2>
+        <p class="mb-8 text-lg text-gray-600">Sorry, you don't have permission to access this page.</p>
+        
+        <!-- Back to Home Button -->
+        {% if user.is_authenticated and user.user_type == 'service_provider' %}
+            <a href="{% url 'services:list' %}" 
+               class="inline-flex items-center px-6 py-3 text-base font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors duration-200">
+                <i class="fas fa-home mr-2"></i>
+                Back to Home
+            </a>
+        {% else %}
+            <a href="{% url 'home' %}" 
+               class="inline-flex items-center px-6 py-3 text-base font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors duration-200">
+                <i class="fas fa-home mr-2"></i>
+                Back to Home
+            </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
