@@ -1,8 +1,8 @@
 # public_service_finder/views.py
-from django.http import HttpResponseForbidden
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
-from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render
+
 from public_service_finder.utils.enums.service_status import ServiceStatus
 from services.repositories import ServiceRepository
 
