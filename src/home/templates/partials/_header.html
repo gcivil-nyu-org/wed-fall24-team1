@@ -1,23 +1,23 @@
-<header class="mb-4 mt-2 bg-gray-800 text-gray-100 p-6">
+<header class="mb-4 mt-2 bg-transparent text-gray-100 p-6">
     <div class="container mx-auto px-4">
         <form method="get" action="" class="flex flex-wrap items-start gap-6">
             <!-- Search by Name -->
             <div class="flex flex-col w-full sm:w-40">
-                <label for="search" class="mb-1 text-sm font-medium">Search by Name</label>
+                <label for="search" class="mb-1 text-sm font-medium text-gray-400 ">Search by Name</label>
                 <input type="text" id="search" name="search" placeholder="Search by Name" value="{{ search_query }}" 
                        class="w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600">
             </div>
 
             <!-- Location Input -->
             <div class="flex flex-col w-full sm:w-40">
-                <label for="location" class="mb-1 text-sm font-medium">Location</label>
+                <label for="location" class="mb-1 text-sm font-medium text-gray-400">Location</label>
                 <input type="text" id="location" name="location" placeholder="Enter Location" value="{{ location_value }}"
                        class="w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600">
             </div>
 
             <!-- Use Current Location Icon Button -->
             <div class="flex flex-col w-full sm:w-auto">
-                <label class="mb-1 text-sm font-medium invisible">Use Location</label>
+                <label class="mb-1 text-sm font-medium text-gray-400">Use Your Location</label>
                 <button type="button" id="current-location"
                         class="w-full sm:w-auto bg-gray-700 text-blue-400 px-4 py-2 rounded hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600 flex items-center justify-center"
                         onclick="getCurrentLocation()">
@@ -30,7 +30,7 @@
 
             <!-- Category Selection -->
             <div class="flex flex-col w-full sm:w-auto">
-                <label for="type" class="mb-1 text-sm font-medium">Category</label>
+                <label for="type" class="mb-1 text-sm font-medium text-gray-400">Category</label>
                 <select id="type" name="type"
                         class="w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600">
                     <option value="" {% if service_type_dropdown == '' %}selected{% endif %}>All Types</option>
@@ -43,7 +43,7 @@
 
             <!-- Radius Slider -->
             <div class="flex flex-col w-full sm:w-auto">
-                <label for="radius" class="mb-1 text-sm font-medium">Radius</label>
+                <label for="radius" class="mb-1 text-sm font-medium text-gray-400">Radius</label>
                 <div class="flex items-center bg-gray-700 p-2 rounded h-12 border border-gray-600">
                     <span class="text-gray-300 mr-2">Radius:</span>
                     <input type="range" id="radius" name="radius" min="1" max="20" value="{% if radius == '' %}5{% else %}{{ radius }}{% endif %}"

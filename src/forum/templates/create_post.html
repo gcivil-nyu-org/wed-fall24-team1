@@ -3,7 +3,7 @@
 {% block title %}Create New Post{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8 bg-gray-900">
+<div class="container mx-auto px-4 py-8 bg-transparent">
     <div class="max-w-2xl mx-auto">
         <h1 class="text-3xl font-bold text-gray-100 mb-6 mt-16">
             Create New Post in
@@ -28,7 +28,7 @@
 
             <div class="flex justify-end space-x-4">
                 <a href="{% url 'forum:category_detail' category.id %}"
-                   class="bg-gray-700 text-gray-300 px-6 py-2 rounded-md hover:bg-gray-600 transition-colors duration-300">
+                   class="bg-red-600 text-white px-6 py-2 rounded-md hover:bg-red-700 transition-colors duration-300">
                     Cancel
                 </a>
                 <button type="submit"

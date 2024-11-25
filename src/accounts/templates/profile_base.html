@@ -10,7 +10,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-6 py-12 pb-32 mb-32 max-w-7xl bg-gray-900" style="min-width: 1000px;">
+<div class="container mx-auto px-6 py-12 pb-32 mb-32 max-w-7xl transparent" style="min-width: 1000px;">
     <div class="mb-10 text-center mt-16">
         <h1 class="text-4xl font-bold text-gray-100 mb-3">Profile</h1>
         <p class="text-gray-400 text-lg">Manage your account information</p>
@@ -220,11 +220,11 @@
 
             <div class="flex justify-between mt-6">
                 <button type="submit"
-                        class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300">
+                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300">
                     Save Changes
                 </button>
                 <button type="button" onclick="toggleEdit()"
-                        class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300">
+                        class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300">
                     Cancel
                 </button>
             </div>
@@ -255,7 +255,7 @@
   </div>
 <div id="serviceDetails"
      class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden overflow-y-auto h-full w-full z-50">
-    <div class="relative top-20 mx-auto p-6 border w-11/12 md:w-3/4 lg:w-1/2 shadow-xl rounded-xl bg-gray-800">
+    <div class="relative top-20 mx-auto p-6 w-11/12 md:w-3/4 lg:w-1/2 shadow-xl rounded-xl bg-gray-800">
         <div class="absolute top-0 right-0 pt-4 pr-4">
             <button id="closeDetails" class="text-gray-500 hover:text-gray-400 transition-colors duration-200">
                 <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -273,14 +273,14 @@
                 <p class="text-sm text-gray-300"><strong>Rating:</strong> <span id="serviceRating">4.5</span></p>
                 <a id="getDirections" href="#" target="_blank" rel="noopener noreferrer"
                    class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mt-2">Get Directions</a>
-                <div class="space-y-1 mb-4">
+                <div class="space-y-1 mb-4 text-sm text-gray-300"><strong>Additional Description Details:</strong>
                     <div id="serviceDescription" class="text-sm mt-2 text-gray-400"></div>
                 </div>
             </div>
 
             <h3 class="text-lg font-semibold mb-2 text-gray-100">Leave a Review</h3>
             <div class="space-y-2 mb-4">
-                <select id="reviewRating" class="w-full p-2 border rounded bg-gray-700 text-gray-100">
+                <select id="reviewRating" class="w-full p-2  rounded bg-gray-700 text-gray-100">
                     <option value="">Select a rating</option>
                     <option value="1">1 Star</option>
                     <option value="2">2 Stars</option>
@@ -288,7 +288,7 @@
                     <option value="4">4 Stars</option>
                     <option value="5">5 Stars</option>
                 </select>
-                <textarea id="reviewText" class="w-full p-2 border rounded bg-gray-700 text-gray-100"
+                <textarea id="reviewText" class="w-full p-2  rounded bg-gray-700 text-gray-100"
                           placeholder="Write your review here..."></textarea>
                 <button id="submitReview" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Submit Review</button>
             </div>

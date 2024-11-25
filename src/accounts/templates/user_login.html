@@ -4,7 +4,7 @@
 {% load socialaccount %}
 
 {% block content %}
-<div class="flex flex-col justify-center py-12 px-4 bg-gray-900">
+<div class="flex flex-col justify-center py-12 px-4 transparent">
     <div class="mx-auto w-full max-w-xl">
         <img src="{% static 'images/logo-psf.png' %}" alt="Logo" class="mx-auto h-16 w-16 rounded-full border border-gray-600 shadow-sm">
         <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-100">
@@ -97,9 +97,7 @@
                         Register now
                     </a>
                 </p>
-                <p class="text-center text-sm text-gray-400">
-                    <a href="{% url 'password_reset' %}" class="text-blue-400 hover:text-blue-300">Forgot your password?</a>
-                </p>
+
                 <p class="text-center text-sm text-gray-400">
                     Are you a service provider?
                     <a href="{% url 'service_provider_login' %}" class="font-medium text-blue-400 hover:text-blue-300">

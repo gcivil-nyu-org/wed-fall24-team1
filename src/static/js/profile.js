@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             reviews.forEach(review => {
                 const reviewDiv = document.createElement('div');
-                reviewDiv.classList.add('bg-gray-800', 'rounded', 'shadow', 'p-4', 'mb-4');
+                reviewDiv.classList.add('bg-gray-700', 'rounded', 'shadow', 'p-4', 'mb-4');
 
                 const rating = parseFloat(review.RatingStars).toFixed(2);
 
@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 reviewDiv.appendChild(ratingElement);
 
                 const reviewText = document.createElement('p');
-                reviewText.classList.add('text-sm');
+                reviewText.classList.add('text-sm', 'text-gray-400');
                 reviewText.textContent = review.RatingMessage;
                 reviewDiv.appendChild(reviewText);
 
@@ -80,22 +80,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (review.ResponseText) {
                     const responseDiv = document.createElement('div');
-                    responseDiv.classList.add('mt-3', 'p-3', 'bg-blue-50', 'rounded');
+                    responseDiv.classList.add('mt-3', 'p-3', 'bg-gray-600', 'rounded');
 
                     const responseHeader = document.createElement('p');
-                    responseHeader.classList.add('font-semibold', 'text-sm', 'text-blue-600');
+                    responseHeader.classList.add('font-semibold', 'text-sm', 'text-blue-400');
                     responseHeader.textContent = "Provider Response:";
                     responseDiv.appendChild(responseHeader);
 
                     const responseText = document.createElement('p');
-                    responseText.classList.add('text-sm');
+                    responseText.classList.add('text-sm', 'text-gray-400');
                     responseText.textContent = review.ResponseText;
                     responseDiv.appendChild(responseText);
 
                     const respondedAt = formatTimestamp(review.RespondedAt);
                     console.log(review.RespondedAt)
                     const responseMeta = document.createElement('p');
-                    responseMeta.classList.add('text-xs', 'text-gray-500');
+                    responseMeta.classList.add('text-xs', 'text-gray-400');
                     responseMeta.textContent = `Responded on ${respondedAt}`;
                     responseDiv.appendChild(responseMeta);
 
@@ -228,26 +228,31 @@ document.addEventListener('DOMContentLoaded', () => {
         descriptionElement.innerHTML = '';
         if (service.Description && typeof service.Description === 'object') {
             let hasDescription = false;
-            const table = document.createElement('table');
+            const dl = document.createElement('dl');
+            dl.className = 'mt-2 space-y-1';
+
             for (const [key, value] of Object.entries(service.Description)) {
                 if (value !== null && value !== '') {
                     hasDescription = true;
-                    const tr = document.createElement('tr');
+                    const div = document.createElement('div');
+                    div.className = 'flex';
 
-                    const th = document.createElement('th');
-                    th.textContent = `${key.replace(/_/g, ' ')}:`;
+                    const dt = document.createElement('dt');
+                    dt.className = 'text-sm font-medium text-gray-400 w-1/3';
+                    dt.textContent = `${key.replace(/_/g, ' ')}:`;
 
-                    const td = document.createElement('td');
-                    td.innerHTML = value.replace(/\n/g, '<br>');
+                    const dd = document.createElement('dd');
+                    dd.className = 'text-sm text-gray-300 ml-2';
+                    dd.innerHTML = value.replace(/\n/g, '<br>');
 
-                    tr.appendChild(th);
-                    tr.appendChild(td);
-                    table.appendChild(tr);
+                    div.appendChild(dt);
+                    div.appendChild(dd);
+                    dl.appendChild(div);
                 }
             }
 
             if (hasDescription) {
-                descriptionElement.appendChild(table);
+                descriptionElement.appendChild(dl);
             } else {
                 descriptionElement.textContent = 'No description available.';
             }

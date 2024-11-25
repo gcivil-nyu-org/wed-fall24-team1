@@ -4,7 +4,7 @@
 {% block title %}{{ post.title }}{% endblock %}
 
 {% block content %}
-    <div class="container mx-auto px-4 py-8 min-w-[1000px] bg-gray-900">
+    <div class="container mx-auto px-4 py-8 min-w-[1000px] bg-transparent">
         <div class="bg-gray-800 rounded-lg shadow-md p-6 mb-6 mt-16 w-full border border-gray-700">
             <div class="flex justify-between items-start mb-4">
                 <div class="flex flex-col space-y-2">
@@ -120,7 +120,7 @@
                 </div>
                 <div class="flex justify-end space-x-4">
                     <button type="button" data-modal-close="editPostModal"
-                            class="bg-gray-700 text-gray-300 px-6 py-2 rounded-md hover:bg-gray-600 transition-colors duration-300">
+                            class="bg-red-600 text-white px-6 py-2 rounded-md hover:bg-red-700 transition-colors duration-300">
                         Cancel
                     </button>
                     <button type="submit"
@@ -146,7 +146,7 @@
                 </div>
                 <div class="flex justify-end space-x-4">
                     <button type="button" data-modal-close="editCommentModal"
-                            class="bg-gray-700 text-gray-300 px-6 py-2 rounded-md hover:bg-gray-600 transition-colors duration-300">
+                            class="bg-red-600 text-white px-6 py-2 rounded-md hover:bg-red-700 transition-colors duration-300">
                         Cancel
                     </button>
                     <button type="submit"
@@ -168,7 +168,7 @@
                 {% csrf_token %}
                 <button type="button"
                         data-modal-close="deletePostModal"
-                        class="bg-gray-700 text-gray-300 px-6 py-2 rounded-md hover:bg-gray-600 transition-colors duration-300">
+                        class="bg-gray-600 text-white px-6 py-2 rounded-md hover:bg-gray-700 transition-colors duration-300">
                     Cancel
                 </button>
                 <button type="submit"
@@ -189,7 +189,7 @@
                 {% csrf_token %}
                 <button type="button"
                         data-modal-close="deleteCommentModal"
-                        class="bg-gray-700 text-gray-300 px-6 py-2 rounded-md hover:bg-gray-600 transition-colors duration-300">
+                        class="bg-gray-600 text-white px-6 py-2 rounded-md hover:bg-gray-700 transition-colors duration-300">
                     Cancel
                 </button>
                 <button type="submit"
