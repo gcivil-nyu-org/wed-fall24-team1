@@ -29,8 +29,9 @@ class PostForm(ProfanityFilteredFormMixin, forms.ModelForm):
             "content": forms.Textarea(
                 attrs={
                     "rows": 5,
-                    "class": "w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 border border-gray-600"
-                }),
+                    "class": "w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 border border-gray-600",
+                }
+            ),
         }
 
     def clean(self):
@@ -51,5 +52,6 @@ class CommentForm(ProfanityFilteredFormMixin, forms.ModelForm):
                 attrs={
                     "rows": 3,
                     "class": "w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 border border-gray-600",
-                }),
+                }
+            ),
         }

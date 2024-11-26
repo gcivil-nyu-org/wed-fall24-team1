@@ -108,7 +108,10 @@ class UserLoginForm(AuthenticationForm):
     password = forms.CharField(
         label="Password",
         widget=forms.PasswordInput(
-            attrs={"class": "form-control w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600", "placeholder": "Enter your password"}
+            attrs={
+                "class": "form-control w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600",
+                "placeholder": "Enter your password",
+            }
         ),
         required=True,
     )
@@ -141,14 +144,20 @@ class ServiceProviderLoginForm(AuthenticationForm):
     email = forms.EmailField(
         label="Email",
         widget=forms.EmailInput(
-            attrs={"class": "form-control w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600", "placeholder": "Enter your email"}
+            attrs={
+                "class": "form-control w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600",
+                "placeholder": "Enter your email",
+            }
         ),
         required=True,
     )
     password = forms.CharField(
         label="Password",
         widget=forms.PasswordInput(
-            attrs={"class": "form-control w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600", "placeholder": "Enter your password"}
+            attrs={
+                "class": "form-control w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600",
+                "placeholder": "Enter your password",
+            }
         ),
         required=True,
     )
