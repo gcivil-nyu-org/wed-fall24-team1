@@ -2,187 +2,278 @@
 {% load static %}
 
 {% block title %}
-    {% if is_service_provider %}
-        Service Provider Profile
-    {% else %}
-        Service Seeker Profile
-    {% endif %}
+  {% if is_service_provider %}
+    Service Provider Profile
+  {% else %}
+    Service Seeker Profile
+  {% endif %}
 {% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-6 py-12 pb-32 mb-32 max-w-7xl" style="min-width: 1000px;">
+  <div class="container mx-auto px-6 py-12 pb-32 mb-32 max-w-7xl" style="min-width: 1200px;">
     <div class="mb-10 text-center mt-16">
-        <h1 class="text-4xl font-bold text-gray-800 mb-3">Profile</h1>
-        <p class="text-gray-600 text-lg">Manage your account information</p>
+      <h1 class="text-4xl font-bold text-gray-800 mb-3">Profile</h1>
+      <p class="text-gray-600 text-lg">Manage your account information</p>
     </div>
 
     <!-- Profile View Section -->
-    <div id="view-profile" class="bg-white rounded-lg shadow-md p-6">
-        <div class="flex justify-between items-start mb-6">
-            <!-- Grouped Profile Picture and Information -->
-            <div class="flex items-center">
-                <div class="w-24 h-24 rounded-full bg-blue-500 text-white flex items-center justify-center text-4xl font-bold mr-6 uppercase">
-                    {{ profile.username|first }}
-                </div>
-                <div>
-                    <h2 class="text-xl font-semibold text-blue-700 mb-2">Profile Information</h2>
-                    <p class="text-gray-600"><strong>Username:</strong> {{ profile.username }}</p>
-                    <p class="text-gray-600"><strong>Email:</strong> {{ profile.email }}</p>
-                    <p class="text-gray-600"><strong>First Name:</strong> {{ profile.first_name }}</p>
-                    <p class="text-gray-600"><strong>Last Name:</strong> {{ profile.last_name }}</p>
-                </div>
-            </div>
-            <!-- Edit Profile Button -->
-            <button onclick="toggleEdit()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300 mt-4 sm:mt-0">
-                Edit Profile
+    <div id="view-profile" class="bg-white rounded-lg shadow-md p-6 w-full">
+      <div class="flex justify-between items-start mb-6">
+        <!-- Grouped Profile Picture and Information -->
+        <div class="flex items-center">
+          <div class="w-24 h-24 rounded-full bg-blue-500 text-white flex items-center justify-center text-4xl font-bold mr-6 uppercase">
+            {{ profile.username|first }}
+          </div>
+          <div>
+            <h2 class="text-xl font-semibold text-blue-700 mb-2">Profile Information</h2>
+            <p class="text-gray-600"><strong>Username:</strong> {{ profile.username }}</p>
+            <p class="text-gray-600"><strong>Email:</strong> {{ profile.email }}</p>
+            <p class="text-gray-600"><strong>First Name:</strong> {{ profile.first_name }}</p>
+            <p class="text-gray-600"><strong>Last Name:</strong> {{ profile.last_name }}</p>
+          </div>
+        </div>
+        <!-- Edit Profile Button -->
+        <button onclick="toggleEdit()"
+                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300 mt-4 sm:mt-0">
+          Edit Profile
+        </button>
+      </div>
+
+      {% if not is_service_provider %}
+        <div class="mb-8 border-b border-gray-200 w-full">
+          <nav class="-mb-px flex space-x-12" aria-label="Tabs">
+            <button id="bookmarks-tab-btn"
+                    class="group inline-flex items-center px-2 py-4 border-b-2 font-medium text-base transition-all duration-200 ease-in-out
+                       border-blue-500 text-blue-600 hover:text-blue-700">
+              <i class="fas fa-bookmark mr-2 text-lg"></i>
+              <span class="tracking-wide">Bookmarks</span>
+              <span class="ml-2 bg-blue-100 text-blue-600 px-2.5 py-0.5 rounded-full text-sm">
+                {{ bookmarks|length }}
+            </span>
             </button>
+
+            <button id="reviews-tab-btn"
+                    class="group inline-flex items-center px-2 py-4 border-b-2 font-medium text-base transition-all duration-200 ease-in-out
+                       border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700">
+              <i class="fas fa-star mr-2 text-lg"></i>
+              <span class="tracking-wide">Reviews</span>
+              <span class="ml-2 bg-gray-100 text-gray-600 px-2.5 py-0.5 rounded-full text-sm">
+                {{ reviews|length }}
+            </span>
+            </button>
+
+            <button id="posts-tab-btn"
+                    class="group inline-flex items-center px-2 py-4 border-b-2 font-medium text-base transition-all duration-200 ease-in-out
+                       border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700">
+              <i class="fas fa-comments mr-2 text-lg"></i>
+              <span class="tracking-wide">Forum Posts</span>
+              <span class="ml-2 bg-gray-100 text-gray-600 px-2.5 py-0.5 rounded-full text-sm">
+                {{ user_posts|length }}
+            </span>
+            </button>
+          </nav>
+        </div>
+        <div id="bookmarks-tab" class="w-full {% if active_tab != 'bookmarks' %}hidden{% endif %}">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-semibold text-gray-800">Bookmarked Services</h2>
+            <span class="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
+            {{ bookmarks|length }} services
+            </span>
+          </div>
+          {% if bookmarks %}
+            <div class="grid grid-cols-1 gap-4 w-full">
+              {% for service in bookmarks %}
+                <div class="bg-gray-50 rounded-lg p-4 flex justify-between items-center w-full">
+                  <div class="flex-grow">
+                    <p class="font-semibold text-gray-800 hover:text-blue-600 cursor-pointer"
+                       onclick="showServiceDetails('{{ service.Id }}')"
+                       style="text-decoration: underline;">
+                      {{ service.Name }}
+                    </p>
+                    <p class="text-gray-600">{{ service.Address }}</p>
+                    <p class="text-gray-600">{{ service.Category }}</p>
+                  </div>
+                  <div class="flex items-center ml-4">
+                    <label class="bookmark-label">
+                      <input type="checkbox"
+                             class="bookmark-checkbox hidden"
+                             checked
+                             data-service-id="{{ service.Id }}">
+                      <i class="bookmark-icon fas fa-bookmark text-2xl cursor-pointer text-blue-500 hover:text-blue-700 transition-colors duration-300"></i>
+                    </label>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="text-gray-500">No bookmarks yet.</p>
+          {% endif %}
         </div>
 
-        {% if not is_service_provider %}
-        <!-- Only show these sections for regular users -->
-        <div class="mb-8">
-            <h2 class="text-xl font-semibold text-blue-700 mb-4">Bookmarked Services</h2>
-            {% if bookmarks %}
-                <div class="grid gap-4">
-                    {% for service in bookmarks %}
-                        <div class="bg-gray-50 rounded-lg p-4 flex justify-between items-center">
-                            <div class="flex-grow">
-                                <p class="font-semibold text-gray-800 hover:text-blue-600 cursor-pointer"
-                                   onclick="showServiceDetails('{{ service.Id }}')"
-                                   style="text-decoration: underline;">
-                                    {{ service.Name }}
-                                </p>
-                                <p class="text-gray-600">{{ service.Address }}</p>
-                                <p class="text-gray-600">{{ service.Category }}</p>
-                            </div>
-                            <div class="flex items-center ml-4">
-                                <label class="bookmark-label">
-                                    <input type="checkbox"
-                                           class="bookmark-checkbox hidden"
-                                           checked
-                                           data-service-id="{{ service.Id }}">
-                                    <i class="bookmark-icon fas fa-bookmark text-2xl cursor-pointer text-blue-500 hover:text-blue-700 transition-colors duration-300"></i>
-                                </label>
-                            </div>
-                        </div>
-                    {% endfor %}
+        <!-- Reviews Tab -->
+        <div id="reviews-tab" class="w-full {% if active_tab != 'reviews' %}hidden{% endif %}">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-semibold text-gray-800">My Reviews</h2>
+            <span class="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
+            {{ reviews|length }} reviews
+            </span>
+          </div>
+          {% if reviews %}
+            <div class="grid grid-cols-1 gap-4 w-full">
+              {% for review in reviews %}
+                <div class="bg-gray-50 rounded-lg p-4 w-full">
+                  <p class="font-semibold text-gray-800">{{ review.ServiceName }}</p>
+                  <p class="text-gray-600">Rating: {{ review.RatingStars }} stars</p>
+                  <p class="text-gray-600">{{ review.RatingMessage }}</p>
+                  <p class="text-sm text-gray-500"
+                     data-timestamp="{{ review.Timestamp.isoformat }}"></p>
                 </div>
-            {% else %}
-                <p class="text-gray-500">No bookmarks yet.</p>
-            {% endif %}
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="text-gray-500">No reviews yet.</p>
+          {% endif %}
         </div>
 
-        <div class="mb-8">
-            <h2 class="text-xl font-semibold text-blue-700 mb-4">My Reviews</h2>
-            {% if reviews %}
-                <div class="grid gap-4">
-                    {% for review in reviews %}
-                        <div class="bg-gray-50 rounded-lg p-4">
-                            <p class="font-semibold text-gray-800">{{ review.ServiceName }}</p>
-                            <p class="text-gray-600">Rating: {{ review.RatingStars }} stars</p>
-                            <p class="text-gray-600">{{ review.RatingMessage }}</p>
-                            <p class="text-sm text-gray-500" data-timestamp="{{ review.Timestamp.isoformat }}"></p>                        </div>
-                    {% endfor %}
+        <!-- Posts Tab -->
+        <div id="posts-tab" class="w-full {% if active_tab != 'posts' %}hidden{% endif %}">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-semibold text-gray-800">My Forum Posts</h2>
+            <span class="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
+            {{ user_posts|length }} posts
+            </span>
+          </div>
+          {% if user_posts %}
+            <div class="grid grid-cols-1 gap-4 w-full">
+              {% for post in user_posts %}
+                <div class="bg-gray-50 rounded-lg p-4 w-full">
+                  <div class="flex justify-between items-start w-full">
+                    <div class="flex-grow">
+                      <a href="{% url 'forum:post_detail' post.id %}"
+                         class="font-semibold text-gray-800 hover:text-blue-600">
+                        {{ post.title }}
+                      </a>
+                      <p class="text-gray-600 text-sm mt-1">
+                        {{ post.content|truncatewords:30 }}</p>
+                      <div class="text-sm text-gray-500 mt-2">
+                        <span>Category: {{ post.category.name }}</span> |
+                        <span>Posted on: {{ post.created_at|date:"M d, Y" }}</span> |
+                        <span>Comments: {{ post.comments.count }}</span>
+                      </div>
+                    </div>
+                    <div class="text-sm">
+                      {% if post.is_closed %}
+                        <span class="bg-red-100 text-red-800 px-2 py-1 rounded">Closed</span>
+                      {% else %}
+                        <span class="bg-green-100 text-green-800 px-2 py-1 rounded">Open</span>
+                      {% endif %}
+                    </div>
+                  </div>
                 </div>
-            {% else %}
-                <p class="text-gray-500">No reviews yet.</p>
-            {% endif %}
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="text-gray-500">No forum posts yet.</p>
+          {% endif %}
         </div>
-        {% endif %}
+      {% endif %}
     </div>
 
     <!-- Profile Edit Form Section -->
-    <div id="edit-profile" class="bg-white rounded-lg shadow-md p-6 hidden">
-        <h2 class="text-xl font-semibold text-blue-700 mb-4">Edit Profile</h2>
-        <form method="POST" class="space-y-4">
-            {% csrf_token %}
-            {% for field in form %}
-            <div>
-                <label class="block text-gray-700 font-medium mb-2" for="{{ field.id_for_label }}">
-                    {{ field.label }}
-                </label>
-                {{ field }}
-                {% if field.errors %}
-                    {% for error in field.errors %}
-                        <p class="text-red-500 text-sm mt-1">{{ error }}</p>
-                    {% endfor %}
-                {% endif %}
-            </div>
-            {% endfor %}
+    <div id="edit-profile" class="bg-white rounded-lg shadow-md p-6 hidden w-full ">
+      <h2 class="text-xl font-semibold text-blue-700 mb-4">Edit Profile</h2>
+      <form method="POST" class="space-y-4">
+        {% csrf_token %}
+        {% for field in form %}
+          <div>
+            <label class="block text-gray-700 font-medium mb-2" for="{{ field.id_for_label }}">
+              {{ field.label }}
+            </label>
+            {{ field }}
+            {% if field.errors %}
+              {% for error in field.errors %}
+                <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+              {% endfor %}
+            {% endif %}
+          </div>
+        {% endfor %}
 
-            <div class="flex justify-between mt-6">
-                <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300">
-                    Save Changes
-                </button>
-                <button type="button" onclick="toggleEdit()" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300">
-                    Cancel
-                </button>
-            </div>
-        </form>
+        <div class="flex justify-between mt-6">
+          <button type="submit"
+                  class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300">
+            Save Changes
+          </button>
+          <button type="button" onclick="toggleEdit()"
+                  class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300">
+            Cancel
+          </button>
+        </div>
+      </form>
     </div>
-</div>
+  </div>
 
-<!-- Modal HTML -->
-<div id="serviceDetails" class="fixed inset-0 bg-gray-600 bg-opacity-75 hidden overflow-y-auto h-full w-full z-50">
+  <!-- Modal HTML -->
+  <div id="serviceDetails" class="fixed inset-0 bg-gray-600 bg-opacity-75 hidden overflow-y-auto h-full w-full z-50">
     <div class="relative top-20 mx-auto p-6 border w-11/12 md:w-3/4 lg:w-1/2 shadow-xl rounded-xl bg-white">
-        <div class="absolute top-0 right-0 pt-4 pr-4">
-            <button id="closeDetails" class="text-gray-400 hover:text-gray-500 transition-colors duration-200">
-                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-            </button>
+      <div class="absolute top-0 right-0 pt-4 pr-4">
+        <button id="closeDetails" class="text-gray-400 hover:text-gray-500 transition-colors duration-200">
+          <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div class="mt-3">
+        <h2 id="serviceName" class="text-xl font-semibold text-gray-900 mb-4">Service Name</h2>
+        <div id="serviceMap" class="w-full h-64 rounded-lg overflow-hidden mb-6"></div>
+        <div class="space-y-1 mb-4">
+          <p class="text-sm"><strong>Address:</strong> <span id="serviceAddress">123 Main St</span></p>
+          <p class="text-sm"><strong>Type:</strong> <span id="serviceType">Homeless</span></p>
+          <p class="text-sm"><strong>Rating:</strong> <span id="serviceRating">4.5</span></p>
+          <a id="getDirections" href="#" target="_blank" rel="noopener noreferrer"
+             class="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-2">Get
+            Directions</a>
+          <div class="space-y-1 mb-4">
+            <div id="serviceDescription" class="text-sm mt-2"></div>
+          </div>
         </div>
-        <div class="mt-3">
-            <h2 id="serviceName" class="text-xl font-semibold text-gray-900 mb-4">Service Name</h2>
-            <div id="serviceMap" class="w-full h-64 rounded-lg overflow-hidden mb-6"></div>
-            <div class="space-y-1 mb-4">
-                <p class="text-sm"><strong>Address:</strong> <span id="serviceAddress">123 Main St</span></p>
-                <p class="text-sm"><strong>Type:</strong> <span id="serviceType">Homeless</span></p>
-                <p class="text-sm"><strong>Rating:</strong> <span id="serviceRating">4.5</span></p>
-                <a id="getDirections" href="#" target="_blank" rel="noopener noreferrer"
-                   class="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-2">Get Directions</a>
-                <div class="space-y-1 mb-4">
-                    <div id="serviceDescription" class="text-sm mt-2"></div>
-                </div>
-            </div>
 
-            <h3 class="text-lg font-semibold mb-2">Leave a Review</h3>
-            <div class="space-y-2 mb-4">
-                <select id="reviewRating" class="w-full p-2 border rounded">
-                    <option value="">Select a rating</option>
-                    <option value="1">1 Star</option>
-                    <option value="2">2 Stars</option>
-                    <option value="3">3 Stars</option>
-                    <option value="4">4 Stars</option>
-                    <option value="5">5 Stars</option>
-                </select>
-                <textarea id="reviewText" class="w-full p-2 border rounded"
-                          placeholder="Write your review here..."></textarea>
-                <button id="submitReview" class="bg-blue-500 text-white px-4 py-2 rounded">Submit Review</button>
-            </div>
-
-            <div id="reviewsContainer" class="space-y-4"></div>
+        <h3 class="text-lg font-semibold mb-2">Leave a Review</h3>
+        <div class="space-y-2 mb-4">
+          <select id="reviewRating" class="w-full p-2 border rounded">
+            <option value="">Select a rating</option>
+            <option value="1">1 Star</option>
+            <option value="2">2 Stars</option>
+            <option value="3">3 Stars</option>
+            <option value="4">4 Stars</option>
+            <option value="5">5 Stars</option>
+          </select>
+          <textarea id="reviewText" class="w-full p-2 border rounded"
+                    placeholder="Write your review here..."></textarea>
+          <button id="submitReview" class="bg-blue-500 text-white px-4 py-2 rounded">Submit Review</button>
         </div>
+
+        <div id="reviewsContainer" class="space-y-4"></div>
+      </div>
     </div>
-</div>
+  </div>
 
-<div class="h-32"></div>
+  <div class="h-32"></div>
 {% endblock %}
 {% block scripts %}
-<script>
-    // Pass Django template variables to JS
-    const itemsData = JSON.parse('{{ serialized_bookmarks|escapejs }}');
-    const userIsAuthenticated = {{ user.is_authenticated|lower }};
-</script>
-<script src="{% static 'js/profile.js' %}"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Convert all timestamps
-        document.querySelectorAll('[data-timestamp]').forEach(element => {
-            const timestamp = element.getAttribute('data-timestamp');
-            element.textContent = formatTimestamp(timestamp);
-        });
-    });
-</script>
+  <script>
+      // Pass Django template variables to JS
+      const itemsData = JSON.parse('{{ serialized_bookmarks|escapejs }}');
+      const userIsAuthenticated = {{ user.is_authenticated|lower }};
+  </script>
+  <script src="{% static 'js/profile.js' %}"></script>
+  <script>
+      document.addEventListener('DOMContentLoaded', function () {
+          // Convert all timestamps
+          document.querySelectorAll('[data-timestamp]').forEach(element => {
+              const timestamp = element.getAttribute('data-timestamp');
+              element.textContent = formatTimestamp(timestamp);
+          });
+      });
+  </script>
 {% endblock %}

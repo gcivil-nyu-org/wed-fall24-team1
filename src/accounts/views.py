@@ -17,6 +17,7 @@ from dateutil.parser import parse as parse_date
 
 
 from accounts.models import CustomUser
+from forum.models import Post
 from home.repositories import HomeRepository
 
 from .forms import (
@@ -26,6 +27,8 @@ from .forms import (
     ServiceProviderLoginForm,
     ServiceProviderForm,
 )
+
+ITEMS_PER_PAGE = 10
 
 
 def register(request):
@@ -59,12 +62,11 @@ def convert_decimals(obj):
 
 @login_required
 def profile_view(request):
-    print("In profile view", request.GET)
     user = request.user
 
     if user.user_type == "service_provider":
-        # Handle service provider profile
         service_provider = get_object_or_404(CustomUser, email=user.email)
+        user_posts = Post.objects.filter(author=user).order_by("-created_at")
 
         if request.method == "POST":
             form = ServiceProviderForm(request.POST, instance=service_provider)
@@ -77,18 +79,20 @@ def profile_view(request):
         return render(
             request,
             "profile_base.html",
-            {"profile": service_provider, "form": form, "is_service_provider": True},
+            {
+                "profile": service_provider,
+                "form": form,
+                "is_service_provider": True,
+                "user_posts": user_posts,
+            },
         )
 
     elif user.user_type == "user":
-        # Existing code for regular users
         service_seeker = get_object_or_404(CustomUser, email=user.email)
 
         # Fetch user's bookmarks
         repo = HomeRepository()
         bookmarks = repo.get_user_bookmarks(str(user.id))
-
-        # Process the bookmarks
         processed_bookmarks = [
             {
                 "Id": item.get("Id"),
@@ -123,6 +127,12 @@ def profile_view(request):
             except Exception:
                 pass
 
+        # Fetch user's posts
+        user_posts = Post.objects.filter(author=user).order_by("-created_at")
+
+        # Get active tab
+        active_tab = "bookmarks"
+
         if request.method == "POST":
             form = ServiceSeekerForm(request.POST, instance=service_seeker)
             if form.is_valid():
@@ -139,7 +149,9 @@ def profile_view(request):
                 "form": form,
                 "bookmarks": processed_bookmarks,
                 "reviews": reviews,
+                "user_posts": user_posts,
                 "is_service_provider": False,
+                "active_tab": active_tab,
                 "serialized_bookmarks": json.dumps(processed_bookmarks),
             },
         )

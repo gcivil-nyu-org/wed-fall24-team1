@@ -130,6 +130,52 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    const tabs = ['bookmarks', 'reviews', 'posts'];
+    let activeTab = 'bookmarks';
+
+    function switchTab(tabName) {
+        // Hide all tab contents
+        tabs.forEach(tab => {
+            const tabContent = document.getElementById(`${tab}-tab`);
+            if (tabContent) {
+                tabContent.classList.add('hidden');
+            }
+        });
+
+        // Show selected tab content
+        const selectedTab = document.getElementById(`${tabName}-tab`);
+        if (selectedTab) {
+            selectedTab.classList.remove('hidden');
+        }
+
+        // Update tab button styles
+        tabs.forEach(tab => {
+            const button = document.getElementById(`${tab}-tab-btn`);
+            if (button) {
+                if (tab === tabName) {
+                    button.classList.remove('border-transparent', 'text-gray-500');
+                    button.classList.add('border-blue-500', 'text-blue-600');
+                } else {
+                    button.classList.add('border-transparent', 'text-gray-500');
+                    button.classList.remove('border-blue-500', 'text-blue-600');
+                }
+            }
+        });
+
+        activeTab = tabName;
+    }
+
+    // Add click listeners to tab buttons
+    tabs.forEach(tab => {
+        const button = document.getElementById(`${tab}-tab-btn`);
+        if (button) {
+            button.addEventListener('click', () => switchTab(tab));
+        }
+    });
+
+    // Initialize with bookmarks tab
+    switchTab('bookmarks');
+
     let map = null;
     let marker = null;
 
@@ -268,6 +314,23 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
+
+    function updateBookmarkCounters() {
+        const remainingBookmarks = document.querySelectorAll('.bookmark-checkbox').length;
+
+        // Update tab counter
+        const tabCounter = document.querySelector('#bookmarks-tab-btn .ml-2');
+        if (tabCounter) {
+            tabCounter.textContent = remainingBookmarks;
+        }
+
+        // Update header counter
+        const headerCounter = document.querySelector('#bookmarks-tab .bg-blue-100');
+        if (headerCounter) {
+            headerCounter.textContent = `${remainingBookmarks} service${remainingBookmarks !== 1 ? 's' : ''}`;
+        }
+    }
+
     // Add event listeners for bookmark checkboxes
     const bookmarkCheckboxes = document.querySelectorAll('.bookmark-checkbox');
     bookmarkCheckboxes.forEach(checkbox => {
@@ -290,24 +353,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const data = await response.json();
                 if (!data.success) {
-                    // Revert the checkbox state if the request failed
                     this.checked = !this.checked;
                     alert(data.error || 'Failed to toggle bookmark.');
                 } else {
-                    // If removing bookmark, remove the service card from the UI
                     if (action === 'remove') {
                         const serviceCard = this.closest('.bg-gray-50');
                         serviceCard.remove();
 
-                        // Check if there are any remaining bookmarks
+                        // Update counters after removing bookmark
+                        updateBookmarkCounters();
+
                         const remainingBookmarks = document.querySelectorAll('.bookmark-checkbox');
                         if (remainingBookmarks.length === 0) {
-                            const bookmarksContainer = document.querySelector('.grid.gap-4');
-                            const noBookmarksMessage = document.createElement('p');
-                            noBookmarksMessage.className = 'text-gray-500';
-                            noBookmarksMessage.textContent = 'No bookmarks yet.';
-                            bookmarksContainer.innerHTML = '';
-                            bookmarksContainer.appendChild(noBookmarksMessage);
+                            const bookmarksContainer = document.querySelector('#bookmarks-tab .grid.gap-4');
+                            if (bookmarksContainer) {
+                                const noBookmarksMessage = document.createElement('p');
+                                noBookmarksMessage.className = 'text-gray-500';
+                                noBookmarksMessage.textContent = 'No bookmarks yet.';
+                                bookmarksContainer.innerHTML = '';
+                                bookmarksContainer.appendChild(noBookmarksMessage);
+                            }
                         }
                     }
                 }
