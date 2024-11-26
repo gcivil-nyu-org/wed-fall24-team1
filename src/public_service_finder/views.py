@@ -1,7 +1,8 @@
 # public_service_finder/views.py
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
-from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render
+
 from public_service_finder.utils.enums.service_status import ServiceStatus
 from services.repositories import ServiceRepository
 
@@ -18,16 +19,19 @@ def root_redirect_view(request):
 
 
 @login_required
-@user_passes_test(lambda user: user.is_superuser)
 def admin_only_view_new_listings(request):
+    if not request.user.is_superuser:
+        return render(request, "403.html", status=403)
     service_repo = ServiceRepository()
     pending_services = service_repo.get_pending_approval_services()
     return render(request, "admin_only.html", {"pending_services": pending_services})
 
 
 @login_required
-@user_passes_test(lambda user: user.is_superuser)
 def admin_update_listing(request, service_id):
+    if not request.user.is_superuser:
+        return render(request, "403.html", status=403)
+
     if request.method == "POST":
         new_status = request.POST.get("status")
 
