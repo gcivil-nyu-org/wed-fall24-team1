@@ -83,17 +83,17 @@ LOGOUT_REDIRECT_URL = "user_login"  # Redirect to user login after logout
 
 # settings.py
 
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.gmail.com'  # Example for Gmail
-# EMAIL_USE_TLS = True
-# EMAIL_PORT = 587
-# EMAIL_HOST_USER = 'your_email@example.com'
-# EMAIL_HOST_PASSWORD = 'your_email_password'
-# DEFAULT_FROM_EMAIL = 'noreply@yourdomain.com'
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"  # Example for Gmail
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = config("SMTP_USER")
+EMAIL_HOST_PASSWORD = config("SMTP_PASSWORD")
+DEFAULT_FROM_EMAIL = config("SMTP_USER")
 # settings.py
 
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-DEFAULT_FROM_EMAIL = "noreply@yourdomain.com"
+# EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# DEFAULT_FROM_EMAIL = "noreply@yourdomain.com"
 
 
 LANGUAGE_CODE = "en-us"
