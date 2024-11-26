@@ -72,8 +72,17 @@ class ServiceForm(forms.Form):
 
 
 class DescriptionItemForm(forms.Form):
-    key = forms.CharField(max_length=100)
-    value = forms.CharField(widget=forms.Textarea(attrs={"rows": 3}))
+    key = forms.CharField(max_length=100,
+                          widget=forms.TextInput(
+                              attrs={
+                                  "class": "w-full p-2 rounded bg-gray-600 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600",
+                              }
+                          ),
+                          )
+    value = forms.CharField(widget=forms.Textarea(attrs={
+        "rows": 3,
+        "class": "w-full p-2 rounded bg-gray-600 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 border border-gray-600",
+    }))
 
 
 class CustomDescriptionFormSet(BaseFormSet):

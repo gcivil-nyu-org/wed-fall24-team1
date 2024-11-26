@@ -14,7 +14,7 @@ class UserRegisterForm(UserCreationForm):
         required=True,
         widget=forms.TextInput(
             attrs={
-                "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
+                "class": "w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600",
                 "placeholder": "Username",
             }
         ),
@@ -23,7 +23,7 @@ class UserRegisterForm(UserCreationForm):
         required=True,
         widget=forms.EmailInput(
             attrs={
-                "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
+                "class": "w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600",
                 "placeholder": "Email Address",
             }
         ),
@@ -33,7 +33,7 @@ class UserRegisterForm(UserCreationForm):
         required=True,
         widget=forms.TextInput(
             attrs={
-                "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
+                "class": "w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600",
                 "placeholder": "First Name",
             }
         ),
@@ -43,7 +43,7 @@ class UserRegisterForm(UserCreationForm):
         required=True,
         widget=forms.TextInput(
             attrs={
-                "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
+                "class": "w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600",
                 "placeholder": "Last Name",
             }
         ),
@@ -53,7 +53,7 @@ class UserRegisterForm(UserCreationForm):
         label="Password",
         widget=forms.PasswordInput(
             attrs={
-                "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
+                "class": "w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600",
                 "placeholder": "Enter Password",
             }
         ),
@@ -63,7 +63,7 @@ class UserRegisterForm(UserCreationForm):
         label="Confirm Password",
         widget=forms.PasswordInput(
             attrs={
-                "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
+                "class": "w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600",
                 "placeholder": "Confirm Password",
             }
         ),
@@ -75,7 +75,7 @@ class UserRegisterForm(UserCreationForm):
         required=True,
         widget=forms.Select(
             attrs={
-                "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
+                "class": "w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600",
                 "placeholder": "Select User Type",
             }
         ),
@@ -99,7 +99,7 @@ class UserLoginForm(AuthenticationForm):
         label="Username",
         widget=forms.TextInput(
             attrs={
-                "class": "form-control",
+                "class": "form-control w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600",
                 "placeholder": "Enter your username",
             }
         ),
@@ -108,7 +108,7 @@ class UserLoginForm(AuthenticationForm):
     password = forms.CharField(
         label="Password",
         widget=forms.PasswordInput(
-            attrs={"class": "form-control", "placeholder": "Enter your password"}
+            attrs={"class": "form-control w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600", "placeholder": "Enter your password"}
         ),
         required=True,
     )
@@ -141,14 +141,14 @@ class ServiceProviderLoginForm(AuthenticationForm):
     email = forms.EmailField(
         label="Email",
         widget=forms.EmailInput(
-            attrs={"class": "form-control", "placeholder": "Enter your email"}
+            attrs={"class": "form-control w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600", "placeholder": "Enter your email"}
         ),
         required=True,
     )
     password = forms.CharField(
         label="Password",
         widget=forms.PasswordInput(
-            attrs={"class": "form-control", "placeholder": "Enter your password"}
+            attrs={"class": "form-control w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600", "placeholder": "Enter your password"}
         ),
         required=True,
     )
@@ -196,27 +196,27 @@ class ServiceSeekerForm(forms.ModelForm):
         widgets = {
             "username": forms.TextInput(
                 attrs={
-                    "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
+                    "class": "w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600",
                     "readonly": "readonly",  # Make username non-editable
                     "placeholder": "Username",
                 }
             ),
             "email": forms.EmailInput(
                 attrs={
-                    "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
+                    "class": "w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600",
                     "readonly": "readonly",  # Make email non-editable
                     "placeholder": "Email Address",
                 }
             ),
             "first_name": forms.TextInput(
                 attrs={
-                    "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
+                    "class": "w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600",
                     "placeholder": "First Name",
                 }
             ),
             "last_name": forms.TextInput(
                 attrs={
-                    "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
+                    "class": "w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600",
                     "placeholder": "Last Name",
                 }
             ),
@@ -232,27 +232,27 @@ class ServiceProviderForm(forms.ModelForm):
         widgets = {
             "username": forms.TextInput(
                 attrs={
-                    "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
+                    "class": "w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600",
                     "readonly": "readonly",  # Make username non-editable
                     "placeholder": "Username",
                 }
             ),
             "email": forms.EmailInput(
                 attrs={
-                    "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
+                    "class": "w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600",
                     "readonly": "readonly",  # Make email non-editable
                     "placeholder": "Email Address",
                 }
             ),
             "first_name": forms.TextInput(
                 attrs={
-                    "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
+                    "class": "w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600",
                     "placeholder": "First Name",
                 }
             ),
             "last_name": forms.TextInput(
                 attrs={
-                    "class": "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700",
+                    "class": "w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600",
                     "placeholder": "Last Name",
                 }
             ),
