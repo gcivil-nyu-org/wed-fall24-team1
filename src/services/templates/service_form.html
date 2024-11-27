@@ -23,13 +23,13 @@
           <div class="p-8 space-y-6">
             {% for field in form %}
               <div class="space-y-1">
-                <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-400">
                   {{ field.label }}
                 </label>
                 {% if field.name == 'category' %}
                   <select name="{{ field.name }}"
                           id="{{ field.id_for_label }}"
-                          class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                          class="w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 border border-gray-600">
                     {% for value, label in field.field.choices %}
                       <option value="{{ value }}"
                               {% if field.value == value %}selected{% endif %}>
@@ -45,7 +45,7 @@
                            id="{{ field.id_for_label }}"
                            {% if field.value %}checked{% endif %}
                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                    <label for="{{ field.id_for_label }}" class="ml-2 block text-sm text-gray-700">
+                    <label for="{{ field.id_for_label }}" class="ml-2 block text-sm text-gray-400">
                       {{ field.help_text|default:"Mark as available" }}
                     </label>
                   </div>
@@ -55,7 +55,7 @@
                           name="announcement"
                           id="announcement"
                           rows="3"
-                          class="mt-1 block w-full px-3 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm"
+                          class="w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 border border-gray-600"
                           placeholder="Add an important update about your service"
                   >{{ service.announcement|default:'' }}</textarea>
                   <p class="mt-2 text-sm text-gray-500 flex items-center">
@@ -70,7 +70,7 @@
                          name="{{ field.name }}"
                          id="{{ field.id_for_label }}"
                          value="{{ field.value|default:'' }}"
-                         class="mt-1 block w-full px-3 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm"
+                         class="w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 border border-gray-600"
                          {% if field.field.required %}required{% endif %}>
                 {% endif %}
                 {% if field.errors %}

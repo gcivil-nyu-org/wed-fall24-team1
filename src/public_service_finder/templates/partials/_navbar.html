@@ -7,13 +7,13 @@
                 <a href="{% url 'services:list' %}" class="flex items-center space-x-3">
                     <img src="{% static 'images/logo-psf.png' %}" alt="Logo"
                          class="h-10 w-10 rounded-full border border-gray-600 shadow-sm">
-                    <span class="text-2xl font-extrabold tracking-wide text-blue-400">Public Service Finder</span>
+                    <span class="text-2xl font-extrabold tracking-wide text-blue-400 hover:text-blue-300 hover:underline">Public Service Finder</span>
                 </a>
             {% else %}
                 <a href="{% url 'home' %}" class="flex items-center space-x-3">
                     <img src="{% static 'images/logo-psf.png' %}" alt="Logo"
                          class="h-10 w-10 rounded-full border border-gray-600 shadow-sm">
-                    <span class="text-2xl font-extrabold tracking-wide text-blue-400">Public Service Finder</span>
+                    <span class="text-2xl font-extrabold tracking-wide text-blue-400 hover:text-blue-300 hover:underline">Public Service Finder</span>
                 </a>
             {% endif %}
         </div>
