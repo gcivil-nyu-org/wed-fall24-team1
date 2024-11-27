@@ -3,8 +3,8 @@
 // Global variables
 let map;
 let currentLocationMarker = null;
-let userLat = null;
-let userLng = null;
+window.userLat = null;
+window.userLng = null;
 let serviceMarkers = {}; // Object to hold service markers by Id
 let selectedMarker = null; // Variable to track the selected marker
 let selectedSidebarButton = null; // Variable to track the selected sidebar button
@@ -59,20 +59,20 @@ document.addEventListener('DOMContentLoaded', function() {
     }).addTo(map);
 
     // Retrieve and set the selected filter from localStorage
-    const savedFilter = localStorage.getItem('selectedFilter') || 'distance';
+    const savedFilter = sessionStorage.getItem('selectedFilter') || 'distance';
     const filterSelect = document.getElementById('filterSelect');
     if (filterSelect) {
         filterSelect.value = savedFilter;
     }
 
     // Check if user location is stored in localStorage
-    userLat = localStorage.getItem('userLat');
-    userLng = localStorage.getItem('userLng');
-    const savedAddress = localStorage.getItem('userAddress'); // Fetch saved address
+    window.userLat = sessionStorage.getItem('userLat');
+    window.userLng = sessionStorage.getItem('userLng');
+    const savedAddress = sessionStorage.getItem('userAddress'); // Fetch saved address
 
-    if (userLat && userLng) {
+    if (window.userLat && window.userLng) {
         // If user location is stored, update the marker and map view
-        setUserLocation(parseFloat(userLat), parseFloat(userLng), false);
+        setUserLocation(parseFloat(window.userLat), parseFloat(window.userLng), false);
     } else {
         // If not, set the default marker
         setUserLocation(defaultLat, defaultLng, false);
@@ -170,14 +170,14 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('user-lon').value = '';
 
             // Clear localStorage values
-            localStorage.removeItem('userLat');
-            localStorage.removeItem('userLng');
-            localStorage.removeItem('userAddress');
-            localStorage.removeItem('selectedFilter'); // Clear selected filter
+            sessionStorage.removeItem('userLat');
+            sessionStorage.removeItem('userLng');
+            sessionStorage.removeItem('userAddress');
+            sessionStorage.removeItem('selectedFilter'); // Clear selected filter
 
             // Reset global variables
-            userLat = defaultLat;
-            userLng = defaultLng;
+            window.userLat = defaultLat;
+            window.userLng = defaultLng;
 
             // Reset map to default location
             setUserLocation(defaultLat, defaultLng, false);
@@ -203,7 +203,7 @@ document.addEventListener('DOMContentLoaded', function() {
         filterSelect.addEventListener('change', function() {
             const selectedFilter = this.value;
             // Save the selected filter to localStorage
-            localStorage.setItem('selectedFilter', selectedFilter);
+            sessionStorage.setItem('selectedFilter', selectedFilter);
             // Re-initialize markers and service list based on the new filter
             initializeServiceMarkers();
             updateServiceList();
@@ -220,16 +220,19 @@ function setUserLocation(lat, lon, shouldReverseGeocode = true) {
     if (currentLocationMarker) {
         map.removeLayer(currentLocationMarker);
     }
-    currentLocationMarker = L.marker([lat, lon], { icon: userLocationIcon }).addTo(map);
+    currentLocationMarker = L.marker([lat, lon], {
+        icon: userLocationIcon,
+        zIndexOffset: 1000
+    }).addTo(map);
     map.setView([lat, lon], 12);
 
     // Update global variables
-    userLat = lat;
-    userLng = lon;
+    window.userLat = lat;
+    window.userLng = lon;
 
-    // Store the user's coordinates in localStorage
-    localStorage.setItem('userLat', lat);
-    localStorage.setItem('userLng', lon);
+    // Store the user's coordinates in sessionStorage
+    sessionStorage.setItem('userLat', lat);
+    sessionStorage.setItem('userLng', lon);
 
     document.getElementById('user-lat').value = lat;
     document.getElementById('user-lon').value = lon;
@@ -257,8 +260,8 @@ function reverseGeocode(lat, lon) {
                 if (locationInput) {
                     locationInput.value = address;
                 }
-                // Save the address to localStorage
-                localStorage.setItem('userAddress', address);
+                // Save the address to sessionStorage
+                sessionStorage.setItem('userAddress', address);
             }
         })
         .catch(error => {
@@ -278,8 +281,8 @@ function geocodeAddress(address) {
                 const lon = parseFloat(data[0].lon);
 
                 // Update userLat and userLng
-                userLat = lat;
-                userLng = lon;
+                window.userLat = lat;
+                window.userLng = lon;
 
                 document.getElementById('user-lat').value = lat;
                 document.getElementById('user-lon').value = lon;
@@ -287,8 +290,8 @@ function geocodeAddress(address) {
                 // Update the map and marker
                 setUserLocation(lat, lon, false);
 
-                // Save the address to localStorage
-                localStorage.setItem('userAddress', address);
+                // Save the address to sessionStorage
+                sessionStorage.setItem('userAddress', address);
 
                 return Promise.resolve();
             } else {
@@ -307,8 +310,8 @@ function getCurrentLocation() {
                     const lon = position.coords.longitude;
 
                     // Update userLat and userLng
-                    userLat = lat;
-                    userLng = lon;
+                    window.userLat = lat;
+                    window.userLng = lon;
 
                     // Update the map and marker
                     setUserLocation(lat, lon, true);
@@ -474,7 +477,7 @@ function initializeServiceMarkers() {
         return;
     }
 
-    // Get the selected filter from localStorage
+    // Get the selected filter from sessionStorage
     const filterSelect = document.getElementById('filterSelect');
     const selectedFilter = filterSelect ? filterSelect.value : 'distance'; // Default to distance
 
@@ -512,7 +515,7 @@ function initializeServiceMarkers() {
     // Filter services within the specified radius
     const nearbyServices = filteredServices.filter((item) => {
         if (item.Lat && item.Log) {
-            const distance = calculateDistance(userLat, userLng, item.Lat, item.Log);
+            const distance = calculateDistance(window.userLat, window.userLng, item.Lat, item.Log);
             item.Distance = distance;
             return distance <= radiusInMiles;
         }
@@ -585,7 +588,7 @@ function initializeServiceMarkers() {
         map.fitBounds(group.getBounds());
     } else {
         // If no service markers, set view to user location or default
-        map.setView([userLat || defaultLat, userLng || defaultLng], 12);
+        map.setView([window.userLat || defaultLat, window.userLng || defaultLng], 12);
     }
 }
 
@@ -597,7 +600,7 @@ function updateServiceList() {
         return;
     }
 
-    // Get the selected filter from localStorage
+    // Get the selected filter from sessionStorage
     const filterSelect = document.getElementById('filterSelect');
     const selectedFilter = filterSelect ? filterSelect.value : 'distance'; // Default to distance
 
@@ -635,7 +638,7 @@ function updateServiceList() {
     // Filter services within the specified radius
     const nearbyServices = filteredServices.filter((item) => {
         if (item.Lat && item.Log) {
-            const distance = calculateDistance(userLat, userLng, item.Lat, item.Log);
+            const distance = calculateDistance(window.userLat, window.userLng, item.Lat, item.Log);
             // Update the distance property if it's not already accurate
             item.Distance = distance;
             return distance <= radiusInMiles;

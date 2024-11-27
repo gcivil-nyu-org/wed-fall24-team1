@@ -151,7 +151,7 @@
                             <i class="fas fa-user-circle text-blue-400"></i>
                             <span>View Profile</span>
                         </a>
-                        <form method="post" action="{% url 'logout' %}">
+                        <form method="post" action="{% url 'logout' %}" id="logoutForm">
                             {% csrf_token %}
                             <button type="submit"
                                     class="block w-full text-left px-4 py-2 hover:bg-gray-700 flex items-center space-x-2">
