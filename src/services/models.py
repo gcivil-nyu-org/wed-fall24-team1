@@ -1,6 +1,7 @@
 # from django.db import models
 
 import uuid
+
 # Create your models here.
 from dataclasses import dataclass, field
 from decimal import Decimal

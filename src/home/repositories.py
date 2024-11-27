@@ -83,7 +83,6 @@ class HomeRepository:
     @staticmethod
     def process_items(items):
         processed_items = []
-        print(items)
         for item in items:
             address = item.get("Address", "N/A")
             map_link = (
