@@ -5,6 +5,8 @@ function toggleEdit() {
     editSection.classList.toggle('hidden');
 }
 
+let reviewToDelete = null;
+
 function formatTimestamp(utcTimestamp) {
     if (!utcTimestamp) {
         return 'N/A';
@@ -130,8 +132,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    const tabs = ['bookmarks', 'reviews', 'posts'];
-    let activeTab = 'bookmarks';
+    const tabs = ['posts', 'bookmarks', 'reviews'];
+    let activeTab = 'posts';
 
     function switchTab(tabName) {
         // Hide all tab contents
@@ -174,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Initialize with bookmarks tab
-    switchTab('bookmarks');
+    switchTab('posts');
 
     let map = null;
     let marker = null;
@@ -341,6 +343,64 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    const modal = document.getElementById('deleteConfirmModal');
+    const confirmBtn = document.getElementById('confirmDelete');
+    const cancelBtn = document.getElementById('cancelDelete');
+
+    function closeModal() {
+        const modal = document.getElementById('deleteConfirmModal');
+        modal.classList.add('hidden');
+        reviewToDelete = null;
+    }
+
+    confirmBtn.addEventListener('click', async () => {
+        if (!reviewToDelete) return;
+
+        try {
+            const response = await fetch(`/home/delete_review/${reviewToDelete.ReviewId}/`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCsrfToken(),
+                },
+                body: JSON.stringify({
+                    username: reviewToDelete.Username,
+                }),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                const reviewElement = document.querySelector(`[data-review-id="${reviewToDelete.ReviewId}"]`);
+                if (reviewElement) {
+                    reviewElement.remove();
+                    updateReviewCounters();
+                }
+            } else {
+                alert(data.error || "Failed to delete review.");
+            }
+        } catch (error) {
+            console.error("Error deleting review:", error);
+            alert("An error occurred. Please try again.");
+        } finally {
+            closeModal();
+        }
+    });
+
+    cancelBtn.addEventListener('click', closeModal);
+
+    // Close modal when clicking outside
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+
+    // Close modal on escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+            closeModal();
+        }
+    });
     // Add event listeners for bookmark checkboxes
     const bookmarkCheckboxes = document.querySelectorAll('.bookmark-checkbox');
     bookmarkCheckboxes.forEach(checkbox => {
@@ -394,6 +454,38 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
+
+
+function updateReviewCounters() {
+    const remainingReviews = document.querySelectorAll('#reviews-tab .grid > div').length;
+
+    // Update tab counter
+    const tabCounter = document.querySelector('#reviews-tab-btn .ml-2');
+    if (tabCounter) {
+        tabCounter.textContent = remainingReviews;
+    }
+
+    // Update header counter
+    const headerCounter = document.querySelector('#reviews-tab .bg-blue-100');
+    if (headerCounter) {
+        headerCounter.textContent = `${remainingReviews} review${remainingReviews !== 1 ? 's' : ''}`;
+    }
+
+    // Show "No reviews" message if needed
+    if (remainingReviews === 0) {
+        const reviewsContainer = document.querySelector('#reviews-tab .grid');
+        if (reviewsContainer) {
+            reviewsContainer.innerHTML = '<p class="text-gray-500">No reviews yet.</p>';
+        }
+    }
+}
+
+
+function handleDeleteReview(review) {
+    reviewToDelete = review;
+    const modal = document.getElementById('deleteConfirmModal');
+    modal.classList.remove('hidden');
+}
 
 // Function to get CSRF token from cookies
 function getCsrfToken() {
