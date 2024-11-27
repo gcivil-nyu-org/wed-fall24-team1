@@ -1,111 +1,114 @@
-{% extends 'base.html' %} 
+{% extends 'base.html' %}
 {% block title %}Login{% endblock %}
 {% load static %}
 {% load socialaccount %}
 
 {% block content %}
-<div class="flex flex-col justify-center py-12 px-4 transparent">
+  <div class="flex flex-col justify-center py-12 px-4 transparent">
     <div class="mx-auto w-full max-w-xl">
-        <img src="{% static 'images/logo-psf.png' %}" alt="Logo" class="mx-auto h-16 w-16 rounded-full border border-gray-600 shadow-sm">
-        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-100">
-            Welcome Back
-        </h2>
-        <p class="mt-2 text-center text-sm text-gray-400">
-            Sign in to access your account
-        </p>
+      <img src="{% static 'images/logo-psf.png' %}" alt="Logo"
+           class="mx-auto h-16 w-16 rounded-full border border-gray-600 shadow-sm">
+      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-100">
+        Welcome Back
+      </h2>
+      <p class="mt-2 text-center text-sm text-gray-400">
+        Sign in to access your account
+      </p>
     </div>
 
     <div class="mt-8 mx-auto w-full" style="min-width: 450px; !important;">
-        <div class="bg-gray-800 py-8 px-8 shadow-xl rounded-lg sm:px-10">
-            <form method="post" class="space-y-8">
-                {% csrf_token %}
+      <div class="bg-gray-800 py-8 px-8 shadow-xl rounded-lg sm:px-10">
+        <form method="post" class="space-y-8">
+          {% csrf_token %}
 
-                {% if form.non_field_errors %}
-                    <div class="bg-red-900 border-l-4 border-red-500 p-4 mb-6">
-                        <div class="flex">
-                            <div class="flex-shrink-0">
-                                <i class="fas fa-exclamation-circle text-red-500"></i>
-                            </div>
-                            <div class="ml-3">
-                                <p class="text-sm text-red-300">
-                                    {% for error in form.non_field_errors %}
-                                        {{ error }}
-                                    {% endfor %}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                {% endif %}
-
-                <!-- Username Field -->
-                <div>
-                    <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-gray-300">
-                        Username
-                    </label>
-                    <div class="mt-1">
-                        {{ form.username }}
-                    </div>
-                    {% if form.username.errors %}
-                        <p class="mt-2 text-sm text-red-400">{{ form.username.errors|join:", " }}</p>
-                    {% endif %}
+          {% if form.non_field_errors %}
+            <div class="bg-red-900 border-l-4 border-red-500 p-4 mb-6">
+              <div class="flex">
+                <div class="flex-shrink-0">
+                  <i class="fas fa-exclamation-circle text-red-500"></i>
                 </div>
-
-                <!-- Password Field -->
-                <div>
-                    <label for="{{ form.password.id_for_label }}" class="block text-sm font-medium text-gray-300">
-                        Password
-                    </label>
-                    <div class="mt-1">
-                        {{ form.password }}
-                    </div>
-                    {% if form.password.errors %}
-                        <p class="mt-2 text-sm text-red-400">{{ form.password.errors|join:", " }}</p>
-                    {% endif %}
+                <div class="ml-3">
+                  <p class="text-sm text-red-300">
+                    {% for error in form.non_field_errors %}
+                      {{ error }}
+                    {% endfor %}
+                  </p>
                 </div>
-
-                <div>
-                    <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        Sign in
-                    </button>
-                </div>
-            </form>
-
-            <div class="mt-6">
-                <div class="relative">
-                    <div class="absolute inset-0 flex items-center">
-                        <div class="w-full border-t border-gray-600"></div>
-                    </div>
-                    <div class="relative flex justify-center text-sm">
-                        <span class="px-2 bg-gray-800 text-gray-400">Or continue with</span>
-                    </div>
-                </div>
-
-                <div class="mt-6">
-                    <a href="{% provider_login_url 'google' %}" class="w-full inline-flex justify-center py-2 px-4 border border-gray-600 rounded-md shadow-sm bg-gray-700 text-sm font-medium text-gray-300 hover:bg-gray-600">
-                        <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                            <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/>
-                        </svg>
-                        <span class="ml-2">Sign in with Google</span>
-                    </a>
-                </div>
+              </div>
             </div>
+          {% endif %}
 
-            <div class="mt-6 flex flex-col space-y-2">
-                <p class="text-center text-sm text-gray-400">
-                    Don't have an account?
-                    <a href="{% url 'register' %}" class="font-medium text-blue-400 hover:text-blue-300">
-                        Register now
-                    </a>
-                </p>
-
-                <p class="text-center text-sm text-gray-400">
-                    Are you a service provider?
-                    <a href="{% url 'service_provider_login' %}" class="font-medium text-blue-400 hover:text-blue-300">
-                        Login as Service Provider
-                    </a>
-                </p>
+          <!-- Username Field -->
+          <div>
+            <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-gray-300">
+              Username
+            </label>
+            <div class="mt-1">
+              {{ form.username }}
             </div>
+            {% if form.username.errors %}
+              <p class="mt-2 text-sm text-red-400">{{ form.username.errors|join:", " }}</p>
+            {% endif %}
+          </div>
+
+          <!-- Password Field -->
+          <div>
+            <label for="{{ form.password.id_for_label }}" class="block text-sm font-medium text-gray-300">
+              Password
+            </label>
+            <div class="mt-1">
+              {{ form.password }}
+            </div>
+            {% if form.password.errors %}
+              <p class="mt-2 text-sm text-red-400">{{ form.password.errors|join:", " }}</p>
+            {% endif %}
+          </div>
+
+          <div>
+            <button type="submit"
+                    class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+              Sign in
+            </button>
+          </div>
+        </form>
+
+        <div class="mt-6">
+          <div class="relative">
+            <div class="absolute inset-0 flex items-center">
+              <div class="w-full border-t border-gray-600"></div>
+            </div>
+            <div class="relative flex justify-center text-sm">
+              <span class="px-2 bg-gray-800 text-gray-400">Or continue with</span>
+            </div>
+          </div>
+
+          <div class="mt-6">
+            <a href="{% provider_login_url 'google' %}"
+               class="w-full inline-flex justify-center py-2 px-4 border border-gray-600 rounded-md shadow-sm bg-gray-700 text-sm font-medium text-gray-300 hover:bg-gray-600">
+              <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/>
+              </svg>
+              <span class="ml-2">Sign in with Google</span>
+            </a>
+          </div>
         </div>
+
+        <div class="mt-6 flex flex-col space-y-2">
+          <p class="text-center text-sm text-gray-400">
+            Don't have an account?
+            <a href="{% url 'register' %}" class="font-medium text-blue-400 hover:text-blue-300">
+              Register now
+            </a>
+          </p>
+
+          <p class="text-center text-sm text-gray-400">
+            Are you a service provider?
+            <a href="{% url 'service_provider_login' %}" class="font-medium text-blue-400 hover:text-blue-300">
+              Login as Service Provider
+            </a>
+          </p>
+        </div>
+      </div>
     </div>
-</div>
+  </div>
 {% endblock %}
