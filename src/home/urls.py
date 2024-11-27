@@ -14,5 +14,5 @@ urlpatterns = [
     ),  # Fix this path
     path("toggle_bookmark/", views.toggle_bookmark, name="toggle_bookmark"),
     path("delete_review/<str:review_id>/", views.delete_review, name="delete_review"),
-    path("edit_review/<str:review_id>/", views.edit_review, name="delete_review"),
+    path("edit_review/<str:review_id>/", views.edit_review, name="edit_review"),
 ]
