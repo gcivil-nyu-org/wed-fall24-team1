@@ -3,7 +3,7 @@
 from django.contrib.auth import views as auth_views
 from django.urls import path, include
 
-from .views import UserLoginView, ServiceProviderLoginView, register
+from .views import UserLoginView, ServiceProviderLoginView, register, CustomLogoutView
 from accounts import views
 
 
@@ -19,9 +19,9 @@ urlpatterns = [
     ),
     path(
         "profile/", views.profile_view, name="profile_view"
-    ),  # TODO: what happen when logged in as service provider.
+    ),
     path(
-        "logout/", auth_views.LogoutView.as_view(next_page="user_login"), name="logout"
+        "logout/", CustomLogoutView.as_view(), name="logout"
     ),  # Logout URL
     path("", include("allauth.urls")),  # This allows allauth URLs under /accounts/
     path(
