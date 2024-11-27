@@ -263,15 +263,15 @@ class CustomLogoutView(LogoutView):
 
         # Check if the user is authenticated
         if user.is_authenticated:
-            if user.user_type == 'service_provider':
+            if user.user_type == "service_provider":
                 # Redirect service providers to the service provider login page
-                next_page = reverse_lazy('service_provider_login')
+                next_page = reverse_lazy("service_provider_login")
             else:
                 # Redirect normal users to the home page
-                next_page = reverse_lazy('home')
+                next_page = reverse_lazy("home")
         else:
             # If the user is not authenticated, default to home page
-            next_page = reverse_lazy('home')
+            next_page = reverse_lazy("home")
 
         return next_page
 

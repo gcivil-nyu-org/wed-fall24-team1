@@ -17,12 +17,8 @@ urlpatterns = [
         ServiceProviderLoginView.as_view(),
         name="service_provider_login",
     ),
-    path(
-        "profile/", views.profile_view, name="profile_view"
-    ),
-    path(
-        "logout/", CustomLogoutView.as_view(), name="logout"
-    ),  # Logout URL
+    path("profile/", views.profile_view, name="profile_view"),
+    path("logout/", CustomLogoutView.as_view(), name="logout"),  # Logout URL
     path("", include("allauth.urls")),  # This allows allauth URLs under /accounts/
     path(
         "password_reset/",
