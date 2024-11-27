@@ -27,7 +27,7 @@ class ServiceDTO:
     service_created_timestamp: str
     service_approved_timestamp: str
     is_active: bool
-    announcement: str
+    announcement: str = ""
 
     @classmethod
     def from_dynamodb_item(cls, item: Dict[str, Any]) -> "ServiceDTO":
