@@ -1,10 +1,10 @@
 # from django.db import models
 
+import uuid
 # Create your models here.
 from dataclasses import dataclass, field
 from decimal import Decimal
-from typing import Dict, Any, List
-import uuid
+from typing import Dict, Any
 
 from public_service_finder.utils.enums.service_status import ServiceStatus
 
@@ -48,7 +48,7 @@ class ServiceDTO:
             service_created_timestamp=item.get("CreatedTimestamp", "NONE"),
             service_approved_timestamp=item.get("ApprovedTimestamp", "NONE"),
             is_active=item.get("IsActive", True),
-            announcement=item.get("Announcement", "")  # Add this line
+            announcement=item.get("Announcement", ""),  # Add this line
         )
 
     def to_dynamodb_item(self) -> Dict[str, Any]:
@@ -67,7 +67,7 @@ class ServiceDTO:
             "CreatedTimestamp": self.service_created_timestamp,
             "ApprovedTimestamp": self.service_approved_timestamp,
             "IsActive": self.is_active,
-            "Announcement": self.announcement
+            "Announcement": self.announcement,
         }
 
 

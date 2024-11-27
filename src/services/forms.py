@@ -24,13 +24,12 @@ class ServiceForm(forms.Form):
         required=False, initial=True, label="Is the service currently available?"
     )
     announcement = forms.CharField(  # Add this field
-        widget=forms.Textarea(attrs={
-            'rows': 3,
-            'placeholder': 'Enter your announcement here'
-        }),
+        widget=forms.Textarea(
+            attrs={"rows": 3, "placeholder": "Enter your announcement here"}
+        ),
         required=False,
         max_length=500,
-        help_text="Use this space to inform users about temporary changes or important updates."
+        help_text="Use this space to inform users about temporary changes or important updates.",
     )
 
     def clean(self):
@@ -63,11 +62,11 @@ class ServiceForm(forms.Form):
             "Restroom": "RESTROOM",
         }
         cleaned_data["category"] = category_translation[cleaned_data["category"]]
-        if 'announcement' in cleaned_data:
-            announcement = cleaned_data['announcement']
+        if "announcement" in cleaned_data:
+            announcement = cleaned_data["announcement"]
             if announcement:
                 profanity.load_censor_words()
-                cleaned_data['announcement'] = profanity.censor(announcement)
+                cleaned_data["announcement"] = profanity.censor(announcement)
 
         return cleaned_data
 
@@ -122,6 +121,7 @@ class CustomDescriptionFormSet(BaseFormSet):
 
         print(f"All keys found: {keys}")  # Debug print for all keys
         return self.cleaned_data
+
 
 DescriptionFormSet = formset_factory(
     DescriptionItemForm,

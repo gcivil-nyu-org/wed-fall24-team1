@@ -125,6 +125,7 @@ class ServiceRepository:
             )
             return False
 
+
 class ReviewRepository:
     def __init__(self):
         self.dynamodb = boto3.resource(

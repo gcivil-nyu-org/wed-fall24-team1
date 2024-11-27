@@ -89,7 +89,7 @@ def service_create(request):
                 service_created_timestamp=datetime.now(timezone.utc).isoformat(),
                 service_approved_timestamp="1900-01-01T00:00:00Z",
                 is_active=is_active,
-                announcement=service_data.get("announcement")
+                announcement=service_data.get("announcement"),
             )
             if service_repo.create_service(service_dto):
                 return redirect("services:list")
@@ -112,6 +112,7 @@ def service_create(request):
         "service_form.html",
         {"form": form, "description_formset": description_formset, "action": "Create"},
     )
+
 
 @login_required
 def service_edit(request, service_id):
@@ -207,14 +208,14 @@ def service_edit(request, service_id):
                 # Create notifications for each user who bookmarked the service
                 for bookmark in bookmarks:
                     try:
-                        user = CustomUser.objects.get(id=bookmark['UserId'])
+                        user = CustomUser.objects.get(id=bookmark["UserId"])
                         Notification.objects.create(
                             recipient=user,
                             sender=request.user,
                             post=None,
                             comment=None,
                             message=f"New announcement from {service.name}: {new_announcement[:50]}{'...' if len(new_announcement) > 50 else ''}",
-                            notification_type="announcement"
+                            notification_type="announcement",
                         )
                     except CustomUser.DoesNotExist:
                         continue
@@ -242,7 +243,7 @@ def service_edit(request, service_id):
                 service.category, service.category
             ),
             "is_active": service.is_active,
-            "announcement": service.announcement
+            "announcement": service.announcement,
         }
         form = ServiceForm(initial=initial_data)
 
@@ -310,6 +311,7 @@ def verify_service(request, service_id):
     if not service or service.provider_id != str(request.user.id):
         raise PermissionDenied
     return service
+
 
 @login_required
 def review_list(request, service_id):
@@ -592,7 +594,21 @@ def review_word_cloud(request):
 
     # Simple text processing
     words = re.findall(r"\w+", text.lower())
-    stopwords = {"the", "and", "is", "in", "it", "of", "to", "a", "i", "for", "this", "that", "with"}
+    stopwords = {
+        "the",
+        "and",
+        "is",
+        "in",
+        "it",
+        "of",
+        "to",
+        "a",
+        "i",
+        "for",
+        "this",
+        "that",
+        "with",
+    }
     words = [word for word in words if word not in stopwords and len(word) > 2]
 
     # Count word frequencies

@@ -244,7 +244,9 @@ class HomeRepository:
             )
             return response.get("Items", [])
         except ClientError as e:
-            print(f"Failed to get bookmarks for service: {e.response['Error']['Message']}")
+            print(
+                f"Failed to get bookmarks for service: {e.response['Error']['Message']}"
+            )
             return []
 
     def fetch_reviews_by_user(self, user_id):
