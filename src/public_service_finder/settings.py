@@ -21,7 +21,7 @@ from decouple import config
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-DEBUG = True
+DEBUG = config("DEBUG", default=True, cast=bool)
 SECRET_KEY = config("DJANGO_SECRET_KEY")
 GEOCODING_API_KEY = config("GEOCODING_API_KEY")
 SUPABASE_DB_NAME = config("SUPABASE_DB_NAME")
@@ -90,6 +90,8 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = config("SMTP_USER")
 EMAIL_HOST_PASSWORD = config("SMTP_PASSWORD")
 DEFAULT_FROM_EMAIL = config("SMTP_USER")
+
+# settings.py
 # settings.py
 
 # EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
