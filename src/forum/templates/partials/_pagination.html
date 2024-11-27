@@ -2,19 +2,19 @@
 <div class="flex justify-center space-x-2 mt-6">
     {% if page_obj.has_previous %}
     <a href="?{% if search_query %}search={{ search_query }}&{% endif %}page={{ page_obj.previous_page_number }}"
-       class="px-3 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50">
+       class="px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-sm text-gray-300 hover:bg-gray-700">
         Previous
     </a>
     {% endif %}
 
     {% for num in page_obj.paginator.page_range %}
     {% if page_obj.number == num %}
-    <span class="px-3 py-2 bg-blue-50 border border-blue-500 rounded-md text-sm text-blue-600">
-            {{ num }}
-        </span>
+    <span class="px-3 py-2 bg-blue-900 border border-blue-700 rounded-md text-sm text-blue-100">
+        {{ num }}
+    </span>
     {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
     <a href="?{% if search_query %}search={{ search_query }}&{% endif %}page={{ num }}"
-       class="px-3 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50">
+       class="px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-sm text-gray-300 hover:bg-gray-700">
         {{ num }}
     </a>
     {% endif %}
@@ -22,7 +22,7 @@
 
     {% if page_obj.has_next %}
     <a href="?{% if search_query %}search={{ search_query }}&{% endif %}page={{ page_obj.next_page_number }}"
-       class="px-3 py-2 bg-white border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50">
+       class="px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-sm text-gray-300 hover:bg-gray-700">
         Next
     </a>
     {% endif %}

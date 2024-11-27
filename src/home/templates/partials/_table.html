@@ -2,13 +2,14 @@
 
 <head>
   <link href="{% static 'css/styles.css' %}" rel="stylesheet">
-  <!-- Include Font Awesome for icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
         integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
         crossorigin="anonymous" referrerpolicy="no-referrer"/>
   <style>
       #serviceDetails {
           font-family: Arial, sans-serif;
+          background-color: #1a202c;
+          color: #e2e8f0;
       }
 
       #serviceDetails .flex {
@@ -24,7 +25,7 @@
           display: flex;
           align-items: center;
           font-size: 0.875rem;
-          color: #4a5568;
+          color: #a0aec0;
           margin-right: 1rem;
       }
 
@@ -35,7 +36,7 @@
       #serviceDetails .bookmark-icon {
           cursor: pointer;
           font-size: 1.5rem;
-          color: #cbd5e0;
+          color: #4a5568;
           transition: color 0.3s ease;
       }
 
@@ -51,84 +52,83 @@
           display: inline-block;
           margin-top: 1rem;
           text-decoration: none;
+          background-color: #4299e1;
+          color: #fff;
       }
 
       #serviceDetails #reviewRating,
       #serviceDetails #reviewText {
           width: 100%;
           margin-bottom: 0.5rem;
+          background-color: #2d3748;
+          color: #e2e8f0;
+          border: 1px solid #4a5568;
       }
 
       #serviceDetails #submitReview {
           cursor: pointer;
+          background-color: #4299e1;
+          color: #fff;
       }
 
-      /* Parent flex container */
       .flex-container {
           display: flex;
-          align-items: baseline; /* Align items (rating and icons) on the same baseline */
-          justify-content: space-between; /* Ensure proper spacing between rating and icons */
-          gap: 16px; /* Optional: Add space between rating and icons */
+          align-items: baseline;
+          justify-content: space-between;
+          gap: 16px;
       }
 
-      /* Rating element styling */
       .rating-element {
           margin: 0;
           padding: 0;
-          line-height: 1.5; /* Ensure consistent line height */
+          line-height: 1.5;
       }
 
-      /* Icon container styling */
       .icon-container {
           display: flex;
-          gap: 8px; /* Space between icons */
-          align-items: center; /* Align icons vertically */
+          gap: 8px;
+          align-items: center;
       }
-
   </style>
 </head>
 
-<!-- Include serialized_items and userIsAuthenticated directly -->
 <script>
     const itemsData = JSON.parse('{{ serialized_items|escapejs }}');
     const userIsAuthenticated = {{ user.is_authenticated|yesno:'true,false' }};
 </script>
-
 <div id="editReviewModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex items-center justify-center">
-  <div class="bg-white p-6 rounded-lg shadow-xl max-w-lg w-full">
-    <h3 class="text-lg font-semibold mb-4">Edit Review</h3>
-    <select id="editRating" class="w-full p-2 border rounded mb-4">
+  <div class="bg-gray-800 rounded-lg p-8 max-w-2xl w-full mx-4 border border-gray-700">
+    <h3 class="text-2xl font-bold mb-4 text-gray-100">Edit Review</h3>
+    <select id="editRating" class="w-full mb-3 p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600">
       <option value="1">1 Star</option>
       <option value="2">2 Stars</option>
       <option value="3">3 Stars</option>
       <option value="4">4 Stars</option>
       <option value="5">5 Stars</option>
     </select>
-    <textarea id="editMessage" class="w-full p-2 border rounded mb-4" rows="4"></textarea>
+    <textarea id="editMessage" class="w-full mb-2 p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 border border-gray-600" rows="4"></textarea>
     <div class="flex justify-end gap-2">
-      <button id="cancelEdit" class="px-4 py-2 border rounded text-gray-600 hover:bg-gray-100">Cancel</button>
-      <button id="confirmEdit" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Save Changes</button>
+      <button id="cancelEdit" class="bg-red-600 text-white px-6 py-2 rounded-md hover:bg-red-700 transition-colors duration-300">Cancel</button>
+      <button id="confirmEdit" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors duration-300">Save Changes</button>
     </div>
   </div>
 </div>
 
 <div id="deleteReviewModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex items-center justify-center">
-  <div class="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
-    <h3 class="text-lg font-semibold mb-4">Delete Review</h3>
-    <p class="mb-4">This cannot be undone.</p>
+  <div class="bg-gray-800 rounded-lg p-8 max-w-md w-full mx-4 border border-gray-700">
+    <h3 class="text-2xl font-bold mb-4 text-gray-100">Delete Review</h3>
+    <p class="text-gray-300 mb-6">This cannot be undone.</p>
     <div class="flex justify-end gap-2">
-      <button id="cancelDelete" class="px-4 py-2 border rounded text-gray-600 hover:bg-gray-100">Cancel</button>
-      <button id="confirmDelete" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">Delete</button>
+      <button id="cancelDelete" class="bg-gray-600 text-white px-6 py-2 rounded-md hover:bg-gray-700 transition-colors duration-300">Cancel</button>
+      <button id="confirmDelete" class="bg-red-600 text-white px-6 py-2 rounded-md hover:bg-red-700 transition-colors duration-300">Delete</button>
     </div>
   </div>
 </div>
-
-<div id="serviceDetails" class="bg-white rounded-lg shadow-md p-4 mb-8 hidden">
+<div id="serviceDetails" class="bg-gray-800 rounded-lg shadow-md p-4 mb-8 hidden">
   <div class="flex justify-between items-start mb-4">
-    <h2 id="serviceId" class="text-lg font-semibold" style="display: none;">Id</h2>
-    <h2 id="serviceName" class="text-lg font-semibold">Service Name</h2>
+    <h2 id="serviceId" class="text-lg font-semibold text-gray-100" style="display: none;">Id</h2>
+    <h2 id="serviceName" class="text-lg font-semibold text-gray-100">Service Name</h2>
 
-    <!-- Availability and Bookmark Icon -->
     <div class="flex items-center space-x-3">
       <span id="serviceAvailability" class="font-semibold hidden">Currently Unavailable</span>
 
@@ -140,14 +140,13 @@
       {% endif %}
     </div>
 
-    <button id="closeDetails" class="text-gray-500 hover:text-gray-700">
+    <button id="closeDetails" class="text-gray-400 hover:text-gray-700">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
            stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
       </svg>
     </button>
   </div>
-
   <div id="serviceAnnouncement"
        class="mb-3 flex items-center space-x-2 text-yellow-700 bg-yellow-50 border-l-2 border-yellow-400 px-3 py-2 rounded-lg hidden">
     <svg class="h-4 w-4 flex-shrink-0 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -158,20 +157,25 @@
   </div>
 
   <div class="space-y-1 mb-4">
-    <p class="text-sm"><strong>Address:</strong> <span id="serviceAddress">123 Main St</span></p>
-    <p class="text-sm"><strong>Type:</strong> <span id="serviceType">Homeless</span></p>
-    <p class="text-sm"><strong>Rating:</strong> <span id="serviceRating">4.5</span></p>
-    <p class="text-sm"><strong>Distance:</strong> <span id="serviceDistance">1.2 miles</span></p>
+    <p class="text-sm"><strong class="text-gray-300">Address:</strong> <span id="serviceAddress" class="text-gray-400">123 Main St</span>
+    </p>
+    <p class="text-sm"><strong class="text-gray-300">Type:</strong> <span id="serviceType" class="text-gray-400">Homeless</span>
+    </p>
+    <p class="text-sm"><strong class="text-gray-300">Rating:</strong> <span id="serviceRating"
+                                                                            class="text-gray-400">4.5</span></p>
+    <p class="text-sm"><strong class="text-gray-300">Distance:</strong> <span id="serviceDistance"
+                                                                              class="text-gray-400">1.2 miles</span></p>
     <a id="getDirections" href="#" target="_blank" rel="noopener noreferrer"
-       class="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-2">Get Directions</a>
+       class="inline-block bg-blue-600 text-gray-100 px-4 py-2 rounded hover:bg-blue-700 mt-2">Get Directions</a>
     <div class="space-y-1 mb-4">
-      <div id="serviceDescription" class="text-sm mt-2"></div>
+      <div id="serviceDescription" class="text-sm mt-2 text-gray-400"></div>
     </div>
   </div>
 
-  <h3 class="text-lg font-semibold mb-2">Leave a Review</h3>
+  <h3 class="text-lg font-semibold mb-2 text-gray-100">Leave a Review</h3>
   <div class="space-y-2 mb-4">
-    <select id="reviewRating" class="w-full p-2 border rounded">
+    <select id="reviewRating"
+            class="w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600">
       <option value="">Select a rating</option>
       <option value="1">1 Star</option>
       <option value="2">2 Stars</option>
@@ -179,8 +183,11 @@
       <option value="4">4 Stars</option>
       <option value="5">5 Stars</option>
     </select>
-    <textarea id="reviewText" class="w-full p-2 border rounded" placeholder="Write your review here..."></textarea>
-    <button id="submitReview" class="bg-blue-500 text-white px-4 py-2 rounded">Submit Review</button>
+    <textarea id="reviewText"
+              class="w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 border border-gray-600"
+              placeholder="Write your review here..."></textarea>
+    <button id="submitReview" class="bg-blue-600 text-gray-100 px-4 py-2 rounded hover:bg-blue-700">Submit Review
+    </button>
   </div>
 
   <div id="reviewsContainer" class="space-y-4"></div>
@@ -190,8 +197,23 @@
     document.addEventListener('DOMContentLoaded', () => {
 
         function formatTimestamp(utcTimestamp) {
-            // Ensure we're parsing the UTC timestamp correctly
-            const date = new Date(utcTimestamp + 'Z'); // Append 'Z' to ensure UTC interpretation
+            let dateString = utcTimestamp;
+
+            // Check if the timestamp already contains timezone info (Z or ±HH:MM)
+            const hasTimezone = /([Zz]|[+\-]\d{2}:\d{2})$/.test(utcTimestamp);
+
+            if (!hasTimezone) {
+                // Append 'Z' only if no timezone info is present
+                dateString += 'Z';
+            }
+
+            const date = new Date(dateString);
+
+            // Check if the date is valid
+            if (isNaN(date)) {
+                console.error("Invalid date:", dateString);
+                return "Invalid Date";
+            }
 
             const options = {
                 year: 'numeric',
@@ -231,8 +253,7 @@
 
                 reviews.forEach(review => {
                     const reviewDiv = document.createElement('div');
-                    reviewDiv.classList.add('bg-white', 'rounded-lg', 'shadow', 'p-2', 'mb-2');
-
+                    reviewDiv.classList.add('bg-gray-800', 'rounded', 'shadow', 'p-4', 'mb-4');
                     const rating = parseFloat(review.RatingStars).toFixed(2);
 
                     const flexContainer = document.createElement('div');
@@ -281,16 +302,16 @@
 
                     const timestamp = formatTimestamp(review.Timestamp);
                     const meta = document.createElement('p');
-                    meta.classList.add('text-xs', 'text-gray-500');
+                    meta.classList.add('text-sm', 'text-gray-400');
                     meta.textContent = `By ${review.Username} on ${timestamp}`;
                     reviewDiv.appendChild(meta);
 
                     if (review.ResponseText) {
                         const responseDiv = document.createElement('div');
-                        responseDiv.classList.add('mt-3', 'p-3', 'bg-blue-50', 'rounded');
+                        responseDiv.classList.add('mt-2', 'p-3', 'bg-gray-700', 'border-gray-800', 'rounded');
 
                         const responseHeader = document.createElement('p');
-                        responseHeader.classList.add('font-semibold', 'text-sm', 'text-blue-600');
+                        responseHeader.classList.add('font-semibold', 'text-sm', 'text-blue-500');
                         responseHeader.textContent = "Provider Response:";
                         responseDiv.appendChild(responseHeader);
 
@@ -301,7 +322,7 @@
 
                         const respondedAt = formatTimestamp(review.RespondedAt);
                         const responseMeta = document.createElement('p');
-                        responseMeta.classList.add('text-xs', 'text-gray-500');
+                        responseMeta.classList.add('text-xs', 'text-gray-400');
                         responseMeta.textContent = `Responded on ${respondedAt}`;
                         responseDiv.appendChild(responseMeta);
 
@@ -435,6 +456,7 @@
             const heading = document.createElement('h3');
             heading.textContent = 'Additional Descriptive Details:';
             heading.style.marginBottom = '10px';
+            heading.style.marginTop = '20px';
             heading.style.fontSize = '1.1em';
             heading.style.fontWeight = 'bold';
             descriptionElement.appendChild(heading);
@@ -442,27 +464,31 @@
             // Check if Description exists and is an object
             if (service.Description && typeof service.Description === 'object') {
                 let hasDescription = false;
-                const table = document.createElement('table');
+                const dl = document.createElement('dl');
+                dl.className = 'mt-2 space-y-1';
 
                 for (const [key, value] of Object.entries(service.Description)) {
                     if (value !== null && value !== '') {
                         hasDescription = true;
-                        const tr = document.createElement('tr');
+                        const div = document.createElement('div');
+                        div.className = 'flex';
 
-                        const th = document.createElement('th');
-                        th.textContent = `${key.replace(/_/g, ' ')}:`;
+                        const dt = document.createElement('dt');
+                        dt.className = 'text-sm font-medium text-gray-400 w-1/3';
+                        dt.textContent = `${key.replace(/_/g, ' ')}:`;
 
-                        const td = document.createElement('td');
-                        td.innerHTML = value.replace(/\n/g, '<br>');
+                        const dd = document.createElement('dd');
+                        dd.className = 'text-sm text-gray-300 ml-2';
+                        dd.innerHTML = value.replace(/\n/g, '<br>');
 
-                        tr.appendChild(th);
-                        tr.appendChild(td);
-                        table.appendChild(tr);
+                        div.appendChild(dt);
+                        div.appendChild(dd);
+                        dl.appendChild(div);
                     }
                 }
 
                 if (hasDescription) {
-                    descriptionElement.appendChild(table);
+                    descriptionElement.appendChild(dl);
                 } else {
                     descriptionElement.textContent = 'No description available.';
                 }

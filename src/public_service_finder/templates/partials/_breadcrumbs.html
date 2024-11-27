@@ -10,7 +10,7 @@
 {% if 'login' not in request.path %}
 {% if 'register' not in request.path %}
 
-    <div class="bg-gray-100 border-b border-gray-200">
+    <div class="bg-gray-800 border-b border-gray-700">
     <div class="container mx-auto px-4">
         <div class="flex items-center h-12">
             <nav class="flex" aria-label="Breadcrumb">
@@ -18,18 +18,18 @@
                     {% if 'forum' in request.path %}
                         <li>
                             <div class="flex items-center">
-                                <i class="fas fa-comments text-gray-400 mr-2"></i>
-                                <a href="{% url 'forum:category_list' %}" class="text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors duration-200">Forums</a>
+                                <i class="fas fa-comments text-gray-500 mr-2"></i>
+                                <a href="{% url 'forum:category_list' %}" class="text-sm font-medium text-gray-400 hover:text-blue-400 transition-colors duration-200">Forums</a>
                             </div>
                         </li>
 
                         {% if 'category' in request.path and category %}
                             <li>
                                 <div class="flex items-center">
-                                    <svg class="h-5 w-5 text-gray-300 mx-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <svg class="h-5 w-5 text-gray-500 mx-1" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
                                     </svg>
-                                    <span class="text-sm font-medium text-gray-500">{{ category.name }}</span>
+                                    <span class="text-sm font-medium text-gray-400">{{ category.name }}</span>
                                 </div>
                             </li>
                         {% endif %}
@@ -37,18 +37,18 @@
                         {% if 'post' in request.path and post %}
                             <li>
                                 <div class="flex items-center">
-                                    <svg class="h-5 w-5 text-gray-300 mx-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <svg class="h-5 w-5 text-gray-500 mx-1" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
                                     </svg>
-                                    <a href="{% url 'forum:category_detail' post.category.id %}" class="text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors duration-200">{{ post.category.name }}</a>
+                                    <a href="{% url 'forum:category_detail' post.category.id %}" class="text-sm font-medium text-gray-400 hover:text-blue-400 transition-colors duration-200">{{ post.category.name }}</a>
                                 </div>
                             </li>
                             <li>
                                 <div class="flex items-center">
-                                    <svg class="h-5 w-5 text-gray-300 mx-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <svg class="h-5 w-5 text-gray-500 mx-1" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
                                     </svg>
-                                    <span class="text-sm font-medium text-blue-600">{{ post.title|truncatechars:50 }}</span>
+                                    <span class="text-sm font-medium text-blue-400">{{ post.title|truncatechars:50 }}</span>
                                 </div>
                             </li>
                         {% endif %}
@@ -56,10 +56,10 @@
                         {% if 'create_post' in request.path %}
                             <li>
                                 <div class="flex items-center">
-                                    <svg class="h-5 w-5 text-gray-300 mx-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <svg class="h-5 w-5 text-gray-500 mx-1" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
                                     </svg>
-                                    <span class="text-sm font-medium text-blue-600">Create New Post</span>
+                                    <span class="text-sm font-medium text-blue-400">Create New Post</span>
                                 </div>
                             </li>
                         {% endif %}
@@ -67,18 +67,18 @@
                     {% if 'services' in request.path %}
                         <li>
                             <div class="flex items-center">
-                                <i class="fas fa-building text-gray-400 mr-2"></i>
-                                <a href="{% url 'services:list' %}" class="text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors duration-200">My Services</a>
+                                <i class="fas fa-building text-gray-500 mr-2"></i>
+                                <a href="{% url 'services:list' %}" class="text-sm font-medium text-gray-400 hover:text-blue-400 transition-colors duration-200">My Services</a>
                             </div>
                         </li>
 
                         {% if 'create' in request.path %}
                             <li>
                                 <div class="flex items-center">
-                                    <svg class="h-5 w-5 text-gray-300 mx-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <svg class="h-5 w-5 text-gray-500 mx-1" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
                                     </svg>
-                                    <span class="text-sm font-medium text-blue-600">Create Service</span>
+                                    <span class="text-sm font-medium text-blue-400">Create Service</span>
                                 </div>
                             </li>
                         {% endif %}
@@ -86,18 +86,18 @@
                         {% if 'edit' in request.path and service %}
                             <li>
                                 <div class="flex items-center">
-                                    <svg class="h-5 w-5 text-gray-300 mx-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <svg class="h-5 w-5 text-gray-500 mx-1" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
                                     </svg>
-                                    <a href="{% url 'services:list' %}" class="text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors duration-200">{{ service.name }}</a>
+                                    <a href="{% url 'services:list' %}" class="text-sm font-medium text-gray-400 hover:text-blue-400 transition-colors duration-200">{{ service.name }}</a>
                                 </div>
                             </li>
                             <li>
                                 <div class="flex items-center">
-                                    <svg class="h-5 w-5 text-gray-300 mx-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <svg class="h-5 w-5 text-gray-500 mx-1" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
                                     </svg>
-                                    <span class="text-sm font-medium text-blue-600">Edit Service</span>
+                                    <span class="text-sm font-medium text-blue-400">Edit Service</span>
                                 </div>
                             </li>
                         {% endif %}
@@ -105,10 +105,10 @@
                         {% if 'details' in request.path and service %}
                             <li>
                                 <div class="flex items-center">
-                                    <svg class="h-5 w-5 text-gray-300 mx-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <svg class="h-5 w-5 text-gray-500 mx-1" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
                                     </svg>
-                                    <span class="text-sm font-medium text-blue-600">{{ service.name }}</span>
+                                    <span class="text-sm font-medium text-blue-400">{{ service.name }}</span>
                                 </div>
                             </li>
                         {% endif %}

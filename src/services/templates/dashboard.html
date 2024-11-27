@@ -3,42 +3,42 @@
 {% block content %}
 <div class="min-h-screen bg-transparent py-12">
     <div class="container mx-auto px-2 sm:px-4 lg:px-6">
-        <h1 class="text-4xl font-extrabold text-gray-900 text-center mb-12">Analytics Dashboard</h1>
+        <h1 class="text-4xl font-extrabold text-gray-100 text-center mb-12">Analytics Dashboard</h1>
 
         <!-- Row 1: Bookmarks Over Time & Reviews Over Time -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            <div class="bg-white rounded-lg shadow-lg p-6 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
-                <h2 class="text-2xl font-bold text-gray-800 mb-4">Bookmarks Over Time</h2>
+            <div class="bg-gray-800 rounded-lg shadow-lg p-6 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
+                <h2 class="text-2xl font-bold text-gray-100 mb-4">Bookmarks Over Time</h2>
                 <canvas id="bookmarksChart" class="w-full"></canvas>
             </div>
-            <div class="bg-white rounded-lg shadow-lg p-6 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
-                <h2 class="text-2xl font-bold text-gray-800 mb-4">Reviews Over Time</h2>
+            <div class="bg-gray-800 rounded-lg shadow-lg p-6 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
+                <h2 class="text-2xl font-bold text-gray-100 mb-4">Reviews Over Time</h2>
                 <canvas id="reviewsChart" class="w-full"></canvas>
             </div>
         </div>
 
         <!-- Row 2: Average Rating Over Time & Rating Distribution -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            <div class="bg-white rounded-lg shadow-lg p-6 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
-                <h2 class="text-2xl font-bold text-gray-800 mb-4">Average Rating Over Time</h2>
+            <div class="bg-gray-800 rounded-lg shadow-lg p-6 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
+                <h2 class="text-2xl font-bold text-gray-100 mb-4">Average Rating Over Time</h2>
                 <canvas id="averageRatingChart" class="w-full"></canvas>
             </div>
-            <div class="bg-white rounded-lg shadow-lg p-6 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
-                <h2 class="text-2xl font-bold text-gray-800 mb-4">Rating Distribution</h2>
+            <div class="bg-gray-800 rounded-lg shadow-lg p-6 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
+                <h2 class="text-2xl font-bold text-gray-100 mb-4">Rating Distribution</h2>
                 <canvas id="ratingDistributionChart" class="w-full"></canvas>
             </div>
         </div>
 
         <!-- Row 3: Category Distribution & Response Rate -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            <div class="bg-white rounded-lg shadow-lg p-6 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
-                <h2 class="text-2xl font-bold text-gray-800 mb-4">Service Category Distribution</h2>
+            <div class="bg-gray-800 rounded-lg shadow-lg p-6 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
+                <h2 class="text-2xl font-bold text-gray-100 mb-4">Service Category Distribution</h2>
                 <canvas id="categoryDistributionChart" class="w-full"></canvas>
             </div>
-            <div class="bg-white rounded-lg shadow-lg p-6 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
-                <h2 class="text-2xl font-bold text-gray-800 mb-4">Response Rate to Reviews</h2>
+            <div class="bg-gray-800 rounded-lg shadow-lg p-6 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
+                <h2 class="text-2xl font-bold text-gray-100 mb-4">Response Rate to Reviews</h2>
                 <div class="flex flex-col items-center">
-                    <p id="responseRateText" class="text-lg font-medium text-gray-600 mt-6 mb-4"></p>
+                    <p id="responseRateText" class="text-lg font-medium text-gray-300 mt-6 mb-4"></p>
                     <div class="w-80 h-80">
                         <canvas id="responseRateChart"></canvas>
                     </div>
@@ -47,22 +47,22 @@
         </div>
 
         <!-- Row 4: Recent Reviews -->
-        <div class="bg-white rounded-lg shadow-lg p-6 mb-8 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Recent Reviews</h2>
+        <div class="bg-gray-800 rounded-lg shadow-lg p-6 mb-8 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
+            <h2 class="text-2xl font-bold text-gray-100 mb-4">Recent Reviews</h2>
             <div id="reviewsContainer" class="space-y-4 max-h-96 overflow-y-auto pr-4"></div>
         </div>
 
         <!-- Row 5: Word Cloud -->
-        <div class="bg-white rounded-lg shadow-lg p-6 mb-8 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Review Keywords Word Cloud</h2>
-            <div id="wordCloud" class="border-2 border-gray-200 rounded-lg p-4">
+        <div class="bg-gray-800 rounded-lg shadow-lg p-6 mb-8 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
+            <h2 class="text-2xl font-bold text-gray-100 mb-4">Review Keywords Word Cloud</h2>
+            <div id="wordCloud" class="border-2 border-gray-700 rounded-lg p-4">
                 <svg width="100%" height="400"></svg>
             </div>
         </div>
 
         <!-- Comparative Analytics -->
-        <div class="bg-white rounded-lg shadow-lg p-6 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">User Analytics</h2>
+        <div class="bg-gray-800 rounded-lg shadow-lg p-6 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
+            <h2 class="text-2xl font-bold text-gray-100 mb-4">User Analytics</h2>
             <canvas id="comparativeChart" class="w-full"></canvas>
         </div>
     </div>
@@ -81,15 +81,15 @@
         width: 8px;
     }
     #reviewsContainer::-webkit-scrollbar-track {
-        background: #f1f1f1;
+        background: #374151;
         border-radius: 10px;
     }
     #reviewsContainer::-webkit-scrollbar-thumb {
-        background: #888;
+        background: #4B5563;
         border-radius: 10px;
     }
     #reviewsContainer::-webkit-scrollbar-thumb:hover {
-        background: #555;
+        background: #6B7280;
     }
 </style>
 {% endblock %}
@@ -126,6 +126,13 @@
                             title: {
                                 display: true,
                                 text: 'Date',
+                                color: 'rgba(229, 231, 235, 1)',
+                            },
+                            ticks: {
+                                color: 'rgba(229, 231, 235, 1)',
+                            },
+                            grid: {
+                                color: 'rgba(75, 85, 99, 0.3)',
                             },
                         },
                         y: {
@@ -133,6 +140,20 @@
                             title: {
                                 display: true,
                                 text: 'Number of Bookmarks',
+                                color: 'rgba(229, 231, 235, 1)',
+                            },
+                            ticks: {
+                                color: 'rgba(229, 231, 235, 1)',
+                            },
+                            grid: {
+                                color: 'rgba(75, 85, 99, 0.3)',
+                            },
+                        },
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'rgba(229, 231, 235, 1)',
                             },
                         },
                     },
@@ -161,12 +182,34 @@
                 options: {
                     scales: {
                         x: {
-                            ticks: { autoSkip: true, maxTicksLimit: 10 },
+                            ticks: { 
+                                autoSkip: true, 
+                                maxTicksLimit: 10,
+                                color: 'rgba(229, 231, 235, 1)',
+                            },
                             type: 'time',
-                            time: { unit: 'day' }
+                            time: { unit: 'day' },
+                            grid: {
+                                color: 'rgba(75, 85, 99, 0.3)',
+                            },
                         },
-                        y: { beginAtZero: true }
-                    }
+                        y: { 
+                            beginAtZero: true,
+                            ticks: {
+                                color: 'rgba(229, 231, 235, 1)',
+                            },
+                            grid: {
+                                color: 'rgba(75, 85, 99, 0.3)',
+                            },
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'rgba(229, 231, 235, 1)',
+                            },
+                        },
+                    },
                 }
             });
         });
@@ -191,13 +234,36 @@
                 },
                 options: {
                     scales: {
-                        y: { min: 0, max: 5 },
+                        y: { 
+                            min: 0, 
+                            max: 5,
+                            ticks: {
+                                color: 'rgba(229, 231, 235, 1)',
+                            },
+                            grid: {
+                                color: 'rgba(75, 85, 99, 0.3)',
+                            },
+                        },
                         x: {
-                            ticks: { autoSkip: true, maxTicksLimit: 10 },
+                            ticks: { 
+                                autoSkip: true, 
+                                maxTicksLimit: 10,
+                                color: 'rgba(229, 231, 235, 1)',
+                            },
                             type: 'time',
-                            time: { unit: 'day' }
+                            time: { unit: 'day' },
+                            grid: {
+                                color: 'rgba(75, 85, 99, 0.3)',
+                            },
                         }
-                    }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'rgba(229, 231, 235, 1)',
+                            },
+                        },
+                    },
                 }
             });
         });
@@ -219,9 +285,36 @@
                 },
                 options: {
                     scales: {
-                        x: { title: { display: true, text: 'Rating Stars' } },
-                        y: { beginAtZero: true }
-                    }
+                        x: { 
+                            title: { 
+                                display: true, 
+                                text: 'Rating Stars',
+                                color: 'rgba(229, 231, 235, 1)',
+                            },
+                            ticks: {
+                                color: 'rgba(229, 231, 235, 1)',
+                            },
+                            grid: {
+                                color: 'rgba(75, 85, 99, 0.3)',
+                            },
+                        },
+                        y: { 
+                            beginAtZero: true,
+                            ticks: {
+                                color: 'rgba(229, 231, 235, 1)',
+                            },
+                            grid: {
+                                color: 'rgba(75, 85, 99, 0.3)',
+                            },
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'rgba(229, 231, 235, 1)',
+                            },
+                        },
+                    },
                 }
             });
         });
@@ -248,7 +341,12 @@
                 },
                 options: {
                     plugins: {
-                        legend: { position: 'right' }
+                        legend: { 
+                            position: 'right',
+                            labels: {
+                                color: 'rgba(229, 231, 235, 1)',
+                            },
+                        }
                     }
                 }
             });
@@ -282,6 +380,9 @@
                     plugins: {
                         legend: {
                             position: 'bottom',
+                            labels: {
+                                color: 'rgba(229, 231, 235, 1)',
+                            },
                         },
                         tooltip: {
                             callbacks: {
@@ -297,7 +398,8 @@
                     },
                     title: {
                         display: true,
-                        text: 'Response Rate'
+                        text: 'Response Rate',
+                        color: 'rgba(229, 231, 235, 1)',
                     },
                     maintainAspectRatio: false,
                 }
@@ -314,15 +416,15 @@
             const container = document.getElementById('reviewsContainer');
             data.reviews.forEach(review => {
                 const reviewDiv = document.createElement('div');
-                reviewDiv.classList.add('p-4', 'bg-gray-50', 'rounded-lg', 'shadow', 'hover:shadow-md', 'transition-shadow', 'duration-300');
+                reviewDiv.classList.add('p-4', 'bg-gray-700', 'rounded-lg', 'shadow', 'hover:shadow-md', 'transition-shadow', 'duration-300');
 
                 const ratingStars = '★'.repeat(parseInt(review.RatingStars)) + '☆'.repeat(5 - parseInt(review.RatingStars));
 
                 reviewDiv.innerHTML = `
-                    <p class="font-semibold text-gray-700">${review.Username}</p>
-                    <p class="text-yellow-500">${ratingStars}</p>
-                    <p class="text-gray-600 mt-2">${review.RatingMessage}</p>
-                    <p class="text-sm text-gray-500 mt-2">${new Date(review.Timestamp).toLocaleDateString()}</p>
+                    <p class="font-semibold text-gray-200">${review.Username}</p>
+                    <p class="text-yellow-400">${ratingStars}</p>
+                    <p class="text-gray-300 mt-2">${review.RatingMessage}</p>
+                    <p class="text-sm text-gray-400 mt-2">${new Date(review.Timestamp).toLocaleDateString()}</p>
                 `;
                 container.appendChild(reviewDiv);
             });
@@ -397,18 +499,35 @@
                             title: {
                                 display: true,
                                 text: 'Values',
+                                color: 'rgba(229, 231, 235, 1)',
+                            },
+                            ticks: {
+                                color: 'rgba(229, 231, 235, 1)',
+                            },
+                            grid: {
+                                color: 'rgba(75, 85, 99, 0.3)',
                             },
                         },
                         x: {
                             title: {
                                 display: true,
                                 text: 'Metrics',
+                                color: 'rgba(229, 231, 235, 1)',
+                            },
+                            ticks: {
+                                color: 'rgba(229, 231, 235, 1)',
+                            },
+                            grid: {
+                                color: 'rgba(75, 85, 99, 0.3)',
                             },
                         },
                     },
                     plugins: {
                         legend: {
                             position: 'top',
+                            labels: {
+                                color: 'rgba(229, 231, 235, 1)',
+                            },
                         },
                     },
                 },

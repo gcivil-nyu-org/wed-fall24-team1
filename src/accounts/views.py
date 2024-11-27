@@ -132,7 +132,7 @@ def profile_view(request):
         user_posts = Post.objects.filter(author=user).order_by("-created_at")
 
         # Get active tab
-        active_tab = "bookmarks"
+        active_tab = "posts"
 
         if request.method == "POST":
             form = ServiceSeekerForm(request.POST, instance=service_seeker)

@@ -1,32 +1,25 @@
 <!-- partials/_pagination.html -->
 <div class="mt-6 mb-4 flex justify-center flex-wrap space-x-2">
     {% if page_obj.has_previous %}
-
-
-    
          <a href="?page=1&{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}" 
-           class="px-4 py-2 bg-blue-400 text-white rounded-md hover:bg-blue-500 mb-2"> <<  </a> 
+           class="px-4 py-2 bg-gray-700 text-gray-200 rounded-md hover:bg-gray-600 mb-2"> <<  </a> 
            <a href="?page={{ page_obj.previous_page_number }}&{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}" 
-           class="px-4 py-2 bg-blue-400 text-white rounded-md hover:bg-blue-500 mb-2"> < </a>
-    
-     
+           class="px-4 py-2 bg-gray-700 text-gray-200 rounded-md hover:bg-gray-600 mb-2"> < </a>
     {% endif %}
 
     {% for num in page_obj.paginator.page_range %}
         {% if num == page_obj.number %}
-            <span class="px-4 py-2 bg-blue-500 text-white rounded-md mb-2">{{ num }}</span>
+            <span class="px-4 py-2 bg-blue-600 text-gray-200 rounded-md mb-2">{{ num }}</span>
         {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
             <a href="?page={{ num }}&{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}" 
-               class="px-4 py-2 bg-blue-400 text-white rounded-md hover:bg-blue-500 mb-2">{{ num }}</a>
+               class="px-4 py-2 bg-gray-700 text-gray-200 rounded-md hover:bg-gray-600 mb-2">{{ num }}</a>
         {% endif %}
     {% endfor %}
 
-  
     {% if page_obj.has_next %}
     <a href="?page={{ page_obj.next_page_number }}&{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}" 
-    class="px-4 py-2 bg-blue-400 text-white rounded-md hover:bg-blue-500 mb-2"> > </a>
+    class="px-4 py-2 bg-gray-700 text-gray-200 rounded-md hover:bg-gray-600 mb-2"> > </a>
         <a href="?page={{ page_obj.paginator.num_pages }}&{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}" 
-           class="px-4 py-2 bg-blue-400 text-white rounded-md hover:bg-blue-500 mb-2">>></a>
-    
+           class="px-4 py-2 bg-gray-700 text-gray-200 rounded-md hover:bg-gray-600 mb-2">>></a>
     {% endif %}
 </div>

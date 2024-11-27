@@ -3,23 +3,23 @@
 {% block title %}Create New Post{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8">
+<div class="container mx-auto px-4 py-8 bg-transparent">
     <div class="max-w-2xl mx-auto">
-        <h1 class="text-3xl font-bold text-gray-800 mb-6 mt-16">
+        <h1 class="text-3xl font-bold text-gray-100 mb-6 mt-16">
             Create New Post in
-            <span class="text-blue-600 italic">{{ category.name }}</span>
+            <span class="text-blue-400 italic">{{ category.name }}</span>
         </h1>
 
-        <form method="post" class="bg-white rounded-lg shadow-md p-6">
+        <form method="post" class="bg-gray-800 rounded-lg shadow-md p-6 border border-gray-700">
             {% csrf_token %}
             {% for field in form %}
             <div class="mb-4">
-                <label for="{{ field.id_for_label }}" class="block text-gray-700 mb-2">
+                <label for="{{ field.id_for_label }}" class="block text-gray-300 mb-2">
                     {{ field.label }}
                 </label>
                 {{ field }}
                 {% if field.errors %}
-                <div class="text-red-500 text-sm mt-1">
+                <div class="text-red-400 text-sm mt-1">
                     {{ field.errors }}
                 </div>
                 {% endif %}
@@ -28,11 +28,11 @@
 
             <div class="flex justify-end space-x-4">
                 <a href="{% url 'forum:category_detail' category.id %}"
-                   class="bg-gray-300 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-400 transition-colors duration-300">
+                   class="bg-red-600 text-white px-6 py-2 rounded-md hover:bg-red-700 transition-colors duration-300">
                     Cancel
                 </a>
                 <button type="submit"
-                        class="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition-colors duration-300">
+                        class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors duration-300">
                     Create Post
                 </button>
             </div>
