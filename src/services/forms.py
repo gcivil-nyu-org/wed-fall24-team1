@@ -1,6 +1,7 @@
 # services/forms.py
 from decimal import Decimal
 
+from better_profanity import profanity
 from django import forms
 from django.forms import formset_factory
 from geopy import Nominatim
@@ -21,6 +22,14 @@ class ServiceForm(forms.Form):
     category = forms.ChoiceField(choices=CATEGORY_CHOICES)
     is_active = forms.BooleanField(
         required=False, initial=True, label="Is the service currently available?"
+    )
+    announcement = forms.CharField(  # Add this field
+        widget=forms.Textarea(
+            attrs={"rows": 3, "placeholder": "Enter your announcement here"}
+        ),
+        required=False,
+        max_length=500,
+        help_text="Use this space to inform users about temporary changes or important updates.",
     )
 
     def clean(self):
@@ -53,6 +62,11 @@ class ServiceForm(forms.Form):
             "Restroom": "RESTROOM",
         }
         cleaned_data["category"] = category_translation[cleaned_data["category"]]
+        if "announcement" in cleaned_data:
+            announcement = cleaned_data["announcement"]
+            if announcement:
+                profanity.load_censor_words()
+                cleaned_data["announcement"] = profanity.censor(announcement)
 
         return cleaned_data
 

@@ -179,6 +179,7 @@ def home_view(request):
             "Description": convert_decimals(item.get("Description", {})),
             "IsBookmarked": item.get("Id") in user_bookmarks,
             "IsActive": item.get("IsActive", True),
+            "Announcement": item.get("Announcement", ""),
         }
         for item in page_obj
     ]

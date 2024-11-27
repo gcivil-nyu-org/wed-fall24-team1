@@ -784,6 +784,7 @@ class ServiceAnalyticsViewsTest(TestCase):
             "description": self.sample_service.description,
             "is_active": self.sample_service.is_active,
             "reviews": [],  # Assuming no reviews are mocked
+            "announcement": "",
         }
         self.assertJSONEqual(response.content, expected_data)
         mock_get_service.assert_called_once_with(self.sample_service_id)
