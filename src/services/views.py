@@ -171,6 +171,7 @@ def service_edit(request, service_id):
                 or service.category != service_data["category"]
                 or service.description != new_description_data
             )
+            fields_changed = service_repo.check_pending_update_exists(service_id)
 
             # Check if `is_active` was toggled
             is_active_toggled = service.is_active != new_is_active
@@ -186,6 +187,7 @@ def service_edit(request, service_id):
             else:
                 # Default to pending approval if any other field changes
                 new_service_status = ServiceStatus.PENDING_APPROVAL.value
+                service_repo.update_service_status(service.id, new_service_status)
 
             # Prepare updated service DTO
             updated_service = ServiceDTO(
@@ -204,7 +206,11 @@ def service_edit(request, service_id):
                 is_active=new_is_active,
             )
 
-            if service_repo.update_service(updated_service):
+            # if service_repo.update_service(updated_service):
+            #     return redirect("services:list")
+
+            pending_update_data = updated_service.to_dynamodb_item()
+            if service_repo.save_pending_update(service_id, pending_update_data):
                 return redirect("services:list")
 
         else:

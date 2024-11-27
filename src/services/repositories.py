@@ -83,6 +83,33 @@ class ServiceRepository:
             print(e.response["Error"]["Message"])
             return None
 
+    # Repository layer to save the "pending_update"
+    def save_pending_update(self, service_id: str, pending_update_data: dict) -> bool:
+        try:
+            # Update the DynamoDB item to add a "pending_update" attribute
+            response = self.table.update_item(
+                Key={"Id": service_id},
+                UpdateExpression="SET pending_update = :pending_update",
+                ExpressionAttributeValues={":pending_update": pending_update_data},
+            )
+            return response["ResponseMetadata"]["HTTPStatusCode"] == 200
+        except ClientError as e:
+            print(e.response["Error"]["Message"])
+            return False
+
+        # Check if `pending_update` exists for the given service ID
+
+    def check_pending_update_exists(self, service_id: str) -> bool:
+        try:
+            response = self.table.get_item(
+                Key={"Id": service_id}, ProjectionExpression="pending_update"
+            )
+            # Check if "pending_update" exists in the item
+            return "Item" in response and "pending_update" in response["Item"]
+        except ClientError as e:
+            print(e.response["Error"]["Message"])
+            return False
+
     def delete_service(self, service_id: str) -> bool:
         try:
             self.table.delete_item(Key={"Id": service_id})
@@ -102,6 +129,33 @@ class ServiceRepository:
                 ConditionExpression="attribute_exists(Id)",  # Ensure item exists
                 ReturnValues="UPDATED_NEW",
             )
+
+            if new_status == "APPROVED":
+                response = self.table.update_item(
+                    Key={"Id": service_id_str},
+                    UpdateExpression="""
+                        SET #name = pending_update.#name,
+                            Address = pending_update.Address,
+                            Lat = pending_update.Lat,
+                            #log = pending_update.#log,
+                            Description = pending_update.Description,
+                            Category = pending_update.Category,
+                            IsActive = pending_update.IsActive
+                        REMOVE pending_update
+                    """,
+                    ExpressionAttributeNames={
+                        "#name": "Name",  # Map #name to Name to avoid using reserved keyword
+                        "#log": "Log",  # Map #name to Name to avoid using reserved keyword
+                    },
+                    ConditionExpression="attribute_exists(pending_update)",
+                )
+            else:
+                response = self.table.update_item(
+                    Key={"Id": service_id},
+                    UpdateExpression="REMOVE pending_update",
+                    ConditionExpression="attribute_exists(pending_update)",
+                )
+
             print("response: " + response)
 
             # Logging successful update
