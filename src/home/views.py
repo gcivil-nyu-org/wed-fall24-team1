@@ -154,10 +154,8 @@ def home_view(request):
     processed_items = HomeRepository.process_items(items)
 
     # Sort the items before pagination
-    if sort_by == "distance":
-        processed_items.sort(key=lambda x: float(x.get("Distance", float("inf"))))
-    elif sort_by == "rating":
 
+    if sort_by == "rating":
         def rating_sort_key(x):
             rating = x.get("Ratings")
             try:
@@ -166,6 +164,8 @@ def home_view(request):
                 return (1, 0)
 
         processed_items.sort(key=rating_sort_key)
+    else:
+        processed_items.sort(key=lambda x: float(x.get("Distance", float("inf"))))
 
     # Paginate the results, showing 10 items per page
     paginator = Paginator(processed_items, 10)
@@ -202,7 +202,7 @@ def home_view(request):
         }
         for item in page_obj
     ]
-
+    
     # Render the home page with context data
     return render(
         request,

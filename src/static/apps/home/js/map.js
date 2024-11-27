@@ -47,8 +47,10 @@ itemsData.forEach(item => {
 // Initialize the map when the document is ready
 document.addEventListener('DOMContentLoaded', function() {
     // Set default coordinates (e.g., New York City)
-    const defaultLat = 40.7128;
-    const defaultLng = -74.0060;
+    window.userLat = sessionStorage.getItem('userLat');
+    window.userLng = sessionStorage.getItem('userLng');
+    const defaultLat = window.userLat?? 40.7128;
+    const defaultLng = window.userLng?? -74.0060;
 
     // Initialize the map
     map = L.map('map').setView([defaultLat, defaultLng], 12);
@@ -66,8 +68,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Check if user location is stored in localStorage
-    window.userLat = sessionStorage.getItem('userLat');
-    window.userLng = sessionStorage.getItem('userLng');
+
     const savedAddress = sessionStorage.getItem('userAddress'); // Fetch saved address
 
     if (window.userLat && window.userLng) {
