@@ -83,6 +83,7 @@ class HomeRepository:
     @staticmethod
     def process_items(items):
         processed_items = []
+        print(items)
         for item in items:
             address = item.get("Address", "N/A")
             map_link = (
@@ -93,6 +94,7 @@ class HomeRepository:
             }
             processed_item["Description"] = item.get("Description", {})
             processed_item["MapLink"] = map_link
+            processed_item["Announcement"] = item.get("Announcement", "")
             processed_items.append(processed_item)
         return processed_items
 
@@ -233,6 +235,17 @@ class HomeRepository:
         except ClientError as e:
             print(f"Failed to get user bookmarks: {e.response['Error']['Message']}")
             raise e
+
+    def get_bookmarks_for_service(self, service_id):
+        """Get all bookmarks for a specific service."""
+        try:
+            response = self.bookmarks_table.scan(
+                FilterExpression=Attr("ServiceId").eq(service_id)
+            )
+            return response.get("Items", [])
+        except ClientError as e:
+            print(f"Failed to get bookmarks for service: {e.response['Error']['Message']}")
+            return []
 
     def fetch_reviews_by_user(self, user_id):
         try:

@@ -185,7 +185,17 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error(`Service with ID ${serviceId} not found.`);
             return;
         }
+        document.getElementById('serviceName').textContent = service.Name || 'No Name';
 
+        // Handle announcement display
+        const announcementDiv = document.getElementById('serviceAnnouncement');
+        const announcementText = announcementDiv.querySelector('p');
+        if (service.Announcement && service.Announcement.trim()) {
+            announcementText.textContent = service.Announcement;
+            announcementDiv.classList.remove('hidden');
+        } else {
+            announcementDiv.classList.add('hidden');
+        }
         document.getElementById('serviceName').textContent = service.Name || 'No Name';
         document.getElementById('serviceAddress').textContent = service.Address || 'N/A';
         document.getElementById('serviceType').textContent = service.Category || 'Unknown';

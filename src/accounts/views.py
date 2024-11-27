@@ -110,6 +110,7 @@ def profile_view(request):
                 "MapLink": f"https://www.google.com/maps/dir/?api=1&destination={quote(item.get('Address'))}",
                 "Description": convert_decimals(item.get("Description", {})),
                 "IsBookmarked": True,
+                "Announcement": item.get("Announcement", "")
             }
             for item in bookmarks
         ]

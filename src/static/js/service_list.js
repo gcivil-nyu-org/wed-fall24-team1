@@ -28,6 +28,17 @@ document.addEventListener('DOMContentLoaded', function () {
                     <p><strong>Category:</strong> ${data.category}</p>
                     <p><strong>Address:</strong> ${data.address}</p>
                     ${data.is_active ? '' : '<p class="text-red-500">This service is currently unavailable.</p>'}
+                    ${data.announcement ? `
+                      <div class="mb-3 flex items-center space-x-2 text-yellow-700 bg-yellow-50 border-l-2 border-yellow-400 px-3 py-2 rounded-lg">
+                        <svg class="h-4 w-4 flex-shrink-0 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
+                        </svg>
+                        <p class="text-sm">
+                          ${data.announcement}
+                        </p>
+                      </div>
+                    ` : ''}
                     <div class="mt-4">
                         <h4 class="font-semibold">Description:</h4>
                         <dl class="mt-2 space-y-1">

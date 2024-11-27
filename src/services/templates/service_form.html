@@ -2,193 +2,211 @@
 {% load static %}
 
 {% block content %}
-    <div class="min-h-screen py-12">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="max-w-3xl mx-auto">
-                <!-- Header -->
-                <div class="mb-8">
-                    <h1 class="text-3xl font-bold text-gray-900 leading-tight">
-                        {{ action }} Service
-                    </h1>
-                    <p class="mt-2 text-sm text-gray-600">
-                        Fill in the details below to {{ action|lower }} your service.
-                    </p>
-                </div>
-                
-                <!-- Main Form -->
-                <form method="post" class="bg-white shadow-lg rounded-xl overflow-hidden">
-                    {% csrf_token %}
-
-                    <!-- Main Fields Section -->
-                    <div class="p-8 space-y-6">
-                        {% for field in form %}
-                            <div class="space-y-1">
-                                <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">
-                                    {{ field.label }}
-                                </label>
-                                {% if field.name == 'category' %}
-                                    <select name="{{ field.name }}"
-                                            id="{{ field.id_for_label }}"
-                                            class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
-                                        {% for value, label in field.field.choices %}
-                                            <option value="{{ value }}"
-                                                    {% if field.value == value %}selected{% endif %}>
-                                                {{ label }}
-                                            </option>
-                                        {% endfor %}
-                                    </select>
-                                {% elif field.name == 'is_active' %}
-                                    <!-- New is_active field -->
-                                    <div class="flex items-center">
-                                        <input type="checkbox"
-                                               name="{{ field.name }}"
-                                               id="{{ field.id_for_label }}"
-                                               {% if field.value %}checked{% endif %}
-                                               class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                                        <label for="{{ field.id_for_label }}" class="ml-2 block text-sm text-gray-700">
-                                            {{ field.help_text|default:"Mark as available" }}
-                                        </label>
-                                    </div>
-                                {% else %}
-                                    <input type="{{ field.field.widget.input_type }}"
-                                           name="{{ field.name }}"
-                                           id="{{ field.id_for_label }}"
-                                           value="{{ field.value|default:'' }}"
-                                           class="mt-1 block w-full px-3 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm"
-                                           {% if field.field.required %}required{% endif %}>
-                                {% endif %}
-                                {% if field.errors %}
-                                    <p class="mt-1 text-sm text-red-600">
-                                        {{ field.errors }}
-                                    </p>
-                                {% endif %}
-                            </div>
-                        {% endfor %}
-
-                        <!-- Description Section -->
-                        <div class="pt-6">
-                            <h2 class="text-xl font-semibold text-gray-900 mb-4">Description Items</h2>
-                            {{ description_formset.management_form }}
-                            <div id="description-formset" class="space-y-4">
-                                {% for form in description_formset %}
-                                    <div class="description-form p-4 bg-gray-50 rounded-lg border border-gray-200 relative">
-                                        {% if form.instance.pk %}
-                                            <input type="hidden" name="{{ form.prefix }}-id"
-                                                   value="{{ form.instance.pk }}">
-                                        {% endif %}
-
-                                        <!-- Hidden DELETE field -->
-                                        <input type="checkbox" name="{{ form.prefix }}-DELETE"
-                                               id="{{ form.prefix }}-DELETE" style="display: none;">
-
-                                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                            <div>
-                                                <label for="{{ form.key.id_for_label }}"
-                                                       class="block text-sm font-medium text-gray-700">
-                                                    Key
-                                                </label>
-                                                {{ form.key }}
-                                                {% if form.key.errors %}
-                                                    <p class="mt-1 text-sm text-red-600">
-                                                        {{ form.key.errors }}
-                                                    </p>
-                                                {% endif %}
-                                            </div>
-                                            <div>
-                                                <label for="{{ form.value.id_for_label }}"
-                                                       class="block text-sm font-medium text-gray-700">
-                                                    Value
-                                                </label>
-                                                {{ form.value }}
-                                                {% if form.value.errors %}
-                                                    <p class="mt-1 text-sm text-red-600">
-                                                        {{ form.value.errors }}
-                                                    </p>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                        <div class="mt-3">
-                                            <button type="button"
-                                                    class="delete-description inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-red-500 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-                                                <!-- Delete Icon -->
-                                                <svg class="mr-1.5 -ml-1 h-4 w-4" fill="none" stroke="currentColor"
-                                                     viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                          stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                                </svg>
-                                                Delete
-                                            </button>
-                                        </div>
-                                        {% if form.non_field_errors %}
-                                            <div class="mt-2 text-sm text-red-600">
-                                                {{ form.non_field_errors }}
-                                            </div>
-                                        {% endif %}
-                                    </div>
-                                {% endfor %}
-                            </div>
-                            <!-- Hidden empty form template -->
-                            <div id="empty-form-template" style="display:none;">
-                                <div class="description-form p-4 bg-gray-50 rounded-lg border border-gray-200 relative">
-                                    <input type="checkbox" name="{{ description_formset.empty_form.prefix }}-DELETE"
-                                           id="{{ description_formset.empty_form.prefix }}-DELETE"
-                                           style="display: none;">
-                                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                        <div>
-                                            <label for="{{ description_formset.empty_form.key.id_for_label }}"
-                                                   class="block text-sm font-medium text-gray-700">Key</label>
-                                            {{ description_formset.empty_form.key }}
-                                        </div>
-                                        <div>
-                                            <label for="{{ description_formset.empty_form.value.id_for_label }}"
-                                                   class="block text-sm font-medium text-gray-700">Value</label>
-                                            {{ description_formset.empty_form.value }}
-                                        </div>
-                                    </div>
-                                    <div class="mt-3">
-                                        <button type="button"
-                                                class="delete-description inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-red-500 hover:bg-red-600">
-                                            <svg class="mr-1.5 -ml-1 h-4 w-4" fill="none" stroke="currentColor"
-                                                 viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                      d="M6 18L18 6M6 6l12 12"></path>
-                                            </svg>
-                                            Delete
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <button type="button"
-                                    id="add-description"
-                                    class="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                <!-- Add Icon -->
-                                <svg class="mr-2 -ml-1 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                          d="M12 4v16m8-8H4"/>
-                                </svg>
-                                Add Description Item
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Form Actions -->
-                    <div class="px-8 py-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3">
-                        <a href="{% url 'services:list' %}"
-                           class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                            Cancel
-                        </a>
-                        <button type="submit"
-                                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                            {{ action }} Service
-                        </button>
-                    </div>
-                </form>
-            </div>
+  <div class="min-h-screen py-12">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl mx-auto">
+        <!-- Header -->
+        <div class="mb-8">
+          <h1 class="text-3xl font-bold text-gray-900 leading-tight">
+            {{ action }} Service
+          </h1>
+          <p class="mt-2 text-sm text-gray-600">
+            Fill in the details below to {{ action|lower }} your service.
+          </p>
         </div>
-    </div>
 
-    {% block scripts %}
-        <script src="{% static 'js/service_form.js' %}"></script>
-    {% endblock %}
+        <!-- Main Form -->
+        <form method="post" class="bg-white shadow-lg rounded-xl overflow-hidden">
+          {% csrf_token %}
+
+          <!-- Main Fields Section -->
+          <div class="p-8 space-y-6">
+            {% for field in form %}
+              <div class="space-y-1">
+                <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                  {{ field.label }}
+                </label>
+                {% if field.name == 'category' %}
+                  <select name="{{ field.name }}"
+                          id="{{ field.id_for_label }}"
+                          class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                    {% for value, label in field.field.choices %}
+                      <option value="{{ value }}"
+                              {% if field.value == value %}selected{% endif %}>
+                        {{ label }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                {% elif field.name == 'is_active' %}
+                  <!-- New is_active field -->
+                  <div class="flex items-center">
+                    <input type="checkbox"
+                           name="{{ field.name }}"
+                           id="{{ field.id_for_label }}"
+                           {% if field.value %}checked{% endif %}
+                           class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                    <label for="{{ field.id_for_label }}" class="ml-2 block text-sm text-gray-700">
+                      {{ field.help_text|default:"Mark as available" }}
+                    </label>
+                  </div>
+                {% elif field.name == 'announcement' %}
+                  <label for="announcement"></label>
+                  <textarea
+                          name="announcement"
+                          id="announcement"
+                          rows="3"
+                          class="mt-1 block w-full px-3 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm"
+                          placeholder="Add an important update about your service"
+                  >{{ service.announcement|default:'' }}</textarea>
+                  <p class="mt-2 text-sm text-gray-500 flex items-center">
+                    <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Use this space to inform users about temporary changes or important updates.
+                  </p>
+                {% else %}
+                  <input type="{{ field.field.widget.input_type }}"
+                         name="{{ field.name }}"
+                         id="{{ field.id_for_label }}"
+                         value="{{ field.value|default:'' }}"
+                         class="mt-1 block w-full px-3 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm"
+                         {% if field.field.required %}required{% endif %}>
+                {% endif %}
+                {% if field.errors %}
+                  <p class="mt-1 text-sm text-red-600">
+                    {{ field.errors }}
+                  </p>
+                {% endif %}
+              </div>
+            {% endfor %}
+
+            <!-- Description Section -->
+            <div class="pt-6">
+              <h2 class="text-xl font-semibold text-gray-900 mb-4">Description Items</h2>
+              {{ description_formset.management_form }}
+              <div id="description-formset" class="space-y-4">
+                {% for form in description_formset %}
+                  <div class="description-form p-4 bg-gray-50 rounded-lg border border-gray-200 relative">
+                    {% if form.instance.pk %}
+                      <input type="hidden" name="{{ form.prefix }}-id"
+                             value="{{ form.instance.pk }}">
+                    {% endif %}
+
+                    <!-- Hidden DELETE field -->
+                    <input type="checkbox" name="{{ form.prefix }}-DELETE"
+                           id="{{ form.prefix }}-DELETE" style="display: none;">
+
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <div>
+                        <label for="{{ form.key.id_for_label }}"
+                               class="block text-sm font-medium text-gray-700">
+                          Key
+                        </label>
+                        {{ form.key }}
+                        {% if form.key.errors %}
+                          <p class="mt-1 text-sm text-red-600">
+                            {{ form.key.errors }}
+                          </p>
+                        {% endif %}
+                      </div>
+                      <div>
+                        <label for="{{ form.value.id_for_label }}"
+                               class="block text-sm font-medium text-gray-700">
+                          Value
+                        </label>
+                        {{ form.value }}
+                        {% if form.value.errors %}
+                          <p class="mt-1 text-sm text-red-600">
+                            {{ form.value.errors }}
+                          </p>
+                        {% endif %}
+                      </div>
+                    </div>
+                    <div class="mt-3">
+                      <button type="button"
+                              class="delete-description inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-red-500 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                        <!-- Delete Icon -->
+                        <svg class="mr-1.5 -ml-1 h-4 w-4" fill="none" stroke="currentColor"
+                             viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round"
+                                stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                        Delete
+                      </button>
+                    </div>
+                    {% if form.non_field_errors %}
+                      <div class="mt-2 text-sm text-red-600">
+                        {{ form.non_field_errors }}
+                      </div>
+                    {% endif %}
+                  </div>
+                {% endfor %}
+              </div>
+              <!-- Hidden empty form template -->
+              <div id="empty-form-template" style="display:none;">
+                <div class="description-form p-4 bg-gray-50 rounded-lg border border-gray-200 relative">
+                  <input type="checkbox" name="{{ description_formset.empty_form.prefix }}-DELETE"
+                         id="{{ description_formset.empty_form.prefix }}-DELETE"
+                         style="display: none;">
+                  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                      <label for="{{ description_formset.empty_form.key.id_for_label }}"
+                             class="block text-sm font-medium text-gray-700">Key</label>
+                      {{ description_formset.empty_form.key }}
+                    </div>
+                    <div>
+                      <label for="{{ description_formset.empty_form.value.id_for_label }}"
+                             class="block text-sm font-medium text-gray-700">Value</label>
+                      {{ description_formset.empty_form.value }}
+                    </div>
+                  </div>
+                  <div class="mt-3">
+                    <button type="button"
+                            class="delete-description inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-red-500 hover:bg-red-600">
+                      <svg class="mr-1.5 -ml-1 h-4 w-4" fill="none" stroke="currentColor"
+                           viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M6 18L18 6M6 6l12 12"></path>
+                      </svg>
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <button type="button"
+                      id="add-description"
+                      class="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                <!-- Add Icon -->
+                <svg class="mr-2 -ml-1 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 4v16m8-8H4"/>
+                </svg>
+                Add Description Item
+              </button>
+            </div>
+          </div>
+
+          <!-- Move this inside the p-8 space-y-6 div, after the main fields and before description section -->
+
+          <!-- Form Actions -->
+          <div class="px-8 py-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3">
+            <a href="{% url 'services:list' %}"
+               class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+              Cancel
+            </a>
+            <button type="submit"
+                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+              {{ action }} Service
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  {% block scripts %}
+    <script src="{% static 'js/service_form.js' %}"></script>
+  {% endblock %}
 
 {% endblock %}

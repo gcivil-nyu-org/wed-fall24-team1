@@ -30,7 +30,7 @@ class ServiceRepository:
             log.error(f"Error creating service: {e.responseText['Error']['Message']}")
             return None
 
-    def get_services_by_provider(self, provider_id: str) -> list[ServiceDTO]:
+    def get_services_by_provider(self, provider_id: int) -> list[ServiceDTO]:
         try:
             response = self.table.scan(
                 FilterExpression="ProviderId = :pid",
@@ -124,7 +124,6 @@ class ServiceRepository:
                 f"Unexpected error updating service status for ID {service_id}, exception: {e}"
             )
             return False
-
 
 class ReviewRepository:
     def __init__(self):

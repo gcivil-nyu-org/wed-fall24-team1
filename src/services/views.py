@@ -89,6 +89,7 @@ def service_create(request):
                 service_created_timestamp=datetime.now(timezone.utc).isoformat(),
                 service_approved_timestamp="1900-01-01T00:00:00Z",
                 is_active=is_active,
+                announcement=service_data.get("announcement")
             )
             if service_repo.create_service(service_dto):
                 return redirect("services:list")
@@ -112,20 +113,9 @@ def service_create(request):
         {"form": form, "description_formset": description_formset, "action": "Create"},
     )
 
-
 @login_required
 def service_edit(request, service_id):
-    try:
-        _ = uuid.UUID(service_id)
-    except ValueError:
-        raise Http404("Invalid service_id")
-
-    if request.user.user_type != "service_provider":
-        raise PermissionDenied
-
-    service = service_repo.get_service(service_id)
-    if not service or service.provider_id != str(request.user.id):
-        raise PermissionDenied
+    service = verify_service(request, service_id)
 
     # Reverse translation for category
     category_reverse_translation = {
@@ -175,6 +165,9 @@ def service_edit(request, service_id):
             # Check if `is_active` was toggled
             is_active_toggled = service.is_active != new_is_active
 
+            new_announcement = service_data.get("announcement", "")
+            announcement_changed = service.announcement != new_announcement
+
             # Decide the `service_status` based on changes
             if not fields_changed and is_active_toggled:
                 # Retain the approved status if previously approved
@@ -183,9 +176,11 @@ def service_edit(request, service_id):
                     if service.service_status == ServiceStatus.APPROVED.value
                     else ServiceStatus.PENDING_APPROVAL.value
                 )
+            elif fields_changed:
+                new_service_status = ServiceStatus.PENDING_APPROVAL.value
             else:
                 # Default to pending approval if any other field changes
-                new_service_status = ServiceStatus.PENDING_APPROVAL.value
+                new_service_status = service.service_status
 
             # Prepare updated service DTO
             updated_service = ServiceDTO(
@@ -202,7 +197,27 @@ def service_edit(request, service_id):
                 service_created_timestamp=service.service_created_timestamp,
                 service_approved_timestamp=service.service_approved_timestamp,
                 is_active=new_is_active,
+                announcement=service_data.get("announcement"),
             )
+
+            if announcement_changed and new_announcement.strip():
+                # Get all bookmarks for this service
+                bookmarks = home_repo.get_bookmarks_for_service(service_id)
+
+                # Create notifications for each user who bookmarked the service
+                for bookmark in bookmarks:
+                    try:
+                        user = CustomUser.objects.get(id=bookmark['UserId'])
+                        Notification.objects.create(
+                            recipient=user,
+                            sender=request.user,
+                            post=None,
+                            comment=None,
+                            message=f"New announcement from {service.name}: {new_announcement[:50]}{'...' if len(new_announcement) > 50 else ''}",
+                            notification_type="announcement"
+                        )
+                    except CustomUser.DoesNotExist:
+                        continue
 
             if service_repo.update_service(updated_service):
                 return redirect("services:list")
@@ -227,6 +242,7 @@ def service_edit(request, service_id):
                 service.category, service.category
             ),
             "is_active": service.is_active,
+            "announcement": service.announcement
         }
         form = ServiceForm(initial=initial_data)
 
@@ -253,7 +269,6 @@ def service_edit(request, service_id):
 @login_required
 def service_details(request, service_id):
     service = service_repo.get_service(service_id)
-    home_repo = HomeRepository()
     reviews = home_repo.fetch_reviews_for_service(service_id)
     data = {
         "id": service.id,
@@ -265,23 +280,14 @@ def service_details(request, service_id):
         "description": service.description,
         "is_active": service.is_active,
         "reviews": reviews,
+        "announcement": service.announcement,
     }
 
     return JsonResponse(data)
 
 
 def service_delete(request, service_id):
-    try:
-        _ = uuid.UUID(service_id)
-    except ValueError:
-        raise Http404("Invalid service ID")
-
-    if request.user.user_type != "service_provider":
-        raise PermissionDenied
-
-    service = service_repo.get_service(service_id)
-    if not service or service.provider_id != str(request.user.id):
-        raise PermissionDenied
+    _ = verify_service(request, service_id)
 
     if request.method == "POST":
         if service_repo.delete_service(service_id):
@@ -292,6 +298,18 @@ def service_delete(request, service_id):
     # If it's not a POST request, return a 405 Method Not Allowed
     return HttpResponseNotAllowed(["POST"])
 
+
+def verify_service(request, service_id):
+    try:
+        _ = uuid.UUID(service_id)
+    except ValueError:
+        raise Http404("Invalid service ID")
+    if request.user.user_type != "service_provider":
+        raise PermissionDenied
+    service = service_repo.get_service(service_id)
+    if not service or service.provider_id != str(request.user.id):
+        raise PermissionDenied
+    return service
 
 @login_required
 def review_list(request, service_id):
@@ -574,23 +592,7 @@ def review_word_cloud(request):
 
     # Simple text processing
     words = re.findall(r"\w+", text.lower())
-    stopwords = set(
-        [
-            "the",
-            "and",
-            "is",
-            "in",
-            "it",
-            "of",
-            "to",
-            "a",
-            "i",
-            "for",
-            "this",
-            "that",
-            "with",
-        ]
-    )
+    stopwords = {"the", "and", "is", "in", "it", "of", "to", "a", "i", "for", "this", "that", "with"}
     words = [word for word in words if word not in stopwords and len(word) > 2]
 
     # Count word frequencies
