@@ -217,35 +217,41 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Function to set user's location and update the marker
-function setUserLocation(lat, lon, shouldReverseGeocode = true) {
-    if (currentLocationMarker) {
-        map.removeLayer(currentLocationMarker);
+function setUserLocation(lat, lon, shouldReverseGeocode = true, iconClicked = false) {
+    if(!iconClicked) {
+        if (currentLocationMarker) {
+            map.removeLayer(currentLocationMarker);
+        }
+
+        currentLocationMarker = L.marker([lat, lon], {
+            icon: userLocationIcon,
+            zIndexOffset: 1000
+        }).addTo(map);
+        map.setView([lat, lon], 12);
+
+        // Update global variables
+        window.userLat = lat;
+        window.userLng = lon;
+
+        // Store the user's coordinates in sessionStorage
+        sessionStorage.setItem('userLat', lat);
+        sessionStorage.setItem('userLng', lon);
+
+        document.getElementById('user-lat').value = lat;
+        document.getElementById('user-lon').value = lon;
     }
-    currentLocationMarker = L.marker([lat, lon], {
-        icon: userLocationIcon,
-        zIndexOffset: 1000
-    }).addTo(map);
-    map.setView([lat, lon], 12);
-
-    // Update global variables
-    window.userLat = lat;
-    window.userLng = lon;
-
-    // Store the user's coordinates in sessionStorage
-    sessionStorage.setItem('userLat', lat);
-    sessionStorage.setItem('userLng', lon);
-
-    document.getElementById('user-lat').value = lat;
-    document.getElementById('user-lon').value = lon;
 
     // Reverse geocode to update the address in the location input field
     if (shouldReverseGeocode) {
         reverseGeocode(lat, lon);
     }
 
-    // After updating the user location, re-initialize the service markers and service list
-    initializeServiceMarkers();
-    updateServiceList();
+    if(!iconClicked) {
+        // After updating the user location, re-initialize the service markers and service list
+        initializeServiceMarkers();
+        updateServiceList();
+
+    }
 }
 
 // Function to reverse geocode coordinates to an address
@@ -315,7 +321,7 @@ function getCurrentLocation() {
                     window.userLng = lon;
 
                     // Update the map and marker
-                    setUserLocation(lat, lon, true);
+                    setUserLocation(lat, lon, true, true);
 
                     // Update hidden inputs
                     document.getElementById('user-lat').value = lat;
