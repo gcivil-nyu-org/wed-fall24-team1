@@ -1,21 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    function formatTimestamp(utcTimestamp) {
-        // Ensure we're parsing the UTC timestamp correctly
-        const date = new Date(utcTimestamp + 'Z'); // Append 'Z' to ensure UTC interpretation
-
-        const options = {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true,
-        };
-
-        return date.toLocaleString(undefined, options);
-    }
-
     const reviewFormContainer = document.getElementById('reviewFormContainer');
     const loginToReviewContainer = document.getElementById('loginToReviewContainer');
 
@@ -30,6 +14,37 @@ document.addEventListener('DOMContentLoaded', () => {
         loginButton.addEventListener('click', () => {
             window.location.href = '/accounts/login/user/';
         });
+    }
+
+    function formatTimestamp(utcTimestamp) {
+        let dateString = utcTimestamp;
+
+        // Check if the timestamp already contains timezone info (Z or ±HH:MM)
+        const hasTimezone = /([Zz]|[+\-]\d{2}:\d{2})$/.test(utcTimestamp);
+
+        if (!hasTimezone) {
+            // Append 'Z' only if no timezone info is present
+            dateString += 'Z';
+        }
+
+        const date = new Date(dateString);
+
+        // Check if the date is valid
+        if (isNaN(date)) {
+            console.error("Invalid date:", dateString);
+            return "Invalid Date";
+        }
+
+        const options = {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true,
+        };
+
+        return date.toLocaleString(undefined, options);
     }
 
     function sanitizeHTML(str) {
@@ -58,8 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             reviews.forEach(review => {
                 const reviewDiv = document.createElement('div');
-                reviewDiv.classList.add('bg-white', 'rounded-lg', 'shadow', 'p-2', 'mb-2');
-
+                reviewDiv.classList.add('bg-gray-800', 'rounded', 'shadow', 'p-4', 'mb-4');
                 const rating = parseFloat(review.RatingStars).toFixed(2);
 
                 const flexContainer = document.createElement('div');
@@ -79,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const iconContainer = document.createElement('div');
                     iconContainer.classList.add('icon-container'); // Add custom class for styling
 
-                    if(!review.ResponseText){
+                    if (!review.ResponseText) {
                         const editIcon = document.createElement('i');
                         editIcon.classList.add('fas', 'fa-edit', 'text-blue-500', 'cursor-pointer');
                         editIcon.title = "Edit Review";
@@ -108,16 +122,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const timestamp = formatTimestamp(review.Timestamp);
                 const meta = document.createElement('p');
-                meta.classList.add('text-xs', 'text-gray-500');
+                meta.classList.add('text-sm', 'text-gray-400');
                 meta.textContent = `By ${review.Username} on ${timestamp}`;
                 reviewDiv.appendChild(meta);
 
                 if (review.ResponseText) {
                     const responseDiv = document.createElement('div');
-                    responseDiv.classList.add('mt-3', 'p-3', 'bg-blue-50', 'rounded');
+                    responseDiv.classList.add('mt-2', 'p-3', 'bg-gray-700', 'border-gray-800', 'rounded');
 
                     const responseHeader = document.createElement('p');
-                    responseHeader.classList.add('font-semibold', 'text-sm', 'text-blue-600');
+                    responseHeader.classList.add('font-semibold', 'text-sm', 'text-blue-500');
                     responseHeader.textContent = "Provider Response:";
                     responseDiv.appendChild(responseHeader);
 
@@ -128,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const respondedAt = formatTimestamp(review.RespondedAt);
                     const responseMeta = document.createElement('p');
-                    responseMeta.classList.add('text-xs', 'text-gray-500');
+                    responseMeta.classList.add('text-xs', 'text-gray-400');
                     responseMeta.textContent = `Responded on ${respondedAt}`;
                     responseDiv.appendChild(responseMeta);
 
@@ -186,6 +200,15 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('serviceType').textContent = service.Category || 'Unknown';
         document.getElementById('serviceRating').textContent = service.Ratings && service.Ratings !== 0 ? parseFloat(service.Ratings).toFixed(2) : 'N/A';
         document.getElementById('serviceDistance').textContent = service.Distance ? parseFloat(service.Distance).toFixed(2) + ' miles' : 'N/A';
+
+        const announcementDiv = document.getElementById('serviceAnnouncement');
+        const announcementText = announcementDiv.querySelector('p');
+        if (service.Announcement && service.Announcement.trim()) {
+            announcementText.textContent = service.Announcement;
+            announcementDiv.classList.remove('hidden');
+        } else {
+            announcementDiv.classList.add('hidden');
+        }
 
         const serviceAvailability = document.getElementById('serviceAvailability');
         if (service.IsActive === false) {
@@ -253,6 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const heading = document.createElement('h3');
         heading.textContent = 'Additional Descriptive Details:';
         heading.style.marginBottom = '10px';
+        heading.style.marginTop = '20px';
         heading.style.fontSize = '1.1em';
         heading.style.fontWeight = 'bold';
         descriptionElement.appendChild(heading);
@@ -260,27 +284,31 @@ document.addEventListener('DOMContentLoaded', () => {
         // Check if Description exists and is an object
         if (service.Description && typeof service.Description === 'object') {
             let hasDescription = false;
-            const table = document.createElement('table');
+            const dl = document.createElement('dl');
+            dl.className = 'mt-2 space-y-1';
 
             for (const [key, value] of Object.entries(service.Description)) {
                 if (value !== null && value !== '') {
                     hasDescription = true;
-                    const tr = document.createElement('tr');
+                    const div = document.createElement('div');
+                    div.className = 'flex';
 
-                    const th = document.createElement('th');
-                    th.textContent = `${key.replace(/_/g, ' ')}:`;
+                    const dt = document.createElement('dt');
+                    dt.className = 'text-sm font-medium text-gray-400 w-1/3';
+                    dt.textContent = `${key.replace(/_/g, ' ')}:`;
 
-                    const td = document.createElement('td');
-                    td.innerHTML = value.replace(/\n/g, '<br>');
+                    const dd = document.createElement('dd');
+                    dd.className = 'text-sm text-gray-300 ml-2';
+                    dd.innerHTML = value.replace(/\n/g, '<br>');
 
-                    tr.appendChild(th);
-                    tr.appendChild(td);
-                    table.appendChild(tr);
+                    div.appendChild(dt);
+                    div.appendChild(dd);
+                    dl.appendChild(div);
                 }
             }
 
             if (hasDescription) {
-                descriptionElement.appendChild(table);
+                descriptionElement.appendChild(dl);
             } else {
                 descriptionElement.textContent = 'No description available.';
             }
@@ -321,80 +349,89 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     async function handleEditReview(review) {
-        try {
-          const newRating = prompt(
-            "Enter a new rating (1-5):",
-            review.RatingStars
-          );
+        const modal = document.getElementById('editReviewModal');
+        const editRating = document.getElementById('editRating');
+        const editMessage = document.getElementById('editMessage');
 
-          // Validate the rating input
-          const ratingRegex = /^[1-5]$/; // Only allows values from 1 to 5
+        // Set current values
+        editRating.value = review.RatingStars;
+        editMessage.value = review.RatingMessage;
 
-          if (!newRating || !ratingRegex.test(newRating)) {
-            alert("Please enter a valid rating between 1 and 5.");
-            return;
-          }
+        modal.classList.remove('hidden');
 
-          const newMessage = prompt("Enter a new message:", review.RatingMessage);
-          if (!newMessage.trim()) {
-            alert("A message is required.");
-            return;
-          }
+        const handleEdit = async () => {
+            try {
+                const response = await fetch(
+                    `/home/edit_review/${review.ReviewId}/`,
+                    {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRFToken": getCsrfToken(),
+                        },
+                        body: JSON.stringify({
+                            username: review.Username,
+                            rating: parseInt(editRating.value),
+                            message: editMessage.value.trim(),
+                        }),
+                    }
+                );
 
-          const response = await fetch(
-            `/home/edit_review/${review["ReviewId"]}/`,
-            {
-              method: "PUT",
-              headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": getCsrfToken(),
-              },
-              body: JSON.stringify({
-                username: review.Username,
-                rating: parseInt(newRating),
-                message: newMessage,
-              }),
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    fetchAndDisplayReviews(review.ServiceId, 1);
+                    modal.classList.add('hidden');
+                } else {
+                    alert(data.error || "Failed to edit review.");
+                }
+            } catch (error) {
+                console.error("Error editing review:", error);
+                alert("An error occurred. Please try again.");
             }
-          );
+        };
 
-          const data = await response.json();
+        // Event listeners
+        document.getElementById('confirmEdit').onclick = handleEdit;
+        document.getElementById('cancelEdit').onclick = () => {
+            modal.classList.add('hidden');
+        };
+    }
 
-          if (response.ok && data.success) {
-            fetchAndDisplayReviews(review.ServiceId, 1); // Refresh the reviews
-          } else {
-            alert(data.error || "Failed to edit review.");
-          }
-        } catch (error) {
-          console.error("Error editing review:", error);
-          alert("An error occurred. Please try again.");
-        }
-      }
-      function handleDeleteReview(review) {
-        if (confirm("Are you sure you want to delete this review?")) {
-          fetch(`/home/delete_review/${review["ReviewId"]}/`, {
-            method: "DELETE",
-            headers: {
-              "X-CSRFToken": getCsrfToken(),
-            },
-            body: JSON.stringify({
-              username: review.Username,
-            }),
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              if (data.success) {
-                // console.log("fetching again after delete " + review.ServiceId);
-                fetchAndDisplayReviews(review.ServiceId, 1); // Refresh the reviews
-              } else {
-                alert(data.error || "Failed to delete review.");
-              }
-            })
-            .catch((error) => {
-              console.error("Error deleting review:", error);
-              alert("An error occurred. Please try again.");
-            });
-        }
-      }
+    function handleDeleteReview(review) {
+        const modal = document.getElementById('deleteReviewModal');
+        modal.classList.remove('hidden');
+
+        const handleDelete = async () => {
+            try {
+                const response = await fetch(`/home/delete_review/${review.ReviewId}/`, {
+                    method: "DELETE",
+                    headers: {
+                        "X-CSRFToken": getCsrfToken(),
+                    },
+                    body: JSON.stringify({
+                        username: review.Username,
+                    }),
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    await fetchAndDisplayReviews(review.ServiceId, 1);
+                    modal.classList.add('hidden');
+                } else {
+                    alert(data.error || "Failed to delete review.");
+                }
+            } catch (error) {
+                console.error("Error deleting review:", error);
+                alert("An error occurred. Please try again.");
+            }
+        };
+
+        // Event listeners
+        document.getElementById('confirmDelete').onclick = handleDelete;
+        document.getElementById('cancelDelete').onclick = () => {
+            modal.classList.add('hidden');
+        };
+    }
 
     // Event listener for submitReview button
     document.getElementById('submitReview').addEventListener('click', async () => {
