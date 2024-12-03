@@ -156,6 +156,7 @@ def home_view(request):
     # Sort the items before pagination
 
     if sort_by == "rating":
+
         def rating_sort_key(x):
             rating = x.get("Ratings")
             try:
@@ -202,7 +203,7 @@ def home_view(request):
         }
         for item in page_obj
     ]
-    
+
     # Render the home page with context data
     return render(
         request,
