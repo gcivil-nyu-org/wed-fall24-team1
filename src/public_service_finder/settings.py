@@ -59,10 +59,10 @@ INSTALLED_APPS = [
     "allauth.account",
     "allauth.socialaccount",  # Ensure this is included
     "allauth.socialaccount.providers.google",  # For Google OAuth
+    "forum",
     "home",
     "services",
     "accounts",
-    "forum",
     "axes",
     "widget_tweaks",
 ]

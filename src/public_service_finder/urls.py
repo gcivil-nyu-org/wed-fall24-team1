@@ -2,11 +2,9 @@
 
 from django.contrib import admin
 from django.urls import path, include
-from .views import (
-    admin_only_view_new_listings,
-    admin_update_listing,
-    root_redirect_view,
-)  # Import the redirect view
+
+from public_service_finder.views import admin_only_view_new_listings, admin_update_listing, root_redirect_view
+
 
 urlpatterns = [
     path("admin/", admin.site.urls),

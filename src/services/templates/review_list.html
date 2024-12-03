@@ -40,6 +40,7 @@
                     {% if user.id|stringformat:"s" == service.provider_id %}
                         <div id="responseForm-{{ review.review_id }}" class="mt-2">
                             <textarea id="responseText-{{ review.review_id }}"
+                                    maxlength="1000"
                                       class="w-full p-2 border rounded bg-gray-700 text-gray-100"
                                       placeholder="Write your response..."></textarea>
                             <button onclick="sendResponse('{{ service.id }}', '{{ review.review_id }}')"

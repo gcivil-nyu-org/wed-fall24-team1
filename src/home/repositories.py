@@ -10,6 +10,8 @@ from django.conf import settings
 from botocore.exceptions import ClientError
 from geopy import distance as dist
 
+from public_service_finder.utils.enums.service_status import ServiceStatus
+
 
 class HomeRepository:
     def __init__(self):
@@ -42,14 +44,23 @@ class HomeRepository:
             filter_expression = Attr("Category").contains(category_filter)
 
         # Add ServiceStatus filter (if exists, it should be "APPROVED")
-        service_status_filter = Or(
+        service_status_filter1 = Or(
             Attr(
                 "ServiceStatus"
             ).not_exists(),  # Include items where ServiceStatus does not exist
-            Attr("ServiceStatus").eq(
+              Attr("ServiceStatus").eq(
                 "APPROVED"
-            ),  # Include items where ServiceStatus is "APPROVED"
+            )
         )
+        service_status_filter2 = Or(
+            Attr(
+                ServiceStatus.EDIT_REQUESTED.value
+            ).not_exists(),  # Include items where ServiceStatus does not exist
+              Attr("ServiceStatus").eq(
+                ServiceStatus.EDIT_REQUEST_REJECTED.value
+            )
+        )
+        service_status_filter = Or(service_status_filter1, service_status_filter2) 
 
         # Combine the existing filter expression with the new ServiceStatus filter
         if filter_expression:
@@ -79,6 +90,8 @@ class HomeRepository:
             return filtered_items
 
         return items
+    
+
 
     @staticmethod
     def process_items(items):

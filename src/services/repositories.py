@@ -7,7 +7,8 @@ from django.utils import timezone
 from boto3.dynamodb.conditions import Key
 from typing import List
 
-from .models import ServiceDTO, ReviewDTO
+from services.models import ReviewDTO, ServiceDTO
+
 
 log = logging.getLogger(__name__)
 
@@ -59,10 +60,11 @@ class ServiceRepository:
             )
             return None
 
-    def get_pending_approval_services(self) -> list[ServiceDTO]:
+    def get_pending_approval_or_editRequested_services(self) -> list[ServiceDTO]:
         try:
+            filter_expression = Attr("ServiceStatus").eq("PENDING_APPROVAL") | Attr("ServiceStatus").eq("EDIT_REQUESTED")
             response = self.table.scan(
-                FilterExpression=Attr("ServiceStatus").eq("PENDING_APPROVAL")
+                FilterExpression=filter_expression
             )
             return [
                 ServiceDTO.from_dynamodb_item(item)
@@ -73,6 +75,21 @@ class ServiceRepository:
                 f"Error fetching pending approval services: {e.response['Error']['Message']}"
             )
             return []
+
+
+
+    def save_pending_update(self, service_id: str, pending_update_data: dict) -> bool:
+        try:
+            # Update the DynamoDB item to add a "pending_update" attribute
+            response = self.table.update_item(
+                Key={"Id": service_id},
+                UpdateExpression="SET pending_update = :pending_update",
+                ExpressionAttributeValues={":pending_update": pending_update_data},
+            )
+            return response["ResponseMetadata"]["HTTPStatusCode"] == 200
+        except ClientError as e:
+            print(e.response["Error"]["Message"])
+            return False
 
     def update_service(self, service_dto: ServiceDTO) -> ServiceDTO | None:
         try:
