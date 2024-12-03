@@ -62,10 +62,10 @@ class ServiceRepository:
 
     def get_pending_approval_or_editRequested_services(self) -> list[ServiceDTO]:
         try:
-            filter_expression = Attr("ServiceStatus").eq("PENDING_APPROVAL") | Attr("ServiceStatus").eq("EDIT_REQUESTED")
-            response = self.table.scan(
-                FilterExpression=filter_expression
-            )
+            filter_expression = Attr("ServiceStatus").eq("PENDING_APPROVAL") | Attr(
+                "ServiceStatus"
+            ).eq("EDIT_REQUESTED")
+            response = self.table.scan(FilterExpression=filter_expression)
             return [
                 ServiceDTO.from_dynamodb_item(item)
                 for item in response.get("Items", [])
@@ -75,8 +75,6 @@ class ServiceRepository:
                 f"Error fetching pending approval services: {e.response['Error']['Message']}"
             )
             return []
-
-
 
     def save_pending_update(self, service_id: str, pending_update_data: dict) -> bool:
         try:

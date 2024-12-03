@@ -186,9 +186,6 @@ def service_edit(request, service_id):
                 new_service_status = service.service_status
                 new_service_status = ServiceStatus.EDIT_REQUESTED.value
                 service_repo.update_service_status(service.id, new_service_status)
-            
-            
-            
 
             # Prepare updated service DTO
             updated_service = ServiceDTO(
@@ -206,11 +203,11 @@ def service_edit(request, service_id):
                 service_approved_timestamp=service.service_approved_timestamp,
                 is_active=new_is_active,
                 announcement=service_data.get("announcement"),
-                pending_update=""
+                pending_update="",
             )
-            
+
             pending_update_data = updated_service.to_dynamodb_item()
-            
+
             if service_repo.save_pending_update(service_id, pending_update_data):
                 return redirect("services:list")
 

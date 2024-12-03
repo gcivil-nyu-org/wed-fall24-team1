@@ -48,19 +48,15 @@ class HomeRepository:
             Attr(
                 "ServiceStatus"
             ).not_exists(),  # Include items where ServiceStatus does not exist
-              Attr("ServiceStatus").eq(
-                "APPROVED"
-            )
+            Attr("ServiceStatus").eq("APPROVED"),
         )
         service_status_filter2 = Or(
             Attr(
                 ServiceStatus.EDIT_REQUESTED.value
             ).not_exists(),  # Include items where ServiceStatus does not exist
-              Attr("ServiceStatus").eq(
-                ServiceStatus.EDIT_REQUEST_REJECTED.value
-            )
+            Attr("ServiceStatus").eq(ServiceStatus.EDIT_REQUEST_REJECTED.value),
         )
-        service_status_filter = Or(service_status_filter1, service_status_filter2) 
+        service_status_filter = Or(service_status_filter1, service_status_filter2)
 
         # Combine the existing filter expression with the new ServiceStatus filter
         if filter_expression:
@@ -90,8 +86,6 @@ class HomeRepository:
             return filtered_items
 
         return items
-    
-
 
     @staticmethod
     def process_items(items):

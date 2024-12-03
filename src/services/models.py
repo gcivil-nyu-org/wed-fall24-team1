@@ -71,7 +71,7 @@ class ServiceDTO:
             "ApprovedTimestamp": self.service_approved_timestamp,
             "IsActive": self.is_active,
             "Announcement": self.announcement,
-            "pending_update": self.pending_update,  
+            "pending_update": self.pending_update,
         }
 
 
