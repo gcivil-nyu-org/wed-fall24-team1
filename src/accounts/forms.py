@@ -4,6 +4,7 @@ from django import forms
 from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.auth.forms import PasswordResetForm
 
 from .models import CustomUser
 
@@ -267,3 +268,12 @@ class ServiceProviderForm(forms.ModelForm):
             ),
         }
         # Add any other basic fields you want to include for service providers
+
+class CustomPasswordResetForm(PasswordResetForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Update the widget attributes for the email field
+        self.fields['email'].widget.attrs.update({
+            'class': 'mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-gray-300 focus:border-blue-500 focus:ring-blue-500',
+            'placeholder': 'Enter your email'
+        })
