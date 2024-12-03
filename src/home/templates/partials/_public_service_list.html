@@ -1,11 +1,31 @@
 <div class="bg-gray-800 rounded-lg shadow-md p-4">
   <h2 class="text-lg font-semibold mb-2 text-gray-100">Public Services Near You</h2>
 
-  <select id="filterSelect"
-          class="w-full mb-2 p-2 border rounded text-sm bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-600">
-    <option value="distance">Sort by Distance</option>
-    <option value="rating">Sort by Rating</option>
-  </select>
+  <form id="sortingForm" method="get">
+        <!-- Preserve existing GET parameters as hidden inputs -->
+        {% if search_query %}
+            <input type="hidden" name="search" value="{{ search_query }}">
+        {% endif %}
+        {% if radius %}
+            <input type="hidden" name="radius" value="{{ radius }}">
+        {% endif %}
+        {% if user_lat %}
+            <input type="hidden" name="user_lat" value="{{ user_lat }}">
+        {% endif %}
+        {% if user_lon %}
+            <input type="hidden" name="user_lon" value="{{ user_lon }}">
+        {% endif %}
+        {% if service_type_dropdown %}
+            <input type="hidden" name="type" value="{{ service_type_dropdown }}">
+        {% endif %}
+        <!-- Exclude 'page' parameter to reset to page 1 when sorting changes -->
+
+        <!-- Sorting Dropdown -->
+        <select name="sort" id="filterSelect" class="w-full p-2 border rounded text-sm bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-300" onchange="this.form.submit()">
+            <option value="distance" {% if sort_by == 'distance' %}selected{% endif %}>Sort by Distance</option>
+            <option value="rating" {% if sort_by == 'rating' %}selected{% endif %}>Sort by Rating</option>
+        </select>
+    </form>
 
   <div id="serviceList" class="space-y-2 max-h-96 overflow-y-auto mb-4">
     {% for item in page_obj %}
