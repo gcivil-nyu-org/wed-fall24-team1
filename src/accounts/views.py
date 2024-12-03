@@ -5,7 +5,7 @@ from urllib.parse import quote
 from axes.models import AccessAttempt
 from django.conf import settings
 from django.contrib.auth import login
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import LoginView, LogoutView
 from django.core.exceptions import PermissionDenied
 from django.db import models
 from django.shortcuts import get_object_or_404, render, redirect
@@ -253,6 +253,27 @@ class ServiceProviderLoginView(CustomLoginView):
         if self.request.user.user_type == "service_provider":
             return reverse_lazy("services:list")
         return reverse_lazy("login")
+
+
+class CustomLogoutView(LogoutView):
+    def get_next_page(self):
+        # Get the default next page
+        next_page = super().get_next_page()
+        user = self.request.user
+
+        # Check if the user is authenticated
+        if user.is_authenticated:
+            if user.user_type == "service_provider":
+                # Redirect service providers to the service provider login page
+                next_page = reverse_lazy("service_provider_login")
+            else:
+                # Redirect normal users to the home page
+                next_page = reverse_lazy("home")
+        else:
+            # If the user is not authenticated, default to home page
+            next_page = reverse_lazy("home")
+
+        return next_page
 
 
 # Login selection page view

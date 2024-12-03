@@ -35,6 +35,9 @@ def convert_decimals(obj):
 
 @require_POST
 def submit_review(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Authentication required."}, status=401)
+
     try:
         data = json.loads(request.body)
         service_id = data.get("service_id")
@@ -232,6 +235,9 @@ def get_reviews(request, service_id):
 
 @require_POST
 def toggle_bookmark(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Authentication required."}, status=401)
+
     try:
         data = json.loads(request.body)
         service_id = data.get("service_id")
@@ -265,6 +271,9 @@ def toggle_bookmark(request):
 
 @require_http_methods(["DELETE"])
 def delete_review(request, review_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Authentication required."}, status=401)
+
     try:
         repo = HomeRepository()
         data = json.loads(request.body)
@@ -285,6 +294,9 @@ def delete_review(request, review_id):
 
 @require_http_methods(["PUT"])
 def edit_review(request, review_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Authentication required."}, status=401)
+
     try:
         data = json.loads(request.body)
         new_rating = data.get("rating")

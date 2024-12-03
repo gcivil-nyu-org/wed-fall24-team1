@@ -432,7 +432,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     alert(data.error || 'Failed to toggle bookmark.');
                 } else {
                     if (action === 'remove') {
-                        const serviceCard = this.closest('.bg-gray-50');
+                        const serviceCard = this.closest('.bg-gray-700');
                         serviceCard.remove();
 
                         // Update counters after removing bookmark

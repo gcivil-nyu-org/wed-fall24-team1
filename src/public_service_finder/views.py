@@ -9,13 +9,13 @@ from services.repositories import ServiceRepository
 
 def root_redirect_view(request):
     if request.user.is_authenticated:
-        return (
-            redirect("services:list")
-            if request.user.user_type == "service_provider"
-            else redirect("home")
-        )
+        if request.user.user_type == "service_provider":
+            return redirect("services:list")
+        else:
+            return redirect("home")
     else:
-        return redirect("user_login")  # Redirect to user login if not logged in
+        # If the user is not authenticated, redirect to home page
+        return redirect("home")  # Redirect to user login if not logged in
 
 
 @login_required
