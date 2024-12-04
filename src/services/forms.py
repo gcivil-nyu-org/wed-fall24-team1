@@ -88,6 +88,7 @@ class DescriptionItemForm(forms.Form):
         widget=forms.TextInput(
             attrs={
                 "class": "w-full p-2 rounded bg-gray-600 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600",
+                "maxlength": "256",
             }
         ),
     )

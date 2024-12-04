@@ -215,7 +215,9 @@
       <option value="4">4 Stars</option>
       <option value="5">5 Stars</option>
     </select>
-    <textarea id="editMessage" class="w-full mb-2 p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 border border-gray-600" rows="4"></textarea>
+    <textarea id="editMessage"
+    maxlength="1000"
+    class="w-full mb-2 p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 border border-gray-600" rows="4"></textarea>
     <div class="flex justify-end gap-2">
       <button id="cancelEdit" class="bg-red-600 text-white px-6 py-2 rounded-md hover:bg-red-700 transition-colors duration-300">Cancel</button>
       <button id="confirmEdit" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors duration-300">Save Changes</button>
@@ -300,6 +302,7 @@
           <option value="5">5 Stars</option>
         </select>
         <textarea id="reviewText"
+                  maxlength="1000"
                   class="w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 border border-gray-600"
                   placeholder="Write your review here..."></textarea>
         <button id="submitReview" class="bg-blue-600 text-gray-100 px-4 py-2 rounded hover:bg-blue-700">Submit Review
