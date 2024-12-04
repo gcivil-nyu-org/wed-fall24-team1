@@ -542,7 +542,7 @@ function initializeServiceMarkers() {
                 ${item.Address}<br>
                 Rating: ${roundedRating}<br>
                 Distance: ${roundedDistance} Miles<br>
-                <button class="scroll-to-details mt-2 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm">
+                <button class="scroll-to-details mt-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">
                     View Details Below
                 </button>
             </div>

@@ -6,13 +6,13 @@
             {% if user.is_authenticated and user.user_type == 'service_provider' %}
                 <a href="{% url 'services:list' %}" class="flex items-center space-x-3">
                     <img src="{% static 'images/logo-psf.png' %}" alt="Logo"
-                         class="h-10 w-10 rounded-full border border-gray-600 shadow-sm">
+                         class="h-10 w-10 rounded-full border border-blue-800 shadow-sm">
                     <span class="text-2xl font-extrabold tracking-wide text-blue-400 hover:text-blue-300 hover:underline">Public Service Finder</span>
                 </a>
             {% else %}
                 <a href="{% url 'home' %}" class="flex items-center space-x-3">
                     <img src="{% static 'images/logo-psf.png' %}" alt="Logo"
-                         class="h-10 w-10 rounded-full border border-gray-600 shadow-sm">
+                         class="h-10 w-10 rounded-full border border-blue-800 shadow-sm">
                     <span class="text-2xl font-extrabold tracking-wide text-blue-400 hover:text-blue-300 hover:underline">Public Service Finder</span>
                 </a>
             {% endif %}
@@ -34,13 +34,25 @@
                         <span>Home</span>
                     </a>
                 {% endif %}
-            {% endif %}
             <a href="{% url 'forum:category_list' %}"
                class="hidden md:flex items-center space-x-2 text-gray-300 hover:text-blue-400 font-medium p-2 rounded-md hover:bg-gray-700">
                 <i class="fas fa-comments"></i>
                 <span>Forum</span>
             </a>
+            {% endif %}
+
             {% if not user.is_authenticated %}
+
+                <a href="{% url 'home' %}"
+                       class="hidden md:flex items-center space-x-2 text-gray-300 hover:text-blue-400 font-medium p-2 rounded-md hover:bg-gray-700">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                    </a>
+            <a href="{% url 'forum:category_list' %}"
+               class="hidden md:flex items-center space-x-2 text-gray-300 hover:text-blue-400 font-medium p-2 rounded-md hover:bg-gray-700">
+                <i class="fas fa-comments"></i>
+                <span>Forum</span>
+            </a>
                 <a href="{% url 'user_login' %}"
                    class="hidden md:flex items-center space-x-2 text-gray-300 hover:text-blue-400 font-medium p-2 rounded-md hover:bg-gray-700">
                     <i class="fas fa-sign-in-alt"></i>
