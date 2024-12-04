@@ -17,6 +17,7 @@ class CustomUserAdmin(UserAdmin):
         "last_name",
         "user_type",
         "is_staff",
+        "profile_image_url",  # Display profile image URL
     )
 
     # Fields to filter by in the list view

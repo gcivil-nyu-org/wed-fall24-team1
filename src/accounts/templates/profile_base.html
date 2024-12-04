@@ -21,9 +21,14 @@
       <div class="flex justify-between items-start mb-6">
         <!-- Grouped Profile Picture and Information -->
         <div class="flex items-center">
-          <div class="w-24 h-24 rounded-full bg-blue-600 text-white flex items-center justify-center text-4xl font-bold mr-6 uppercase">
-            {{ profile.username|first }}
-          </div>
+          {% if profile.profile_image_url %}
+            <img src="{{ profile.profile_image_url }}" alt="Profile Image"
+                 class="w-24 h-24 rounded-full object-cover mr-6">
+          {% else %}
+            <div class="w-24 h-24 rounded-full bg-blue-600 text-white flex items-center justify-center text-4xl font-bold mr-6 uppercase">
+              {{ profile.username|first }}
+            </div>
+          {% endif %}
           <div>
             <h2 class="text-xl font-semibold text-blue-400 mb-2">Profile Information</h2>
             <p class="text-gray-300"><strong>Username:</strong> {{ profile.username }}</p>
@@ -47,7 +52,7 @@
                        border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700">
               <i class="fas fa-comments mr-2 text-lg"></i>
               <span class="tracking-wide">Forum Posts</span>
-              <span class="ml-2 bg-gray-100 text-gray-600 px-2.5 py-0.5 rounded-full text-sm">
+              <span class="ml-2 bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-sm">
                 {{ user_posts|length }}
             </span>
             </button>
@@ -58,7 +63,7 @@
               <span class="tracking-wide">Bookmarks</span>
               <span class="ml-2 bg-blue-100 text-blue-600 px-2.5 py-0.5 rounded-full text-sm">
                 {{ bookmarks|length }}
-            </span>
+              </span>
             </button>
 
             <button id="reviews-tab-btn"
@@ -68,7 +73,7 @@
               <span class="tracking-wide">Reviews</span>
               <span class="ml-2 bg-gray-100 text-gray-600 px-2.5 py-0.5 rounded-full text-sm">
                 {{ reviews|length }}
-            </span>
+              </span>
             </button>
 
           </nav>
@@ -162,7 +167,7 @@
           <h2 class="text-2xl font-semibold text-gray-400">My Forum Posts</h2>
           <span class="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
             {{ user_posts|length }} posts
-            </span>
+          </span>
         </div>
         {% if user_posts %}
           <div class="grid grid-cols-1 gap-4 w-full">
@@ -175,7 +180,8 @@
                       {{ post.title }}
                     </a>
                     <p class="text-gray-400 text-sm mt-1">
-                      {{ post.content|truncatewords:30 }}</p>
+                      {{ post.content|truncatewords:30 }}
+                    </p>
                     <div class="text-sm text-gray-500 mt-2 flex items-center gap-4">
                       <span><i class="fas fa-folder text-gray-400"></i> {{ post.category.name }}</span>
                       <span><i class="far fa-clock text-gray-400"></i> {{ post.created_at|date:"M d, Y" }}</span>
@@ -199,11 +205,10 @@
       </div>
     </div>
 
-
     <!-- Profile Edit Form Section -->
     <div id="edit-profile" class="bg-gray-800 rounded-lg shadow-md p-6 hidden">
       <h2 class="text-xl font-semibold text-blue-400 mb-4">Edit Profile</h2>
-      <form method="POST" class="space-y-4">
+      <form method="POST" enctype="multipart/form-data" class="space-y-4">
         {% csrf_token %}
         {% for field in form %}
           <div>
@@ -211,6 +216,9 @@
               {{ field.label }}
             </label>
             {{ field }}
+            {% if field.help_text %}
+              <p class="text-gray-500 text-sm">{{ field.help_text }}</p>
+            {% endif %}
             {% if field.errors %}
               {% for error in field.errors %}
                 <p class="text-red-400 text-sm mt-1">{{ error }}</p>
@@ -233,7 +241,7 @@
     </div>
   </div>
 
-  <!-- Modal HTML -->
+  <!-- Delete Confirmation Modal -->
   <div id="deleteConfirmModal"
        class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50 flex items-center justify-center">
     <div class="bg-gray-800 rounded-lg p-8 max-w-md w-full mx-4 border border-gray-700"> <!-- Made width smaller and reduced padding -->

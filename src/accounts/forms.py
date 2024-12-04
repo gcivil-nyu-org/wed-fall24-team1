@@ -80,6 +80,15 @@ class UserRegisterForm(UserCreationForm):
             }
         ),
     )
+    profile_image = forms.ImageField(
+        required=False,
+        widget=forms.ClearableFileInput(
+            attrs={
+                "class": "w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600",
+            }
+        ),
+        help_text="Optional. Upload a profile image.",
+    )
 
     class Meta:
         model = CustomUser
@@ -91,6 +100,7 @@ class UserRegisterForm(UserCreationForm):
             "password1",
             "password2",
             "user_type",
+            "profile_image",  # Add this field
         ]
 
 
@@ -199,9 +209,19 @@ class ServiceProviderLoginForm(AuthenticationForm):
 
 
 class ServiceSeekerForm(forms.ModelForm):
+    profile_image = forms.ImageField(
+        required=False,
+        widget=forms.ClearableFileInput(
+            attrs={
+                "class": "w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600",
+            }
+        ),
+        help_text="Upload a new profile image or leave blank to keep the current one.",
+    )
+
     class Meta:
         model = CustomUser
-        fields = ["username", "email", "first_name", "last_name"]
+        fields = ["username", "email", "first_name", "last_name", "profile_image"]
         widgets = {
             "username": forms.TextInput(
                 attrs={
@@ -235,9 +255,19 @@ class ServiceSeekerForm(forms.ModelForm):
 # Note: We're maintaining two different forms (even though they're the same) for seekers and providers to future-proof our code.
 # We *might* add additional fields for service providers soon.
 class ServiceProviderForm(forms.ModelForm):
+    profile_image = forms.ImageField(
+        required=False,
+        widget=forms.ClearableFileInput(
+            attrs={
+                "class": "w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600",
+            }
+        ),
+        help_text="Upload a new profile image or leave blank to keep the current one.",
+    )
+
     class Meta:
         model = CustomUser
-        fields = ["username", "email", "first_name", "last_name"]
+        fields = ["username", "email", "first_name", "last_name", "profile_image"]
         widgets = {
             "username": forms.TextInput(
                 attrs={
