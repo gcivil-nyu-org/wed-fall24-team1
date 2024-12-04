@@ -30,18 +30,15 @@ def create_flag(request):
             return JsonResponse({"error": "Invalid content type"}, status=400)
 
         # Get the flagged object based on content type
-        content_author = None
         if content_type == "FORUM POST":
             try:
-                flagged_object = Post.objects.get(id=object_id)
-                content_author = flagged_object.author
+                Post.objects.get(id=object_id)
             except Post.DoesNotExist:
                 return JsonResponse({"error": "Post not found"}, status=404)
 
         elif content_type == "FORUM COMMENT":
             try:
-                flagged_object = Comment.objects.get(id=object_id)
-                content_author = flagged_object.author
+                Comment.objects.get(id=object_id)
             except Comment.DoesNotExist:
                 return JsonResponse({"error": "Comment not found"}, status=404)
 
@@ -52,7 +49,6 @@ def create_flag(request):
             if not flagged_object:
                 return JsonResponse({"error": "Review not found"}, status=404)
             # Get the review author's user ID from the review data
-            content_author = CustomUser.objects.get(id=flagged_object.user_id)
 
         # Check if user has already flagged this content
         if Flag.objects.filter(
@@ -71,15 +67,6 @@ def create_flag(request):
                 reason=reason,
                 explanation=explanation,
             )
-
-            # Notify the content author if we found one
-            if content_author:
-                Notification.objects.create(
-                    recipient=content_author,
-                    sender=request.user,
-                    message=f"Your content has been flagged for review: {reason}",
-                    notification_type="flag",
-                )
 
             # Notify admins (only if they haven't been notified about pending flags)
             admin_users = CustomUser.objects.filter(is_superuser=True)

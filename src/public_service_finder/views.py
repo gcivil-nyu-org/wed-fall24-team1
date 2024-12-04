@@ -45,7 +45,7 @@ def admin_only_view_new_listings(request):
                 "created_at": flag.created_at,  # First flag date
                 "flags": [],
                 "flag_count": 0,
-                "first_flag_id": flag.id
+                "first_flag_id": flag.id,
             }
 
         # Add this flag's information
