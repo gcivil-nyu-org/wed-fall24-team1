@@ -6,13 +6,13 @@
             {% if user.is_authenticated and user.user_type == 'service_provider' %}
                 <a href="{% url 'services:list' %}" class="flex items-center space-x-3">
                     <img src="{% static 'images/logo-psf.png' %}" alt="Logo"
-                         class="h-10 w-10 rounded-full border border-gray-600 shadow-sm">
+                         class="h-10 w-10 rounded-full border border-blue-800 shadow-sm">
                     <span class="text-2xl font-extrabold tracking-wide text-blue-400 hover:text-blue-300 hover:underline">Public Service Finder</span>
                 </a>
             {% else %}
                 <a href="{% url 'home' %}" class="flex items-center space-x-3">
                     <img src="{% static 'images/logo-psf.png' %}" alt="Logo"
-                         class="h-10 w-10 rounded-full border border-gray-600 shadow-sm">
+                         class="h-10 w-10 rounded-full border border-blue-800 shadow-sm">
                     <span class="text-2xl font-extrabold tracking-wide text-blue-400 hover:text-blue-300 hover:underline">Public Service Finder</span>
                 </a>
             {% endif %}

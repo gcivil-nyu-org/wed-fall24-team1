@@ -158,7 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (has_previous) {
                 const prevButton = document.createElement('button');
-                prevButton.classList.add('bg-blue-500', 'text-white', 'px-4', 'py-2', 'rounded');
+                prevButton.classList.add('bg-blue-600', 'text-white', 'px-4', 'py-2', 'rounded');
                 prevButton.textContent = 'Previous';
                 prevButton.addEventListener('click', () => fetchAndDisplayReviews(serviceId, current_page - 1));
                 paginationDiv.appendChild(prevButton);
@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (has_next) {
                 const nextButton = document.createElement('button');
-                nextButton.classList.add('bg-blue-500', 'text-white', 'px-4', 'py-2', 'rounded');
+                nextButton.classList.add('bg-blue-600', 'text-white', 'px-4', 'py-2', 'rounded');
                 nextButton.textContent = 'Next';
                 nextButton.addEventListener('click', () => fetchAndDisplayReviews(serviceId, current_page + 1));
                 paginationDiv.appendChild(nextButton);

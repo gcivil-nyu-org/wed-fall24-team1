@@ -274,6 +274,6 @@ class CustomPasswordResetForm(PasswordResetForm):
         super().__init__(*args, **kwargs)
         # Update the widget attributes for the email field
         self.fields['email'].widget.attrs.update({
-            'class': 'mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-gray-300 focus:border-blue-500 focus:ring-blue-500',
-            'placeholder': 'Enter your email'
+            'class': 'w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600',
+            'placeholder': 'Enter Email'
         })
