@@ -66,7 +66,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
                         reviewsContainer.innerHTML += `
                             <div class="review mb-2 p-2 bg-gray-700 rounded">
-                                <p class="text-gray-100"><strong>${review.Username}</strong> - ${review.RatingStars} stars</p>
+                                <div class="flex justify-between items-start">
+                                    <p class="text-gray-100"><strong>${review.Username}</strong> - ${review.RatingStars} stars</p>
+                                    
+                                    <!-- Add the flag button here -->
+                                    ${hasResponseText ? `
+                                    ` : `
+                                        <div class="flag-status-container" data-review-id="${review.ReviewId}">
+                                            <button onclick="openFlagModal('REVIEW', '${review.ReviewId}')" 
+                                                    class="flag-button text-gray-400 hover:text-red-400 transition-colors duration-200"
+                                                    title="Report this review">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    `}
+                                </div>
+                                
                                 <p class="text-sm text-gray-300">${review.RatingMessage}</p>
                                 ${hasResponseText ? `
                                     <div class="mt-3 p-3 bg-gray-600 rounded" id="reviewResponse-${review.ReviewId}">
@@ -89,6 +106,8 @@ document.addEventListener('DOMContentLoaded', function () {
                                 `}
                             </div>
                         `;
+                        checkFlagStatus('REVIEW', review.ReviewId);
+
                     });
                 } else {
                     reviewsContainer.innerHTML += '<p class="text-gray-400">No reviews yet.</p>';
@@ -137,6 +156,39 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 });
+
+async function checkFlagStatus(contentType, objectId) {
+    try {
+        const response = await fetch(`/moderation/check_flag_status/${contentType}/${objectId}/`);
+        const data = await response.json();
+
+        const container = document.querySelector(`.flag-status-container[data-review-id="${objectId}"]`);
+        if (!container) return;
+
+        if (data.hasPendingFlags) {
+            // Replace the flag button with a pending icon
+            container.innerHTML = `
+                <div class="text-yellow-500" title="This review has been reported and is pending moderation">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+            `;
+        } else if (data.userHasFlagged) {
+            // Show flagged state
+            const flagButton = container.querySelector('.flag-button');
+            if (flagButton) {
+                flagButton.classList.add('text-red-400');
+                flagButton.classList.remove('text-gray-400');
+                flagButton.title = 'You have reported this review';
+                flagButton.disabled = true;
+            }
+        }
+    } catch (error) {
+        console.error('Error checking flag status:', error);
+    }
+}
 
 // Function to get CSRF token from cookies
 function getCookie(name) {

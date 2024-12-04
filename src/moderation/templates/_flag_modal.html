@@ -1,48 +1,48 @@
 <div id="flagModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-    <div class="bg-gray-800 rounded-lg p-8 max-w-md w-full mx-4">
-        <h2 class="text-xl font-semibold text-gray-100 mb-4">Report Content</h2>
+  <div class="bg-gray-800 rounded-lg p-8 max-w-md w-full mx-4">
+    <h2 class="text-xl font-semibold text-gray-100 mb-4">Report Content</h2>
 
-        <form id="flagForm" class="space-y-4">
-            {% csrf_token %}
-            <input type="hidden" id="flagContentType" name="content_type">
-            <input type="hidden" id="flagObjectId" name="object_id">
+    <form id="flagForm" class="space-y-4">
+      {% csrf_token %}
+      <input type="hidden" id="flagContentType" name="content_type">
+      <input type="hidden" id="flagObjectId" name="object_id">
 
-            <div>
-                <label for="flagReason" class="block text-sm font-medium text-gray-300 mb-2">
-                    Reason for reporting
-                </label>
-                <select id="flagReason" name="reason"
-                        class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-gray-200 focus:outline-none focus:border-blue-500">
-                    <option value="SPAM">Spam or advertising</option>
-                    <option value="OFFENSIVE">Offensive or inappropriate content</option>
-                    <option value="HARASSMENT">Harassment or hate speech</option>
-                    <option value="MISINFORMATION">False or misleading information</option>
-                    <option value="OTHER">Other reason</option>
-                </select>
-            </div>
+      <div>
+        <label for="flagReason" class="block text-sm font-medium text-gray-300 mb-2">
+          Reason for reporting
+        </label>
+        <select id="flagReason" name="reason"
+                class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-gray-200 focus:outline-none focus:border-blue-500">
+          <option value="SPAM">Spam or advertising</option>
+          <option value="OFFENSIVE">Offensive or inappropriate content</option>
+          <option value="HARASSMENT">Harassment or hate speech</option>
+          <option value="MISINFORMATION">False or misleading information</option>
+          <option value="OTHER">Other reason</option>
+        </select>
+      </div>
 
-            <div>
-                <label for="flagExplanation" class="block text-sm font-medium text-gray-300 mb-2">
-                    Additional details (optional)
-                </label>
-                <textarea id="flagExplanation" name="explanation" rows="3"
-                         class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-gray-200 focus:outline-none focus:border-blue-500"
-                         placeholder="Please provide any additional context..."
-                maxlength="50"></textarea>
-            </div>
+      <div>
+        <label for="flagExplanation" class="block text-sm font-medium text-gray-300 mb-2">
+          Additional details (optional)
+        </label>
+        <textarea id="flagExplanation" name="explanation" rows="3"
+                  class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-gray-200 focus:outline-none focus:border-blue-500"
+                  placeholder="Please provide any additional context..."
+                  maxlength="50"></textarea>
+      </div>
 
-            <div class="flex justify-end space-x-3 mt-6">
-                <button type="button" onclick="closeFlagModal()"
-                        class="px-4 py-2 text-gray-300 hover:text-gray-100 transition-colors duration-150">
-                    Cancel
-                </button>
-                <button type="submit"
-                        class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-150">
-                    Submit Report
-                </button>
-            </div>
-        </form>
-    </div>
+      <div class="flex justify-end space-x-3 mt-6">
+        <button type="button" onclick="closeFlagModal()"
+                class="px-4 py-2 text-gray-300 hover:text-gray-100 transition-colors duration-150">
+          Cancel
+        </button>
+        <button type="submit"
+                class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-150">
+          Submit Report
+        </button>
+      </div>
+    </form>
+  </div>
 </div>
 
 <script>
@@ -59,7 +59,7 @@
         document.getElementById('flagForm').reset();
     }
 
-    document.getElementById('flagForm').addEventListener('submit', async function(e) {
+    document.getElementById('flagForm').addEventListener('submit', async function (e) {
         e.preventDefault();
 
         try {
@@ -75,10 +75,21 @@
             const data = await response.json();
 
             if (response.ok) {
-                // Show success message
+                // Add visual feedback
+                const contentType = formData.get('content_type');
+                const objectId = formData.get('object_id');
+                const flagButton = document.querySelector(`button[onclick="openFlagModal('${contentType}', '${objectId}')"]`);
+
+                if (flagButton) {
+                    flagButton.classList.add('text-red-400');
+                    flagButton.classList.remove('text-gray-400');
+                    flagButton.title = 'You have reported this review';
+                    flagButton.disabled = true;
+                }
+
+                // Show success message using a toast or alert
                 closeFlagModal();
             } else {
-                // Show error message
                 alert(data.error || 'An error occurred while flagging the content');
             }
         } catch (error) {
@@ -88,7 +99,7 @@
     });
 
     // Close modal when clicking outside
-    document.getElementById('flagModal').addEventListener('click', function(e) {
+    document.getElementById('flagModal').addEventListener('click', function (e) {
         if (e.target === this) {
             closeFlagModal();
         }
