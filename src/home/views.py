@@ -1,19 +1,19 @@
-from django.contrib.contenttypes.models import ContentType
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-import json
 import decimal
-
-from .repositories import HomeRepository
-from django.http import JsonResponse
+import json
 import uuid
-from django.views.decorators.http import require_POST
 from decimal import Decimal, Inexact, Rounded
-from django.shortcuts import render, redirect
-from forum.models import Notification
-from accounts.models import CustomUser
-from services.repositories import ServiceRepository
+
 from better_profanity import profanity
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.http import JsonResponse
+from django.shortcuts import render, redirect
+from django.views.decorators.http import require_POST
 from django.views.decorators.http import require_http_methods
+
+from accounts.models import CustomUser
+from forum.models import Notification
+from services.repositories import ServiceRepository
+from .repositories import HomeRepository
 
 # TODO These constants are maintained in the JS frontend and here, we'll have to unify them
 DEFAULT_LAT, DEFAULT_LON = 40.7128, -74.0060
