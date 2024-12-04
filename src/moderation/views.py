@@ -158,10 +158,39 @@ def review_flag(request, flag_id):
 
 @login_required
 def check_flag_status(request, content_type, object_id):
+    """
+    Check the flag status of a piece of content for the current user.
+    Returns:
+    - userHasFlagged: Whether the current user has flagged this content
+    - hasPendingFlags: Whether there are any pending flags on this content
+    This allows the frontend to show different UI states:
+    - Clock icon for content the user has personally flagged
+    - Flag icon for content they haven't flagged yet
+    """
     try:
-        has_pending_flag = Flag.objects.filter(
-            content_type=content_type, object_id=object_id, status="PENDING"
+        # Check if the current user has flagged this content
+        user_flag = Flag.objects.filter(
+            content_type=content_type,
+            object_id=object_id,
+            flagger=request.user,
+            status="PENDING"
         ).exists()
-        return JsonResponse({"hasPendingFlag": has_pending_flag})
+
+        # Check if there are any pending flags (used for admin purposes)
+        total_pending_flags = Flag.objects.filter(
+            content_type=content_type,
+            object_id=object_id,
+            status="PENDING"
+        ).count()
+
+        return JsonResponse({
+            'userHasFlagged': user_flag,
+            'hasPendingFlags': total_pending_flags > 0,
+            'pendingFlagsCount': total_pending_flags  # This might be useful for admins
+        })
     except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
+        # Log the error for debugging
+        print(f"Error checking flag status: {str(e)}")
+        return JsonResponse({
+            'error': str(e)
+            }, status=500)

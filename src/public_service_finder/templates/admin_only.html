@@ -92,9 +92,8 @@
               <tr class="text-left text-gray-300 border-b border-gray-700">
                 <th class="p-4">Content Type</th>
                 <th class="p-4">Content Preview</th>
-                <th class="p-4">Flag Reason</th>
-                <th class="p-4">Flagged By</th>
-                <th class="p-4">Date</th>
+                <th class="p-4">Flags</th>
+                <th class="p-4">First Flagged</th>
                 <th class="p-4">Actions</th>
               </tr>
               </thead>
@@ -122,15 +121,22 @@
                     </div>
                   </td>
                   <td class="p-4">
-                  <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-800 text-yellow-200">
-                    {{ flag.reason }}
-                  </span>
-                    {% if flag.explanation %}
-                      <div class="text-sm text-gray-400 mt-1">{{ flag.explanation|truncatechars:50 }}</div>
-                    {% endif %}
-                  </td>
-                  <td class="p-4 text-gray-300">
-                    {{ flag.flagger.username }}
+      <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-800 text-red-200">
+        {{ flag.flag_count }} flags
+      </span>
+                    <div class="text-sm text-gray-400 mt-2 space-y-2">
+                      {% for flag_detail in flag.flags %}
+                        <div class="flex items-start space-x-2">
+                          <span class="font-medium">{{ flag_detail.flagger }}</span>
+                          <span class="text-gray-500">•</span>
+                          <span class="bg-yellow-800/50 px-2 py-0.5 rounded text-yellow-200">{{ flag_detail.reason }}</span>
+                          {% if flag_detail.explanation %}
+                            <span class="text-gray-500">•</span>
+                            <span class="italic">"{{ flag_detail.explanation }}"</span>
+                          {% endif %}
+                        </div>
+                      {% endfor %}
+                    </div>
                   </td>
                   <td class="p-4 text-gray-400 text-sm">
                     {{ flag.created_at|date:"M d, Y" }}
@@ -147,7 +153,6 @@
                       </button>
                     </div>
                   </td>
-
                 </tr>
               {% endfor %}
               </tbody>
