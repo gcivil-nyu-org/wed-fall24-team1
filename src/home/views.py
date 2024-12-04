@@ -202,6 +202,7 @@ def home_view(request):
             "IsBookmarked": item.get("Id") in user_bookmarks,
             "IsActive": item.get("IsActive", True),
             "Announcement": item.get("Announcement", ""),
+            "ImageURL": item.get("ImageURL", ""),  # Added this line
         }
         for item in page_obj
     ]
