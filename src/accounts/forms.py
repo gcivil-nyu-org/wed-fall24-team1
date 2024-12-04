@@ -218,6 +218,12 @@ class ServiceSeekerForm(forms.ModelForm):
         ),
         help_text="Upload a new profile image or leave blank to keep the current one.",
     )
+    remove_profile_image = forms.BooleanField(
+        required=False,
+        initial=False,
+        label="Remove profile image",
+        help_text="Check this box to remove your current profile image.",
+    )
 
     class Meta:
         model = CustomUser
@@ -263,6 +269,12 @@ class ServiceProviderForm(forms.ModelForm):
             }
         ),
         help_text="Upload a new profile image or leave blank to keep the current one.",
+    )
+    remove_profile_image = forms.BooleanField(
+        required=False,
+        initial=False,
+        label="Remove profile image",
+        help_text="Check this box to remove your current profile image.",
     )
 
     class Meta:

@@ -46,13 +46,12 @@ def register(request):
                 image_extension = profile_image.name.split(".")[-1]
                 unique_filename = f"{uuid.uuid4()}.{image_extension}"
                 s3_key = f"images/{unique_filename}"
-                print(s3_key)
 
                 # Upload to S3
                 s3_client = boto3.client("s3", region_name=settings.AWS_S3_REGION_NAME)
 
                 try:
-                    output = s3_client.upload_fileobj(
+                    s3_client.upload_fileobj(
                         profile_image,
                         settings.AWS_STORAGE_BUCKET_NAME,
                         s3_key,
@@ -61,8 +60,6 @@ def register(request):
                     # Construct the image URL
                     image_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{s3_key}"
                     user.profile_image_url = image_url
-                    print(output)
-                    print(image_url)
                 except ClientError as e:
                     print(f"Failed to upload image to S3: {e}")
                     # Optionally, add an error message to the form
@@ -106,6 +103,9 @@ def profile_view(request):
             )
             if form.is_valid():
                 profile_image = form.cleaned_data.get("profile_image")
+                remove_image = form.cleaned_data.get("remove_profile_image")
+                if remove_image:
+                    user.profile_image_url = None
                 if profile_image:
                     # Generate a unique filename
                     image_extension = profile_image.name.split(".")[-1]
@@ -201,14 +201,14 @@ def profile_view(request):
             )
             if form.is_valid():
                 profile_image = form.cleaned_data.get("profile_image")
-                print(profile_image)
+                remove_image = form.cleaned_data.get("remove_profile_image")
+                if remove_image:
+                    user.profile_image_url = None
                 if profile_image:
                     # Generate a unique filename
                     image_extension = profile_image.name.split(".")[-1]
                     unique_filename = f"{uuid.uuid4()}.{image_extension}"
                     s3_key = f"images/{unique_filename}"
-                    print(s3_key)
-
                     # Upload to S3
                     s3_client = boto3.client(
                         "s3",
@@ -216,17 +216,15 @@ def profile_view(request):
                     )
 
                     try:
-                        output = s3_client.upload_fileobj(
+                        s3_client.upload_fileobj(
                             profile_image,
                             settings.AWS_STORAGE_BUCKET_NAME,
                             s3_key,
                             ExtraArgs={"ContentType": profile_image.content_type},
                         )
-                        print(output)
                         # Construct the image URL
                         image_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{s3_key}"
                         service_seeker.profile_image_url = image_url
-                        print(image_url)
                     except ClientError as e:
                         print(f"Failed to upload image to S3: {e}")
                 form.save()

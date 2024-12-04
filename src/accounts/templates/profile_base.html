@@ -209,36 +209,46 @@
     <div id="edit-profile" class="bg-gray-800 rounded-lg shadow-md p-6 hidden">
       <h2 class="text-xl font-semibold text-blue-400 mb-4">Edit Profile</h2>
       <form method="POST" enctype="multipart/form-data" class="space-y-4">
-        {% csrf_token %}
-        {% for field in form %}
-          <div>
-            <label class="block text-gray-300 font-medium mb-2" for="{{ field.id_for_label }}">
-              {{ field.label }}
-            </label>
-            {{ field }}
-            {% if field.help_text %}
-              <p class="text-gray-500 text-sm">{{ field.help_text }}</p>
-            {% endif %}
-            {% if field.errors %}
-              {% for error in field.errors %}
-                <p class="text-red-400 text-sm mt-1">{{ error }}</p>
-              {% endfor %}
-            {% endif %}
-          </div>
-        {% endfor %}
+          {% csrf_token %}
+          {% for field in form %}
+              <div>
+                  <label class="block text-gray-300 font-medium mb-2" for="{{ field.id_for_label }}">
+                      {{ field.label }}
+                  </label>
+                  {{ field }}
+                  {% if field.help_text %}
+                      <p class="text-gray-500 text-sm">{{ field.help_text }}</p>
+                  {% endif %}
+                  {% if field.errors %}
+                      {% for error in field.errors %}
+                          <p class="text-red-400 text-sm mt-1">{{ error }}</p>
+                      {% endfor %}
+                  {% endif %}
+              </div>
+          {% endfor %}
 
-        <div class="flex justify-between mt-6">
-          <button type="submit"
-                  class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300">
-            Save Changes
-          </button>
-          <button type="button" onclick="toggleEdit()"
-                  class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300">
-            Cancel
-          </button>
-        </div>
+          <!-- Show Remove Profile Image Checkbox Only If User Has an Image -->
+          {% if profile.profile_image_url %}
+              <div class="flex items-center">
+                  <input type="checkbox" id="id_remove_profile_image" name="remove_profile_image"
+                         class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-600 rounded">
+                  <label for="id_remove_profile_image" class="ml-2 block text-sm text-gray-300">
+                      Remove profile image
+                  </label>
+              </div>
+          {% endif %}
+
+          <div class="flex justify-between mt-6">
+              <button type="submit"
+                      class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300">
+                  Save Changes
+              </button>
+              <button type="button" onclick="toggleEdit()"
+                      class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300">
+                  Cancel
+              </button>
+          </div>
       </form>
-    </div>
   </div>
 
   <!-- Delete Confirmation Modal -->
@@ -335,5 +345,14 @@
               element.textContent = formatTimestamp(timestamp);
           });
       });
+      document.querySelector('form').addEventListener('submit', function (e) {
+        const removeCheckbox = document.getElementById('id_remove_profile_image');
+        if (removeCheckbox && removeCheckbox.checked) {
+            const confirmRemoval = confirm("Are you sure you want to remove your profile picture?");
+            if (!confirmRemoval) {
+                e.preventDefault();
+            }
+        }
+    });
   </script>
 {% endblock %}
