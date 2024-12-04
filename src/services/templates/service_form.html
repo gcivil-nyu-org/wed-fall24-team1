@@ -16,71 +16,110 @@
         </div>
 
         <!-- Main Form -->
-        <form method="post" class="bg-gray-800 shadow-lg rounded-xl overflow-hidden">
+        <!-- Added 'enctype="multipart/form-data"' to the form tag -->
+        <form method="post" enctype="multipart/form-data" class="bg-gray-800 shadow-lg rounded-xl overflow-hidden">
           {% csrf_token %}
 
           <!-- Main Fields Section -->
           <div class="p-8 space-y-6">
+            <!-- Display current image if it exists -->
+            {% if service and service.image_url %}
+              <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-400">Current Image</label>
+                <img src="{{ service.image_url }}" alt="Service image" class="w-full h-48 object-cover mt-2"/>
+              </div>
+            {% endif %}
+
             {% for field in form %}
-              <div class="space-y-1">
-                <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-400">
-                  {{ field.label }}
-                </label>
-                {% if field.name == 'category' %}
-                  <select name="{{ field.name }}"
-                          id="{{ field.id_for_label }}"
-                          class="w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 border border-gray-600">
-                    {% for value, label in field.field.choices %}
-                      <option value="{{ value }}"
-                              {% if field.value == value %}selected{% endif %}>
-                        {{ label }}
-                      </option>
-                    {% endfor %}
-                  </select>
-                {% elif field.name == 'is_active' %}
-                  <!-- New is_active field -->
-                  <div class="flex items-center">
-                    <input type="checkbox"
+              {% if field.name == 'remove_image' %}
+                <!-- Only show remove_image if there is an existing image -->
+                {% if service and service.image_url %}
+                  <!-- Remove current image checkbox field -->
+                  <div class="space-y-1">
+                    <div class="flex items-center">
+                      <input type="checkbox"
+                             name="{{ field.name }}"
+                             id="{{ field.id_for_label }}"
+                             {% if field.value %}checked{% endif %}
+                             class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                      <label for="{{ field.id_for_label }}" class="ml-2 block text-sm text-gray-400">
+                        {{ field.label }}
+                      </label>
+                    </div>
+                    {% if field.help_text %}
+                      <p class="mt-2 text-sm text-gray-500">{{ field.help_text }}</p>
+                    {% endif %}
+                  </div>
+                {% endif %}
+              {% else %}
+                <div class="space-y-1">
+                  <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-400">
+                    {{ field.label }}
+                  </label>
+                  {% if field.name == 'category' %}
+                    <select name="{{ field.name }}"
+                            id="{{ field.id_for_label }}"
+                            class="w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 border border-gray-600">
+                      {% for value, label in field.field.choices %}
+                        <option value="{{ value }}"
+                                {% if field.value == value %}selected{% endif %}>
+                          {{ label }}
+                        </option>
+                      {% endfor %}
+                    </select>
+                  {% elif field.name == 'is_active' %}
+                    <!-- New is_active field -->
+                    <div class="flex items-center">
+                      <input type="checkbox"
+                             name="{{ field.name }}"
+                             id="{{ field.id_for_label }}"
+                             {% if field.value %}checked{% endif %}
+                             class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                      <label for="{{ field.id_for_label }}" class="ml-2 block text-sm text-gray-400">
+                        {{ field.help_text|default:"Mark as available" }}
+                      </label>
+                    </div>
+                  {% elif field.name == 'announcement' %}
+                    <label for="announcement"></label>
+                    <textarea
+                            name="announcement"
+                            id="announcement"
+                            rows="3"
+                            class="w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 border border-gray-600"
+                            placeholder="Add an important update about your service"
+                    >{{ service.announcement|default:'' }}</textarea>
+                    <p class="mt-2 text-sm text-gray-500 flex items-center">
+                      <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                      </svg>
+                      Use this space to inform users about temporary changes or important updates.
+                    </p>
+                  {% elif field.name == 'image' %}
+                    <!-- New image upload field -->
+                    <input type="file"
                            name="{{ field.name }}"
                            id="{{ field.id_for_label }}"
-                           {% if field.value %}checked{% endif %}
-                           class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                    <label for="{{ field.id_for_label }}" class="ml-2 block text-sm text-gray-400">
-                      {{ field.help_text|default:"Mark as available" }}
-                    </label>
-                  </div>
-                {% elif field.name == 'announcement' %}
-                  <label for="announcement"></label>
-                  <textarea
-                          name="announcement"
-                          id="announcement"
-                          rows="3"
-                          maxlength="1000"
-                          class="w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 border border-gray-600"
-                          placeholder="Add an important update about your service"
-                  >{{ service.announcement|default:'' }}</textarea>
-                  <p class="mt-2 text-sm text-gray-500 flex items-center">
-                    <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    Use this space to inform users about temporary changes or important updates.
-                  </p>
-                {% else %}
-                  <input type="{{ field.field.widget.input_type }}"
-                         name="{{ field.name }}"
-                         id="{{ field.id_for_label }}"
-                         value="{{ field.value|default:'' }}"
-                         maxlength="256"
-                         class="w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 border border-gray-600"
-                         {% if field.field.required %}required{% endif %}>
-                {% endif %}
-                {% if field.errors %}
-                  <p class="mt-1 text-sm text-red-600">
-                    {{ field.errors }}
-                  </p>
-                {% endif %}
-              </div>
+                           class="w-full text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 border border-gray-600"
+                           accept="image/*">
+                    {% if field.help_text %}
+                      <p class="mt-2 text-sm text-gray-500">{{ field.help_text }}</p>
+                    {% endif %}
+                  {% else %}
+                    <input type="{{ field.field.widget.input_type }}"
+                           name="{{ field.name }}"
+                           id="{{ field.id_for_label }}"
+                           value="{{ field.value|default:'' }}"
+                           class="w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 border border-gray-600"
+                           {% if field.field.required %}required{% endif %}>
+                  {% endif %}
+                  {% if field.errors %}
+                    <p class="mt-1 text-sm text-red-600">
+                      {{ field.errors }}
+                    </p>
+                  {% endif %}
+                </div>
+              {% endif %}
             {% endfor %}
 
             <!-- Description Section -->

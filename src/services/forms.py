@@ -31,6 +31,17 @@ class ServiceForm(forms.Form):
         max_length=500,
         help_text="Use this space to inform users about temporary changes or important updates.",
     )
+    image = forms.ImageField(
+        required=False, help_text="Optional. Upload an image for the service."
+    )
+
+    # Add remove_image field
+    remove_image = forms.BooleanField(
+        required=False,
+        initial=False,
+        label="Remove current image",
+        help_text="Check this box to remove the current image.",
+    )
 
     def clean(self):
         cleaned_data = super().clean()
