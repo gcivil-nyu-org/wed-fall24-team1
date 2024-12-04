@@ -36,32 +36,34 @@ def admin_only_view_new_listings(request):
         content_key = f"{flag.content_type}:{flag.object_id}"
         if content_key not in grouped_flags:
             grouped_flags[content_key] = {
-                'content_type': flag.content_type,
-                'object_id': flag.object_id,
-                'content_preview': flag.content_preview,
-                'content_title': flag.content_title,
-                'content_rating': flag.content_rating,
-                'content_author': flag.content_author,
-                'created_at': flag.created_at,  # First flag date
-                'flags': [],
-                'flag_count': 0,
+                "content_type": flag.content_type,
+                "object_id": flag.object_id,
+                "content_preview": flag.content_preview,
+                "content_title": flag.content_title,
+                "content_rating": flag.content_rating,
+                "content_author": flag.content_author,
+                "created_at": flag.created_at,  # First flag date
+                "flags": [],
+                "flag_count": 0,
             }
 
         # Add this flag's information
-        grouped_flags[content_key]['flags'].append({
-            'flagger': flag.flagger.username,
-            'reason': flag.reason,
-            'explanation': flag.explanation,
-            'created_at': flag.created_at,
-            'flag_id': flag.id
-        })
-        grouped_flags[content_key]['flag_count'] += 1
+        grouped_flags[content_key]["flags"].append(
+            {
+                "flagger": flag.flagger.username,
+                "reason": flag.reason,
+                "explanation": flag.explanation,
+                "created_at": flag.created_at,
+                "flag_id": flag.id,
+            }
+        )
+        grouped_flags[content_key]["flag_count"] += 1
 
     # Convert the dictionary to a list and sort by number of flags (most flags first)
     grouped_flags_list = sorted(
         grouped_flags.values(),
-        key=lambda x: (x['flag_count'], x['created_at']),
-        reverse=True
+        key=lambda x: (x["flag_count"], x["created_at"]),
+        reverse=True,
     )
 
     return render(
@@ -72,6 +74,7 @@ def admin_only_view_new_listings(request):
             "flags": grouped_flags_list,
         },
     )
+
 
 @login_required
 def admin_update_listing(request, service_id):

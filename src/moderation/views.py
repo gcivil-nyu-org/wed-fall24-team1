@@ -173,24 +173,22 @@ def check_flag_status(request, content_type, object_id):
             content_type=content_type,
             object_id=object_id,
             flagger=request.user,
-            status="PENDING"
+            status="PENDING",
         ).exists()
 
         # Check if there are any pending flags (used for admin purposes)
         total_pending_flags = Flag.objects.filter(
-            content_type=content_type,
-            object_id=object_id,
-            status="PENDING"
+            content_type=content_type, object_id=object_id, status="PENDING"
         ).count()
 
-        return JsonResponse({
-            'userHasFlagged': user_flag,
-            'hasPendingFlags': total_pending_flags > 0,
-            'pendingFlagsCount': total_pending_flags  # This might be useful for admins
-        })
+        return JsonResponse(
+            {
+                "userHasFlagged": user_flag,
+                "hasPendingFlags": total_pending_flags > 0,
+                "pendingFlagsCount": total_pending_flags,  # This might be useful for admins
+            }
+        )
     except Exception as e:
         # Log the error for debugging
         print(f"Error checking flag status: {str(e)}")
-        return JsonResponse({
-            'error': str(e)
-            }, status=500)
+        return JsonResponse({"error": str(e)}, status=500)
