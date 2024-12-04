@@ -136,9 +136,14 @@
                 <!-- Profile Section -->
                 <div class="relative">
                     <button id="profileButton"
-                            class="flex items-center space-x-2 focus:outline-none hover:bg-gray-700 p-2 rounded-md">
-                        <img src="{% static 'images/profile-placeholder.jpg' %}" alt="Profile"
-                             class="h-10 w-10 rounded-full border border-gray-600 shadow-sm">
+                    class="flex items-center space-x-2 focus:outline-none hover:bg-gray-700 p-2 rounded-md">
+                    {% if user.is_authenticated and user.profile_image_url %}
+                        <img src="{{ user.profile_image_url }}" alt="Profile Image"
+                             class="h-10 w-10 rounded-full border border-gray-600 shadow-sm object-cover">
+                    {% else %}
+                        <img src="{% static 'images/profile-placeholder.jpg' %}" alt="Profile Placeholder"
+                             class="h-10 w-10 rounded-full border border-gray-600 shadow-sm object-cover">
+                    {% endif %}
                         <span class="text-gray-300">Profile</span>
                         <i class="fas fa-caret-down text-gray-500"></i>
                     </button>

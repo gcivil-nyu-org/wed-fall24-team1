@@ -4,7 +4,6 @@ from urllib.parse import quote
 
 from axes.models import AccessAttempt
 from django.conf import settings
-from django.contrib.auth import login
 from django.contrib.auth.views import LoginView, LogoutView
 from django.core.exceptions import PermissionDenied
 from django.db import models
@@ -14,6 +13,9 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.decorators import login_required
 from dateutil.parser import parse as parse_date
+import uuid
+import boto3
+from botocore.exceptions import ClientError
 
 
 from accounts.models import CustomUser
@@ -33,13 +35,40 @@ ITEMS_PER_PAGE = 10
 
 def register(request):
     if request.method == "POST":
-        form = UserRegisterForm(request.POST)
+        form = UserRegisterForm(request.POST, request.FILES)
         if form.is_valid():
             user = form.save(commit=False)  # Don't save to DB yet
             user.first_name = form.cleaned_data.get("first_name")
             user.last_name = form.cleaned_data.get("last_name")
-            user.save()  # Now save to DB
-            login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+            profile_image = form.cleaned_data.get("profile_image")
+            if profile_image:
+                # Generate a unique filename
+                image_extension = profile_image.name.split(".")[-1]
+                unique_filename = f"{uuid.uuid4()}.{image_extension}"
+                s3_key = f"images/{unique_filename}"
+
+                # Upload to S3
+                s3_client = boto3.client("s3", region_name=settings.AWS_S3_REGION_NAME)
+
+                try:
+                    s3_client.upload_fileobj(
+                        profile_image,
+                        settings.AWS_STORAGE_BUCKET_NAME,
+                        s3_key,
+                        ExtraArgs={"ContentType": profile_image.content_type},
+                    )
+                    # Construct the image URL
+                    image_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{s3_key}"
+                    user.profile_image_url = image_url
+                except ClientError as e:
+                    print(f"Failed to upload image to S3: {e}")
+                    # Optionally, add an error message to the form
+                    form.add_error(
+                        "profile_image", "Failed to upload image. Please try again."
+                    )
+                    return render(request, "register.html", {"form": form})
+
+            user.save()  # Now save to DB            login(request, user, backend="django.contrib.auth.backends.ModelBackend")
             if user.user_type == "service_provider":
                 return redirect("services:list")
             else:
@@ -69,8 +98,41 @@ def profile_view(request):
         user_posts = Post.objects.filter(author=user).order_by("-created_at")
 
         if request.method == "POST":
-            form = ServiceProviderForm(request.POST, instance=service_provider)
+            form = ServiceProviderForm(
+                request.POST, request.FILES, instance=service_provider
+            )
             if form.is_valid():
+                profile_image = form.cleaned_data.get("profile_image")
+                remove_image = form.cleaned_data.get("remove_profile_image")
+                if remove_image:
+                    service_provider.profile_image_url = None
+                if profile_image:
+                    # Generate a unique filename
+                    image_extension = profile_image.name.split(".")[-1]
+                    unique_filename = f"{uuid.uuid4()}.{image_extension}"
+                    s3_key = f"images/{unique_filename}"
+
+                    # Upload to S3
+                    s3_client = boto3.client(
+                        "s3",
+                        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                        region_name=settings.AWS_S3_REGION_NAME,
+                    )
+
+                    try:
+                        s3_client.upload_fileobj(
+                            profile_image,
+                            settings.AWS_STORAGE_BUCKET_NAME,
+                            s3_key,
+                            ExtraArgs={"ContentType": profile_image.content_type},
+                        )
+                        # Construct the image URL
+                        image_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{s3_key}"
+                        service_provider.profile_image_url = image_url
+                    except ClientError as e:
+                        print(f"Failed to upload image to S3: {e}")
+
                 form.save()
                 return redirect("profile_view")
         else:
@@ -133,10 +195,39 @@ def profile_view(request):
 
         # Get active tab
         active_tab = "posts"
-
         if request.method == "POST":
-            form = ServiceSeekerForm(request.POST, instance=service_seeker)
+            form = ServiceSeekerForm(
+                request.POST, request.FILES, instance=service_seeker
+            )
             if form.is_valid():
+                profile_image = form.cleaned_data.get("profile_image")
+                remove_image = form.cleaned_data.get("remove_profile_image")
+                print(remove_image, profile_image)
+                if remove_image:
+                    service_seeker.profile_image_url = None
+                if profile_image:
+                    # Generate a unique filename
+                    image_extension = profile_image.name.split(".")[-1]
+                    unique_filename = f"{uuid.uuid4()}.{image_extension}"
+                    s3_key = f"images/{unique_filename}"
+                    # Upload to S3
+                    s3_client = boto3.client(
+                        "s3",
+                        region_name=settings.AWS_S3_REGION_NAME,
+                    )
+
+                    try:
+                        s3_client.upload_fileobj(
+                            profile_image,
+                            settings.AWS_STORAGE_BUCKET_NAME,
+                            s3_key,
+                            ExtraArgs={"ContentType": profile_image.content_type},
+                        )
+                        # Construct the image URL
+                        image_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{s3_key}"
+                        service_seeker.profile_image_url = image_url
+                    except ClientError as e:
+                        print(f"Failed to upload image to S3: {e}")
                 form.save()
                 return redirect("profile_view")
         else:

@@ -1,3 +1,5 @@
+<!-- register.html -->
+
 {% extends 'base.html' %}
 {% block title %}Register{% endblock %}
 {% load static %}
@@ -17,7 +19,7 @@
 
         <div class="mt-8 mx-auto w-full" style="min-width: 500px; !important;">
             <div class="bg-gray-800 py-8 px-12 shadow-xl rounded-lg">
-                <form method="post" class="space-y-8">
+                <form method="post" enctype="multipart/form-data" class="space-y-8">
                     {% csrf_token %}
                     {% for field in form %}
                         <div>
@@ -27,6 +29,9 @@
                             <div class="mt-1">
                                 {{ field }}
                             </div>
+                            {% if field.help_text %}
+                                <p class="mt-2 text-sm text-gray-500">{{ field.help_text }}</p>
+                            {% endif %}
                             {% if field.errors %}
                                 <p class="mt-2 text-sm text-red-400">{{ field.errors|join:", " }}</p>
                             {% endif %}
