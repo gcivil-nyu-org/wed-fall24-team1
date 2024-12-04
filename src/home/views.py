@@ -134,7 +134,9 @@ def home_view(request):
     ulat = request.GET.get("user_lat", DEFAULT_LAT)
     ulon = request.GET.get("user_lon", DEFAULT_LON)
     service_type = request.GET.get("type", "")
+    sort_by = request.GET.get("sort", "distance")
     user_bookmarks = []
+
     if user:
         user_bookmarks_services = repo.get_user_bookmarks(str(user.id))
         user_bookmarks = [service["Id"] for service in user_bookmarks_services]
@@ -150,6 +152,21 @@ def home_view(request):
     # Fetch items using the repository with filters
     items = repo.fetch_items_with_filter(search_query, service_type, radius, ulat, ulon)
     processed_items = HomeRepository.process_items(items)
+
+    # Sort the items before pagination
+
+    if sort_by == "rating":
+
+        def rating_sort_key(x):
+            rating = x.get("Ratings")
+            try:
+                return (0, -float(rating))
+            except (TypeError, ValueError):
+                return (1, 0)
+
+        processed_items.sort(key=rating_sort_key)
+    else:
+        processed_items.sort(key=lambda x: float(x.get("Distance", float("inf"))))
 
     # Paginate the results, showing 10 items per page
     paginator = Paginator(processed_items, 10)
@@ -171,9 +188,9 @@ def home_view(request):
             "Lat": float(item.get("Lat")) if item.get("Lat") else None,
             "Log": float(item.get("Log")) if item.get("Log") else None,
             "Ratings": (
-                "N/A"
-                if item.get("Ratings") in [0, "0", None]
-                else str(item.get("Ratings"))
+                str(item.get("Ratings"))
+                if item.get("Ratings") not in [None, "N/A"]
+                else "N/A"
             ),
             "RatingCount": str(item.get("rating_count", 0)),
             "Category": item.get("Category", "N/A"),
@@ -200,6 +217,7 @@ def home_view(request):
             "serialized_items": json.dumps(serialized_items),
             "user_lat": ulat if ulat else "",
             "user_lon": ulon if ulon else "",
+            "sort_by": sort_by,
         },
     )
 
