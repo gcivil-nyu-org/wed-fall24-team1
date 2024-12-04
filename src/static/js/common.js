@@ -28,3 +28,4 @@ function formatDateTime(utcTimestamp) {
         return 'Error formatting date';
     }
 }
+

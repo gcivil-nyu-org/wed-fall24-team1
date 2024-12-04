@@ -2,6 +2,32 @@ const profileButton = document.getElementById('profileButton');
 const profileDropdown = document.getElementById('profileDropdown');
 const notificationsButton = document.getElementById('notificationsButton');
 const notificationsDropdown = document.getElementById('notificationsDropdown');
+const logoutForm = document.getElementById('logoutForm');
+
+if (logoutForm) {
+    logoutForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        // Clear user-specific data from localStorage upon logout
+        sessionStorage.removeItem('userLat');
+        sessionStorage.removeItem('userLng');
+        sessionStorage.removeItem('userAddress');
+        localStorage.removeItem('selectedFilter');
+
+        const userLatInput = document.getElementById('user-lat');
+        const userLonInput = document.getElementById('user-lon');
+
+        if (userLatInput) userLatInput.value = '';
+        if (userLonInput) userLonInput.value = '';
+
+        // Reset global variables
+        window.userLat = null;
+        window.userLng = null;
+
+        logoutForm.submit();
+
+    });
+}
 
 profileButton.addEventListener('click', () => {
     profileDropdown.classList.toggle('hidden');

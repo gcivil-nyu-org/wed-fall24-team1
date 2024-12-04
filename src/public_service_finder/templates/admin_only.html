@@ -1,61 +1,301 @@
 {% extends 'base.html' %}
-{% block title %}Admin Only Page{% endblock %}
+{% block title %}Admin Dashboard{% endblock %}
+
 
 {% block content %}
-<div class="min-h-screen bg-transparent">
-    <div class="container mx-auto px-4 py-8 max-w-[1400px] min-w-[1000px]">
-        <!-- Header section -->
-        <div class="flex flex-col items-center mb-8 mt-16">
-            <h1 class="text-4xl font-bold text-gray-100">Admin Dashboard</h1>
-        </div>
 
-        <!-- Pending Services Section -->
+  <div class="min-h-screen bg-transparent">
+    <div class="container mx-auto px-4 py-8 max-w-[1400px] min-w-[1000px]">
+      <!-- Header Section -->
+      <div class="flex flex-col items-center mb-8 mt-6">
+        <h1 class="text-4xl font-bold text-gray-100">Admin Dashboard</h1>
+        <p class="text-gray-400 mt-2">Manage service listings and moderate content</p>
+      </div>
+
+      <!-- Tab Navigation -->
+      <div class="flex space-x-4 mb-6">
+        <button onclick="switchTab('services')"
+                id="servicesTab"
+                class="px-6 py-3 text-gray-300 rounded-t-lg font-medium transition-colors duration-200 tab-active">
+          Service Approvals
+        </button>
+        <button onclick="switchTab('flags')"
+                id="flagsTab"
+                class="px-6 py-3 text-gray-300 rounded-t-lg font-medium transition-colors duration-200">
+          Flagged Content
+        </button>
+      </div>
+
+      <!-- Services Tab Content -->
+      <div id="servicesContent" class="tab-content" style="min-width: 1050px;">
         {% if pending_services %}
-        <div class="overflow-x-auto bg-gray-800 rounded-xl shadow-sm p-8">
-            <table class="min-w-full text-base">
-                <thead>
-                    <tr class="bg-gray-700">
-                        <th class="px-8 py-4 text-left text-sm font-bold text-gray-300 uppercase tracking-wider">Service Name</th>
-                        <th class="px-8 py-4 text-left text-sm font-bold text-gray-300 uppercase tracking-wider">Description</th>
-                        <th class="px-8 py-4 text-left text-sm font-bold text-gray-300 uppercase tracking-wider">Address</th>
-                        <th class="px-8 py-4 text-left text-sm font-bold text-gray-300 uppercase tracking-wider">Status</th>
-                        <th class="px-8 py-4 text-center text-sm font-bold text-gray-300 uppercase tracking-wider">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-gray-800">
-                    {% for service in pending_services %}
-                    <tr id="service-row-{{ service.id }}" class="hover:bg-gray-700 transition-colors duration-200">
-                        <td class="px-8 py-6 whitespace-nowrap text-base font-medium text-gray-100">{{ service.name }}</td>
-                        <td class="px-8 py-6 text-base text-gray-300">{{ service.description }}</td>
-                        <td class="px-8 py-6 text-base text-gray-300">{{ service.address }}</td>
-                        <td class="px-8 py-6">
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-800 text-yellow-200">
-                                {{ service.service_status }}
-                            </span>
-                        </td>
-                        <td class="px-8 py-6 text-center">
-                            <form action="{% url 'admin_update_listing' service.id %}" method="post" class="inline-flex gap-3">
-                                {% csrf_token %}
-                                <button type="submit" name="status" value="approve"
-                                    class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 text-base">
-                                    Approve
-                                </button>
-                                <button type="submit" name="status" value="reject"
-                                    class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 text-base">
-                                    Reject
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
+          <div class="overflow-x-auto bg-gray-800 rounded-xl shadow-sm p-8">
+            <table class="w-full">
+              <thead>
+              <tr class="text-left text-gray-300 border-b border-gray-700">
+                <th class="p-4">Service Name</th>
+                <th class="p-4">Description</th>
+                <th class="p-4">Address</th>
+                <th class="p-4">Status</th>
+                <th class="p-4">Actions</th>
+              </tr>
+              </thead>
+              <tbody>
+              {% for service in pending_services %}
+                <tr class="border-b border-gray-700 hover:bg-gray-750 transition-colors">
+                  <td class="p-4 text-gray-300">{{ service.name }}</td>
+                  <td class="p-4 text-gray-300">{{ service.description }}</td>
+                  <td class="p-4 text-gray-300">{{ service.address }}</td>
+                  <td class="p-4">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-800 text-yellow-200">
+                                    {{ service.service_status }}
+                                </span>
+                  </td>
+                  <td class="p-4">
+                    <div class="flex space-x-2">
+                      <form method="POST" action="{% url 'admin_update_listing' service.id %}" class="inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="status" value="approve">
+                        <button type="submit"
+                                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm transition-colors duration-150">
+                          Approve
+                        </button>
+                      </form>
+                      <form method="POST" action="{% url 'admin_update_listing' service.id %}" class="inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="status" value="reject">
+                        <button type="submit"
+                                class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm transition-colors duration-150">
+                          Reject
+                        </button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+              </tbody>
             </table>
-        </div>
+          </div>
         {% else %}
-        <div class="bg-gray-800 rounded-xl shadow-sm p-8 text-center">
-            <p class="text-gray-400 text-lg">No pending listings at the moment.</p>
-        </div>
+          <div class="bg-gray-800 rounded-xl shadow-sm p-8 text-center">
+            <p class="text-gray-300">No pending service listings at this time.</p>
+          </div>
         {% endif %}
+      </div>
+
+      <!-- Flags Tab Content -->
+      <div id="flagsContent" class="tab-content tab-hidden" style="min-width: 1050px;">
+        {% if flags %}
+          <div class="overflow-x-auto bg-gray-800 rounded-xl shadow-sm p-8">
+            <table class="w-full">
+              <thead>
+              <tr class="text-left text-gray-300 border-b border-gray-700">
+                <th class="p-4">Content Type</th>
+                <th class="p-4">Content Preview</th>
+                <th class="p-4">Flags</th>
+                <th class="p-4">First Flagged</th>
+                <th class="p-4">Actions</th>
+              </tr>
+              </thead>
+              <tbody>
+              {% for flag in flags %}
+                <tr class="border-b border-gray-700 hover:bg-gray-750 transition-colors cursor-pointer"
+                    data-flag-id="{{ flag.first_flag_id }}">
+                  <td class="p-4 text-gray-300">
+                    {{ flag.content_type|title }}
+                  </td>
+                  <td class="p-4 text-gray-300">
+                    <div class="max-w-md"
+                         data-author="{{ flag.content_author }}"
+                         data-full-content="{{ flag.content_preview }}"
+                         onclick="showContentModal('{{ flag.first_flag_id }}')">
+                      {% if flag.content_type == 'FORUM POST' %}
+                        <div class="font-semibold">{{ flag.content_title }}</div>
+                        <div class="text-sm text-gray-400">{{ flag.content_preview|truncatechars:40 }}</div>
+                      {% elif flag.content_type == 'FORUM COMMENT' %}
+                        <div class="text-sm text-gray-400">{{ flag.content_preview|truncatechars:40 }}</div>
+                      {% elif flag.content_type == 'REVIEW' %}
+                        <div class="font-semibold">Rating: {{ flag.content_rating }} ★</div>
+                        <div class="text-sm text-gray-400">{{ flag.content_preview|truncatechars:40 }}</div>
+                      {% endif %}
+                    </div>
+                  </td>
+                  <td class="p-4">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-800 text-red-200">
+                      {{ flag.flag_count }} flags
+                    </span>
+                    <div class="text-sm text-gray-400 mt-2 space-y-2">
+                      {% for flag_detail in flag.flags %}
+                        <div class="flex items-start space-x-2">
+                          <span class="font-medium">{{ flag_detail.flagger }}</span>
+                          <span class="text-gray-500">•</span>
+                          <span class="bg-yellow-800/50 px-2 py-0.5 rounded text-yellow-200">{{ flag_detail.reason }}</span>
+                          {% if flag_detail.explanation %}
+                            <span class="text-gray-500">•</span>
+                            <span class="italic">"{{ flag_detail.explanation }}"</span>
+                          {% endif %}
+                        </div>
+                      {% endfor %}
+                    </div>
+                  </td>
+                  <td class="p-4 text-gray-400 text-sm">
+                    {{ flag.created_at|date:"M d, Y" }}
+                  </td>
+                  <td class="p-4">
+                    <div class="flex space-x-2">
+                      <button onclick="event.stopPropagation(); handleFlagAction('{{ flag.first_flag_id }}', 'dismiss')"
+                              class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm transition-colors duration-150">
+                        Dismiss
+                      </button>
+                      <button onclick="event.stopPropagation(); handleFlagAction('{{ flag.first_flag_id }}', 'revoke')"
+                              class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm transition-colors duration-150">
+                        Revoke
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div id="contentModal"
+               class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 overflow-y-auto p-4">
+            <div class="bg-gray-800 rounded-lg p-8 max-w-2xl w-full border border-gray-700 my-auto">
+              <div class="flex justify-between items-start mb-4">
+                <div>
+                  <h2 id="modalTitle" class="text-2xl font-bold text-gray-100"></h2>
+                  <p id="modalAuthor" class="text-sm text-gray-400"></p>
+                </div>
+                <button onclick="hideContentModal()" class="text-gray-400 hover:text-gray-300">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                </button>
+              </div>
+              <div id="modalContent"
+                   class="prose prose-invert max-w-none text-gray-300 max-h-[70vh] overflow-y-auto"></div>
+            </div>
+          </div>
+        {% else %}
+          <div class="bg-gray-800 rounded-xl shadow-sm p-8 text-center">
+            <p class="text-gray-300">No flagged content requires review at this time.</p>
+          </div>
+
+        {% endif %}
+      </div>
     </div>
-</div>
+  </div>
+
+{% endblock %}
+
+{% block scripts %}
+  {{ block.super }}
+  <script>
+      // JavaScript for handling tab switching
+
+      function showContentModal(flagId) {
+          const previewDiv = document.querySelector(`tr[data-flag-id="${flagId}"] td:nth-child(2) div`);
+
+          const contentType = previewDiv.closest('tr').querySelector('td:first-child').textContent.trim();
+
+          const modal = document.getElementById('contentModal');
+          const modalTitle = document.getElementById('modalTitle');
+          const modalContent = document.getElementById('modalContent');
+          const modalAuthor = document.getElementById('modalAuthor');
+
+          modalTitle.textContent = contentType;
+          modalAuthor.textContent = `By: ${previewDiv.dataset.author}`;
+          modalContent.innerHTML = previewDiv.dataset.fullContent;
+
+          modal.classList.remove('hidden');
+      }
+
+      function hideContentModal() {
+          document.getElementById('contentModal').classList.add('hidden');
+      }
+
+      function switchTab(tabName) {
+          // Update tab buttons
+          document.getElementById('servicesTab').classList.remove('tab-active');
+          document.getElementById('flagsTab').classList.remove('tab-active');
+          document.getElementById(tabName + 'Tab').classList.add('tab-active');
+
+          // Update content visibility using our new specific class
+          document.getElementById('servicesContent').classList.add('tab-hidden');
+          document.getElementById('flagsContent').classList.add('tab-hidden');
+          document.getElementById(tabName + 'Content').classList.remove('tab-hidden');
+      }
+
+      // Add these styles for the active tab state
+      document.head.insertAdjacentHTML('beforeend', `
+        <style>
+            .tab-active {
+                background-color: rgb(31, 41, 55);
+                border-bottom: 2px solid rgb(96, 165, 250);
+                color: rgb(96, 165, 250);
+            }
+            .tab-hidden {
+                display: none;
+            }
+        </style>
+    `);
+
+      async function handleFlagAction(flagId, action) {
+          console.log(flagId)
+          try {
+              const response = await fetch(`{% url 'moderation:review_flag' 0 %}`.replace('0', flagId), {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/x-www-form-urlencoded',
+                      'X-CSRFToken': getCsrfToken(),
+                  },
+                  body: `action=${action}`
+              });
+
+              const data = await response.json();
+
+              if (data.success) {
+                  // Find the table row containing this flag and remove it with a fade effect
+                  const flagRow = document.querySelector(`tr[data-flag-id="${flagId}"]`);
+                  if (flagRow) {
+                      // Add fade-out effect
+                      flagRow.style.transition = 'opacity 0.3s ease-out';
+                      flagRow.style.opacity = '0';
+
+                      // Remove the element after fade completes
+                      setTimeout(() => {
+                          flagRow.remove();
+
+                          // Check if there are any flags left
+                          const remainingFlags = document.querySelectorAll('tr[data-flag-id]');
+                          if (remainingFlags.length === 0) {
+                              // Show "no flags" message
+                              const tableContainer = document.querySelector('#flagsContent .overflow-x-auto');
+                              const noFlagsDiv = document.createElement('div');
+                              noFlagsDiv.className = 'bg-gray-800 rounded-xl shadow-sm p-8 text-center';
+                              noFlagsDiv.innerHTML = '<p class="text-gray-300">No flagged content requires review at this time.</p>';
+                              tableContainer.replaceWith(noFlagsDiv);
+                          }
+                      }, 300);
+                  }
+              } else {
+                  alert(data.error || 'An error occurred while processing the flag');
+              }
+          } catch (error) {
+              console.error('Error:', error);
+              alert('An error occurred while processing the flag');
+          }
+      }
+
+      // Helper function to get CSRF token
+      function getCsrfToken() {
+          const cookies = document.cookie.split('; ');
+          for (const cookie of cookies) {
+              const [name, value] = cookie.split('=');
+              if (name === 'csrftoken') return value;
+          }
+          return '';
+      }
+  </script>
 {% endblock %}

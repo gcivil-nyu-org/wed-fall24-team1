@@ -25,4 +25,5 @@ urlpatterns = [
         name="admin_update_listing",
     ),  # Changed prefix
     path("forum/", include("forum.urls", namespace="forum")),
+    path("moderation/", include("moderation.urls", namespace="moderation")),
 ]

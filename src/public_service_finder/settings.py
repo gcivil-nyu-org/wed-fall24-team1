@@ -75,6 +75,7 @@ INSTALLED_APPS = [
     "services",
     "accounts",
     "forum",
+    "moderation",
     "axes",
     "widget_tweaks",
 ]

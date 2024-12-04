@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.shortcuts import render
 
+from moderation.models import Flag
 from public_service_finder.utils.enums.service_status import ServiceStatus
 from services.repositories import ServiceRepository
 
@@ -22,9 +23,58 @@ def root_redirect_view(request):
 def admin_only_view_new_listings(request):
     if not request.user.is_superuser:
         return render(request, "403.html", status=403)
+
     service_repo = ServiceRepository()
     pending_services = service_repo.get_pending_approval_services()
-    return render(request, "admin_only.html", {"pending_services": pending_services})
+
+    # First, get all pending flags
+    flags = Flag.objects.filter(status="PENDING").select_related("flagger")
+
+    # Create a dictionary to group flags by content
+    grouped_flags = {}
+    for flag in flags:
+        content_key = f"{flag.content_type}:{flag.object_id}"
+        if content_key not in grouped_flags:
+            grouped_flags[content_key] = {
+                "content_type": flag.content_type,
+                "object_id": flag.object_id,
+                "content_preview": flag.content_preview,
+                "content_title": flag.content_title,
+                "content_rating": flag.content_rating,
+                "content_author": flag.content_author,
+                "created_at": flag.created_at,  # First flag date
+                "flags": [],
+                "flag_count": 0,
+                "first_flag_id": flag.id,
+            }
+
+        # Add this flag's information
+        grouped_flags[content_key]["flags"].append(
+            {
+                "flagger": flag.flagger.username,
+                "reason": flag.reason,
+                "explanation": flag.explanation,
+                "created_at": flag.created_at,
+                "flag_id": flag.id,
+            }
+        )
+        grouped_flags[content_key]["flag_count"] += 1
+
+    # Convert the dictionary to a list and sort by number of flags (most flags first)
+    grouped_flags_list = sorted(
+        grouped_flags.values(),
+        key=lambda x: (x["flag_count"], x["created_at"]),
+        reverse=True,
+    )
+
+    return render(
+        request,
+        "admin_only.html",
+        {
+            "pending_services": pending_services,
+            "flags": grouped_flags_list,
+        },
+    )
 
 
 @login_required
