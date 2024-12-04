@@ -180,10 +180,14 @@ document.addEventListener('DOMContentLoaded', () => {
     window.fetchAndDisplayReviews = fetchAndDisplayReviews;
 
     // Add the showServiceDetails function
-    function showServiceDetails(index) {
-        const service = itemsData.find(item => item.Id === index);
+    function showServiceDetails(serviceId) {
+        // Ensure serviceId is a string
+        serviceId = String(serviceId);
+
+        // Find the service data by ID
+        const service = itemsData.find(item => item.Id === serviceId);
         if (!service) {
-            console.error(`Service with index ${index} not found.`);
+            console.error(`Service with ID ${serviceId} not found.`);
             return;
         }
 
@@ -208,8 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const serviceAvailability = document.getElementById('serviceAvailability');
-        if (service.IsActive === false) {
-            serviceAvailability.textContent = 'Currently Unavailable';
+        if (service.IsActive === false || service.IsActive === 'false') {            serviceAvailability.textContent = 'Currently Unavailable';
             serviceAvailability.classList.remove('text-green-500');
             serviceAvailability.classList.add('text-red-500');
         } else {
@@ -321,6 +324,20 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             getDirectionsBtn.href = '#';
             getDirectionsBtn.style.display = 'none';
+        }
+
+        // Handle service image
+
+        const serviceImage = document.getElementById('serviceImage');
+
+        if (service.ImageURL) {
+
+            serviceImage.src = service.ImageURL;
+
+        } else {
+
+            serviceImage.src = placeholderImageURL; // This variable should be defined in the template
+
         }
 
         // Fetch and display reviews

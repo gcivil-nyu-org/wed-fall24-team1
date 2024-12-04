@@ -43,8 +43,11 @@
         {% for service in services %}
           <div class="service-box service-card bg-gray-800 rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden min-w-[300px] border border-gray-700">
             <!-- Add dummy image -->
-            <img src="{% static 'images/placeholder_service.jpeg' %}?height=200&width=400"
-                 alt="Service image" class="w-full h-48 object-cover"/>
+            {% if service.image_url %}
+                <img src="{{ service.image_url }}" alt="Service image" class="w-full h-48 object-cover"/>
+            {% else %}
+                <img src="{% static 'images/placeholder_service.jpeg' %}?height=200&width=400" alt="Service image" class="w-full h-48 object-cover"/>
+            {% endif %}
             <div class="p-6">
               {% if service.announcement %}
                 <div class="mb-3 flex items-center space-x-2 text-yellow-700 bg-yellow-50 border-l-2 border-yellow-400 px-3 py-2 rounded-lg">

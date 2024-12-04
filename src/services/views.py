@@ -13,6 +13,7 @@ from django.shortcuts import render, redirect
 from django.utils import timezone as timezone2  # Ensure this is imported
 from forum.models import Notification
 from home.repositories import HomeRepository
+from public_service_finder import settings
 from public_service_finder.utils.enums.service_status import ServiceStatus
 from .forms import ServiceForm, DescriptionFormSet, ReviewResponseForm
 from .models import ServiceDTO
@@ -20,6 +21,8 @@ from .repositories import ServiceRepository, ReviewRepository
 from collections import Counter
 import re
 from accounts.models import CustomUser
+import boto3
+from botocore.exceptions import ClientError
 
 service_repo = ServiceRepository()
 review_repo = ReviewRepository()
@@ -49,13 +52,14 @@ def service_create(request):
         raise PermissionDenied
 
     if request.method == "POST":
-        form = ServiceForm(request.POST)
+        form = ServiceForm(request.POST, request.FILES)
         description_formset = DescriptionFormSet(request.POST, prefix="description")
 
         if form.is_valid() and description_formset.is_valid():
             # Process the main form data
             service_data = form.cleaned_data
             is_active = service_data.get("is_active", True)
+            image = form.cleaned_data.get("image")
 
             # Process the description formset
             description_data = {}
@@ -74,6 +78,38 @@ def service_create(request):
                     else:
                         description_data[key] = value
 
+            # Handle image upload
+            image_url = ""
+            if image:
+                # Generate a unique filename
+                image_extension = image.name.split(".")[-1]
+                unique_filename = f"{uuid.uuid4()}.{image_extension}"
+                s3_key = f"service-provider-images/{unique_filename}"
+
+                # Upload to S3
+                s3_client = boto3.client("s3", region_name=settings.AWS_S3_REGION_NAME)
+                try:
+                    s3_client.upload_fileobj(
+                        image,
+                        settings.AWS_STORAGE_BUCKET_NAME,
+                        s3_key,
+                        ExtraArgs={"ContentType": image.content_type},
+                    )
+                    # Construct the image URL
+                    image_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{s3_key}"
+                except ClientError as e:
+                    print(f"Failed to upload image to S3: {e}")
+                    form.add_error("image", "Failed to upload image. Please try again.")
+                    return render(
+                        request,
+                        "service_form.html",
+                        {
+                            "form": form,
+                            "description_formset": description_formset,
+                            "action": "Create",
+                        },
+                    )
+
             # Create ServiceDTO with processed data
             service_dto = ServiceDTO(
                 id=str(uuid.uuid4()),
@@ -90,6 +126,7 @@ def service_create(request):
                 service_approved_timestamp="1900-01-01T00:00:00Z",
                 is_active=is_active,
                 announcement=service_data.get("announcement"),
+                image_url=image_url,
             )
             if service_repo.create_service(service_dto):
                 return redirect("services:list")
@@ -127,12 +164,14 @@ def service_edit(request, service_id):
     }
 
     if request.method == "POST":
-        form = ServiceForm(request.POST)
+        form = ServiceForm(request.POST, request.FILES)
         description_formset = DescriptionFormSet(request.POST, prefix="description")
 
         if form.is_valid() and description_formset.is_valid():
             service_data = form.cleaned_data
             new_is_active = service_data.get("is_active", True)
+            image = form.cleaned_data.get("image")
+            remove_image = form.cleaned_data.get("remove_image")
 
             # Collect new description data
             new_description_data = {}
@@ -162,6 +201,41 @@ def service_edit(request, service_id):
                 or service.category != service_data["category"]
                 or service.description != new_description_data
             )
+
+            # Handle image upload and removal
+            image_url = service.image_url
+            if remove_image:
+                image_url = ""
+            if image:
+                # Generate a unique filename
+                image_extension = image.name.split(".")[-1]
+                unique_filename = f"{uuid.uuid4()}.{image_extension}"
+                s3_key = f"service-provider-images/{unique_filename}"
+
+                # Upload to S3
+                s3_client = boto3.client("s3", region_name=settings.AWS_S3_REGION_NAME)
+                try:
+                    s3_client.upload_fileobj(
+                        image,
+                        settings.AWS_STORAGE_BUCKET_NAME,
+                        s3_key,
+                        ExtraArgs={"ContentType": image.content_type},
+                    )
+                    # Construct the image URL
+                    image_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{s3_key}"
+                except ClientError as e:
+                    print(f"Failed to upload image to S3: {e}")
+                    form.add_error("image", "Failed to upload image. Please try again.")
+                    return render(
+                        request,
+                        "service_form.html",
+                        {
+                            "form": form,
+                            "description_formset": description_formset,
+                            "action": "Edit",
+                            "service": service,
+                        },
+                    )
 
             # Check if `is_active` was toggled
             is_active_toggled = service.is_active != new_is_active
@@ -199,6 +273,7 @@ def service_edit(request, service_id):
                 service_approved_timestamp=service.service_approved_timestamp,
                 is_active=new_is_active,
                 announcement=service_data.get("announcement"),
+                image_url=image_url,
             )
 
             if announcement_changed and new_announcement.strip():

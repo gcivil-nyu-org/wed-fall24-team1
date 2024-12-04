@@ -5,96 +5,205 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
         integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
         crossorigin="anonymous" referrerpolicy="no-referrer"/>
-  <style>
-      #serviceDetails {
-          font-family: Arial, sans-serif;
-          background-color: #1a202c;
-          color: #e2e8f0;
-      }
-
-      #serviceDetails .flex {
-          align-items: center;
-      }
-
-      #serviceDetails h2 {
-          margin: 0;
-          flex-grow: 1;
-      }
-
-      #serviceDetails .bookmark-label {
-          display: flex;
-          align-items: center;
-          font-size: 0.875rem;
-          color: #a0aec0;
-          margin-right: 1rem;
-      }
-
-      #serviceDetails .bookmark-label input[type="checkbox"] {
-          display: none;
-      }
-
-      #serviceDetails .bookmark-icon {
-          cursor: pointer;
-          font-size: 1.5rem;
-          color: #4a5568;
-          transition: color 0.3s ease;
-      }
-
-      #serviceDetails .bookmark-label input[type="checkbox"]:checked + .bookmark-icon {
-          color: #4299e1;
-      }
-
-      #serviceDetails .space-y-1 p {
-          margin-bottom: 0.5rem;
-      }
-
-      #serviceDetails #getDirections {
-          display: inline-block;
-          margin-top: 1rem;
-          text-decoration: none;
-          background-color: #4299e1;
-          color: #fff;
-      }
-
-      #serviceDetails #reviewRating,
-      #serviceDetails #reviewText {
-          width: 100%;
-          margin-bottom: 0.5rem;
-          background-color: #2d3748;
-          color: #e2e8f0;
-          border: 1px solid #4a5568;
-      }
-
-      #serviceDetails #submitReview {
-          cursor: pointer;
-          background-color: #4299e1;
-          color: #fff;
-      }
-
-      .flex-container {
-          display: flex;
-          align-items: baseline;
-          justify-content: space-between;
-          gap: 16px;
-      }
-
-      .rating-element {
-          margin: 0;
-          padding: 0;
-          line-height: 1.5;
-      }
-
-      .icon-container {
-          display: flex;
-          gap: 8px;
-          align-items: center;
-      }
-  </style>
+        <style>
+          #serviceDetails {
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+              background-color: #1a202c;
+              color: #e2e8f0;
+              border-radius: 8px;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+              padding: 2rem;
+          }
+    
+          #serviceDetails .flex {
+              align-items: center;
+          }
+    
+          #serviceDetails h2 {
+              margin: 0;
+              flex-grow: 1;
+              font-size: 1.5rem;
+              font-weight: 600;
+          }
+    
+          #serviceDetails .bookmark-label {
+              display: flex;
+              align-items: center;
+              font-size: 0.875rem;
+              color: #a0aec0;
+              margin-right: 1rem;
+          }
+    
+          #serviceDetails .bookmark-label input[type="checkbox"] {
+              display: none;
+          }
+    
+          #serviceDetails .bookmark-icon {
+              cursor: pointer;
+              font-size: 1.5rem;
+              color: #4a5568;
+              transition: color 0.3s ease;
+          }
+    
+          #serviceDetails .bookmark-label input[type="checkbox"]:checked + .bookmark-icon {
+              color: #4299e1;
+          }
+    
+          #serviceDetails .space-y-1 p {
+              margin-bottom: 0.75rem;
+              line-height: 1.6;
+          }
+    
+          #serviceDetails #getDirections {
+              display: inline-block;
+              margin-top: 1rem;
+              text-decoration: none;
+              background-color: #4299e1;
+              color: #fff;
+              padding: 0.5rem 1rem;
+              border-radius: 4px;
+              transition: background-color 0.3s ease;
+          }
+    
+          #serviceDetails #getDirections:hover {
+              background-color: #3182ce;
+          }
+    
+          #serviceDetails #reviewRating,
+          #serviceDetails #reviewText {
+              width: 100%;
+              margin-bottom: 1rem;
+              background-color: #2d3748;
+              color: #e2e8f0;
+              border: 1px solid #4a5568;
+              border-radius: 4px;
+              padding: 0.5rem;
+          }
+    
+          #serviceDetails #submitReview {
+              cursor: pointer;
+              background-color: #4299e1;
+              color: #fff;
+              padding: 0.5rem 1rem;
+              border-radius: 4px;
+              border: none;
+              transition: background-color 0.3s ease;
+          }
+    
+          #serviceDetails #submitReview:hover {
+              background-color: #3182ce;
+          }
+    
+          .flex-container {
+              display: flex;
+              align-items: baseline;
+              justify-content: space-between;
+              gap: 16px;
+          }
+    
+          .rating-element {
+              margin: 0;
+              padding: 0;
+              line-height: 1.5;
+          }
+    
+          .icon-container {
+              display: flex;
+              gap: 8px;
+              align-items: center;
+          }
+    
+          #serviceImageContainer {
+              margin-bottom: 1.5rem;
+          }
+    
+          #serviceImage {
+              width: 100%;
+              height: 250px;
+              object-fit: cover;
+              border-radius: 8px;
+              box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          }
+    
+          #serviceAnnouncement {
+              background-color: #fefcbf;
+              border-left: 4px solid #ecc94b;
+              padding: 1rem;
+              margin-bottom: 1.5rem;
+              border-radius: 4px;
+          }
+    
+          #serviceAnnouncement p {
+              color: #744210;
+              font-size: 0.875rem;
+          }
+    
+          #reviewsContainer {
+              margin-top: 2rem;
+          }
+    
+          #reviewsContainer > div {
+              background-color: #2d3748;
+              border-radius: 8px;
+              padding: 1rem;
+              margin-bottom: 1rem;
+          }
+    
+          #reviewsContainer h4 {
+              font-size: 1rem;
+              font-weight: 600;
+              margin-bottom: 0.5rem;
+          }
+    
+          #reviewsContainer p {
+              font-size: 0.875rem;
+              line-height: 1.5;
+          }
+    
+          #editReviewModal,
+          #deleteReviewModal {
+              background-color: rgba(0, 0, 0, 0.5);
+          }
+    
+          #editReviewModal > div,
+          #deleteReviewModal > div {
+              background-color: #2d3748;
+              border-radius: 8px;
+              padding: 2rem;
+          }
+    
+          #editReviewModal h3,
+          #deleteReviewModal h3 {
+              font-size: 1.5rem;
+              font-weight: 600;
+              margin-bottom: 1rem;
+          }
+    
+          #editReviewModal select,
+          #editReviewModal textarea {
+              width: 100%;
+              padding: 0.5rem;
+              margin-bottom: 1rem;
+              background-color: #4a5568;
+              color: #e2e8f0;
+              border: 1px solid #718096;
+              border-radius: 4px;
+          }
+    
+          #editReviewModal button,
+          #deleteReviewModal button {
+              padding: 0.5rem 1rem;
+              border-radius: 4px;
+              font-weight: 600;
+              transition: background-color 0.3s ease;
+          }
+      </style>
 </head>
 
 <script>
     const itemsData = JSON.parse('{{ serialized_items|escapejs }}');
     const userIsAuthenticated = {{ user.is_authenticated|yesno:'true,false' }};
+    const placeholderImageURL = "{% static 'images/placeholder_service.jpeg' %}";
 </script>
 <div id="editReviewModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex items-center justify-center">
   <div class="bg-gray-800 rounded-lg p-8 max-w-2xl w-full mx-4 border border-gray-700">
@@ -147,6 +256,12 @@
       </svg>
     </button>
   </div>
+
+  <!-- Service Image Section -->
+  <div id="serviceImageContainer" class="mb-4">
+    <img id="serviceImage" src="" alt="Service Image" class="w-full h-48 object-cover rounded-lg">
+  </div>
+
   <div id="serviceAnnouncement"
        class="mb-3 flex items-center space-x-2 text-yellow-700 bg-yellow-50 border-l-2 border-yellow-400 px-3 py-2 rounded-lg hidden">
     <svg class="h-4 w-4 flex-shrink-0 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
