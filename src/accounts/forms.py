@@ -107,6 +107,7 @@ class UserRegisterForm(UserCreationForm):
 class UserLoginForm(AuthenticationForm):
     username = forms.CharField(
         label="Username",
+        max_length=256,
         widget=forms.TextInput(
             attrs={
                 "class": "form-control w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600",
@@ -246,12 +247,14 @@ class ServiceSeekerForm(forms.ModelForm):
             "first_name": forms.TextInput(
                 attrs={
                     "class": "w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600",
+                    "maxlength": "256", 
                     "placeholder": "First Name",
                 }
             ),
             "last_name": forms.TextInput(
                 attrs={
                     "class": "w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600",
+                    "maxlength": "256",  
                     "placeholder": "Last Name",
                 }
             ),
@@ -298,12 +301,14 @@ class ServiceProviderForm(forms.ModelForm):
             "first_name": forms.TextInput(
                 attrs={
                     "class": "w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600",
+                    "maxlength": "256",  
                     "placeholder": "First Name",
                 }
             ),
             "last_name": forms.TextInput(
                 attrs={
                     "class": "w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600",
+                    "maxlength": "256",
                     "placeholder": "Last Name",
                 }
             ),

@@ -11,7 +11,7 @@
             <!-- Location Input -->
             <div class="flex flex-col w-full sm:w-40">
                 <label for="location" class="mb-1 text-sm font-medium text-gray-400">Location</label>
-                <input type="text" id="location" name="location" placeholder="Enter Location" value="{{ location_value }}"
+                <input type="text" id="location" name="location" placeholder="Enter Location" value="{{ location_value }}" maxlength = "256"
                        class="w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600">
             </div>
 
@@ -47,7 +47,7 @@
                 <div class="flex items-center bg-gray-700 p-2 rounded h-12 border border-gray-600">
                     <span class="text-gray-300 mr-2">Radius:</span>
                     <input type="range" id="radius" name="radius" min="1" max="20" value="{% if radius == '' %}5{% else %}{{ radius }}{% endif %}"
-                           class="flex-grow slider bg-gray-600 rounded-lg">
+                      class="flex-grow slider bg-gray-600 rounded-lg">
                     <span id="radiusValue" class="ml-2 text-gray-300 w-5 text-right">{% if radius == '' %}5{% else %}{{ radius }}{% endif %}</span>
                     <span class="ml-2 text-gray-300 text-right">Miles</span>
                 </div>

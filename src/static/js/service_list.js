@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                         Respond
                                     </button>
                                     <div id="responseForm-${review.ReviewId}" class="response-form hidden mt-2">
-                                        <textarea id="responseText-${review.ReviewId}" class="w-full p-2 border rounded focus:outline-none focus:border-blue-700 focus:ring-4 bg-gray-600 text-gray-100 border-gray-500" rows="2" placeholder="Write your response here..."></textarea>
+                                        <textarea id="responseText-${review.ReviewId}" maxlength="1000" class="w-full p-2 border rounded focus:outline-none focus:border-blue-700 focus:ring-4 bg-gray-600 text-gray-100 border-gray-500" rows="2" placeholder="Write your response here..."></textarea>
                                         <button class="send-response bg-green-600 text-white py-1 px-3 rounded mt-2 hover:bg-green-700"
                                                 onclick="sendResponse('${serviceId}', '${review.ReviewId}')">
                                             Send Response
