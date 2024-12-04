@@ -145,3 +145,4 @@ GitHub.sublime-settings
 ps_env
 .aider*
 src/staticfiles
+src/*/migrations
