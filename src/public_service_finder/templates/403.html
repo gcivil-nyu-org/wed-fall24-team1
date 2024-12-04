@@ -13,8 +13,8 @@
         
         <!-- Error Message -->
         <h1 class="mb-4 text-6xl font-semibold text-red-500">403</h1>
-        <h2 class="mb-4 text-3xl font-bold text-gray-800">Access Denied</h2>
-        <p class="mb-8 text-lg text-gray-600">Sorry, you don't have permission to access this page.</p>
+        <h2 class="mb-4 text-3xl font-bold text-gray-300">Access Denied</h2>
+        <p class="mb-8 text-lg text-gray-400">Sorry, you don't have permission to access this page.</p>
         
         <!-- Back to Home Button -->
         {% if user.is_authenticated and user.user_type == 'service_provider' %}
