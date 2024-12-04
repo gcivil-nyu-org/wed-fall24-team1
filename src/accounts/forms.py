@@ -2,7 +2,11 @@
 
 from django import forms
 from django.contrib.auth import get_user_model, authenticate
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import (
+    UserCreationForm,
+    AuthenticationForm,
+    SetPasswordForm,
+)
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.forms import PasswordResetForm
 
@@ -269,11 +273,34 @@ class ServiceProviderForm(forms.ModelForm):
         }
         # Add any other basic fields you want to include for service providers
 
+
 class CustomPasswordResetForm(PasswordResetForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Update the widget attributes for the email field
-        self.fields['email'].widget.attrs.update({
-            'class': 'w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600',
-            'placeholder': 'Enter Email'
-        })
+        self.fields["email"].widget.attrs.update(
+            {
+                "class": "w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600",
+                "placeholder": "Enter Email",
+                "label": "Enter Email",
+            }
+        )
+
+
+class CustomPasswordResetSetPasswordForm(SetPasswordForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Update the widget attributes for the email field
+        print(self.fields)
+        self.fields["new_password1"].widget.attrs.update(
+            {
+                "class": "w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600",
+                "placeholder": "Enter Password",
+            }
+        )
+        self.fields["new_password2"].widget.attrs.update(
+            {
+                "class": "w-full p-2 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 h-12 border border-gray-600",
+                "placeholder": "Confirm Password",
+            }
+        )
