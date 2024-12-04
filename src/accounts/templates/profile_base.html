@@ -227,15 +227,10 @@
               </div>
           {% endfor %}
 
-          <!-- Show Remove Profile Image Checkbox Only If User Has an Image -->
+          <!-- Optional: Show Remove Profile Image Checkbox Only If User Has an Image -->
           {% if profile.profile_image_url %}
-              <div class="flex items-center">
-                  <input type="checkbox" id="id_remove_profile_image" name="remove_profile_image"
-                         class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-600 rounded">
-                  <label for="id_remove_profile_image" class="ml-2 block text-sm text-gray-300">
-                      Remove profile image
-                  </label>
-              </div>
+              <!-- The 'remove_profile_image' field is already rendered in the loop above -->
+              <!-- No need to render it again here -->
           {% endif %}
 
           <div class="flex justify-between mt-6">
@@ -345,6 +340,7 @@
               element.textContent = formatTimestamp(timestamp);
           });
       });
+
       document.querySelector('form').addEventListener('submit', function (e) {
         const removeCheckbox = document.getElementById('id_remove_profile_image');
         if (removeCheckbox && removeCheckbox.checked) {

@@ -105,7 +105,7 @@ def profile_view(request):
                 profile_image = form.cleaned_data.get("profile_image")
                 remove_image = form.cleaned_data.get("remove_profile_image")
                 if remove_image:
-                    user.profile_image_url = None
+                    service_provider.profile_image_url = None
                 if profile_image:
                     # Generate a unique filename
                     image_extension = profile_image.name.split(".")[-1]
@@ -202,8 +202,9 @@ def profile_view(request):
             if form.is_valid():
                 profile_image = form.cleaned_data.get("profile_image")
                 remove_image = form.cleaned_data.get("remove_profile_image")
+                print(remove_image, profile_image)
                 if remove_image:
-                    user.profile_image_url = None
+                    service_seeker.profile_image_url = None
                 if profile_image:
                     # Generate a unique filename
                     image_extension = profile_image.name.split(".")[-1]
