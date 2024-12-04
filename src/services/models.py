@@ -28,6 +28,7 @@ class ServiceDTO:
     service_approved_timestamp: str
     is_active: bool
     announcement: str = ""
+    image_url: str = ""  # Add this field
 
     @classmethod
     def from_dynamodb_item(cls, item: Dict[str, Any]) -> "ServiceDTO":
@@ -50,6 +51,7 @@ class ServiceDTO:
             service_approved_timestamp=item.get("ApprovedTimestamp", "NONE"),
             is_active=item.get("IsActive", True),
             announcement=item.get("Announcement", ""),  # Add this line
+            image_url=item.get("ImageURL", ""),  # Add this line
         )
 
     def to_dynamodb_item(self) -> Dict[str, Any]:
@@ -69,6 +71,7 @@ class ServiceDTO:
             "ApprovedTimestamp": self.service_approved_timestamp,
             "IsActive": self.is_active,
             "Announcement": self.announcement,
+            "ImageURL": self.image_url,  # Add this line
         }
 
 

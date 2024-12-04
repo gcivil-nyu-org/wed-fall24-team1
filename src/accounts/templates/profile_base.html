@@ -45,6 +45,7 @@
       </div>
 
       {% if not is_service_provider %}
+        <!-- Tabs and Content for Service Seekers -->
         <div class="mb-8 border-b border-gray-200 w-full">
           <nav class="-mb-px flex space-x-12" aria-label="Tabs">
             <button id="posts-tab-btn"
@@ -78,6 +79,8 @@
 
           </nav>
         </div>
+
+        <!-- Bookmarks Tab -->
         <div id="bookmarks-tab" class="w-full {% if active_tab != 'bookmarks' %}hidden{% endif %}">
           <div class="flex items-center justify-between mb-6">
             <h2 class="text-2xl font-semibold text-gray-400">Bookmarked Services</h2>
@@ -161,150 +164,178 @@
           {% endif %}
         </div>
 
-      {% endif %}
-      <div id="posts-tab" class="w-full {% if active_tab != 'posts' %}hidden{% endif %}">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-2xl font-semibold text-gray-400">My Forum Posts</h2>
-          <span class="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
-            {{ user_posts|length }} posts
-          </span>
-        </div>
-        {% if user_posts %}
-          <div class="grid grid-cols-1 gap-4 w-full">
-            {% for post in user_posts %}
-              <div class="bg-gray-700 rounded-lg p-4 w-full">
-                <div class="flex justify-between items-start w-full">
-                  <div class="flex-grow">
-                    <a href="{% url 'forum:post_detail' post.id %}"
-                       class="font-semibold text-gray-300 hover:text-blue-600">
-                      {{ post.title }}
-                    </a>
-                    <p class="text-gray-400 text-sm mt-1">
-                      {{ post.content|truncatewords:30 }}
-                    </p>
-                    <div class="text-sm text-gray-500 mt-2 flex items-center gap-4">
-                      <span><i class="fas fa-folder text-gray-400"></i> {{ post.category.name }}</span>
-                      <span><i class="far fa-clock text-gray-400"></i> {{ post.created_at|date:"M d, Y" }}</span>
-                      <span><i class="far fa-comments text-gray-400"></i> {{ post.comments.count }}</span>
+        <!-- Posts Tab -->
+        <div id="posts-tab" class="w-full {% if active_tab != 'posts' %}hidden{% endif %}">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-semibold text-gray-400">My Forum Posts</h2>
+            <span class="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
+              {{ user_posts|length }} posts
+            </span>
+          </div>
+          {% if user_posts %}
+            <div class="grid grid-cols-1 gap-4 w-full">
+              {% for post in user_posts %}
+                <div class="bg-gray-700 rounded-lg p-4 w-full">
+                  <div class="flex justify-between items-start w-full">
+                    <div class="flex-grow">
+                      <a href="{% url 'forum:post_detail' post.id %}"
+                         class="font-semibold text-gray-300 hover:text-blue-600">
+                        {{ post.title }}
+                      </a>
+                      <p class="text-gray-400 text-sm mt-1">
+                        {{ post.content|truncatewords:30 }}
+                      </p>
+                      <div class="text-sm text-gray-500 mt-2 flex items-center gap-4">
+                        <span><i class="fas fa-folder text-gray-400"></i> {{ post.category.name }}</span>
+                        <span><i class="far fa-clock text-gray-400"></i> {{ post.created_at|date:"M d, Y" }}</span>
+                        <span><i class="far fa-comments text-gray-400"></i> {{ post.comments.count }}</span>
+                      </div>
+                    </div>
+                    <div class="text-sm">
+                      {% if post.is_closed %}
+                        <span class="bg-red-100 text-red-800 px-2 py-1 rounded">Closed</span>
+                      {% else %}
+                        <span class="bg-green-100 text-green-800 px-2 py-1 rounded">Open</span>
+                      {% endif %}
                     </div>
                   </div>
-                  <div class="text-sm">
-                    {% if post.is_closed %}
-                      <span class="bg-red-100 text-red-800 px-2 py-1 rounded">Closed</span>
-                    {% else %}
-                      <span class="bg-green-100 text-green-800 px-2 py-1 rounded">Open</span>
-                    {% endif %}
-                  </div>
                 </div>
-              </div>
-            {% endfor %}
-          </div>
-        {% else %}
-          <p class="text-gray-500">No forum posts yet.</p>
-        {% endif %}
-      </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="text-gray-500">No forum posts yet.</p>
+          {% endif %}
+        </div>
+      {% endif %}
     </div>
 
     <!-- Profile Edit Form Section -->
     <div id="edit-profile" class="bg-gray-800 rounded-lg shadow-md p-6 hidden">
       <h2 class="text-xl font-semibold text-blue-400 mb-4">Edit Profile</h2>
+      <!-- Added enctype for file uploads -->
       <form method="POST" enctype="multipart/form-data" class="space-y-4">
-          {% csrf_token %}
-          {% for field in form %}
-              <div>
-                  <label class="block text-gray-300 font-medium mb-2" for="{{ field.id_for_label }}">
-                      {{ field.label }}
-                  </label>
-                  {{ field }}
-                  {% if field.help_text %}
-                      <p class="text-gray-500 text-sm">{{ field.help_text }}</p>
-                  {% endif %}
-                  {% if field.errors %}
-                      {% for error in field.errors %}
-                          <p class="text-red-400 text-sm mt-1">{{ error }}</p>
-                      {% endfor %}
-                  {% endif %}
-              </div>
-          {% endfor %}
+        {% csrf_token %}
 
-          <!-- Optional: Show Remove Profile Image Checkbox Only If User Has an Image -->
-          {% if profile.profile_image_url %}
-              <!-- The 'remove_profile_image' field is already rendered in the loop above -->
-              <!-- No need to render it again here -->
-          {% endif %}
-
-          <div class="flex justify-between mt-6">
-              <button type="submit"
-                      class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300">
-                  Save Changes
-              </button>
-              <button type="button" onclick="toggleEdit()"
-                      class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300">
-                  Cancel
-              </button>
+        <!-- Display current profile image if it exists -->
+        {% if profile.profile_image_url %}
+          <div class="mb-4">
+            <label class="block text-gray-300 font-medium mb-2">Current Profile Image</label>
+            <img src="{{ profile.profile_image_url }}" alt="Profile Image" class="w-24 h-24 rounded-full object-cover">
           </div>
-      </form>
-  </div>
+        {% endif %}
 
-  <!-- Delete Confirmation Modal -->
-  <div id="deleteConfirmModal"
-       class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50 flex items-center justify-center">
-    <div class="bg-gray-800 rounded-lg p-8 max-w-md w-full mx-4 border border-gray-700"> <!-- Made width smaller and reduced padding -->
-      <div class="text-center">
-        <i class="fas fa-trash text-red-600 text-xl mb-3"></i> <!-- Simplified icon -->
-        <h3 class="text-2xl font-bold mb-4 text-gray-100">Delete Review?</h3>
-        <p class="text-gray-300 mb-6">This action cannot be undone.</p>
-        <div class="flex justify-center space-x-3">
-          <button id="confirmDelete"
-                  class="bg-red-600 text-white px-6 py-2 rounded-md hover:bg-red-700 transition-colors duration-300">
-            Delete
+        {% for field in form %}
+          {% if field.name == 'remove_profile_image' %}
+            {% if profile.profile_image_url %}
+              <div>
+                <label class="block text-gray-300 font-medium mb-2" for="{{ field.id_for_label }}">
+                  {{ field.label }}
+                </label>
+                {{ field }}
+                {% if field.help_text %}
+                  <p class="text-gray-500 text-sm">{{ field.help_text }}</p>
+                {% endif %}
+                {% if field.errors %}
+                  {% for error in field.errors %}
+                    <p class="text-red-400 text-sm mt-1">{{ error }}</p>
+                  {% endfor %}
+                {% endif %}
+              </div>
+            {% endif %}
+          {% else %}
+            <div>
+              <label class="block text-gray-300 font-medium mb-2" for="{{ field.id_for_label }}">
+                {{ field.label }}
+              </label>
+              {{ field }}
+              {% if field.help_text %}
+                <p class="text-gray-500 text-sm">{{ field.help_text }}</p>
+              {% endif %}
+              {% if field.errors %}
+                {% for error in field.errors %}
+                  <p class="text-red-400 text-sm mt-1">{{ error }}</p>
+                {% endfor %}
+              {% endif %}
+            </div>
+          {% endif %}
+        {% endfor %}
+
+        <div class="flex justify-between mt-6">
+          <button type="submit"
+                  class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300">
+            Save Changes
           </button>
-          <button id="cancelDelete"
-                  class="bg-gray-600 text-white px-6 py-2 rounded-md hover:bg-gray-700 transition-colors duration-300">
+          <button type="button" onclick="toggleEdit()"
+                  class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300">
             Cancel
           </button>
         </div>
+      </form>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteConfirmModal"
+         class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50 flex items-center justify-center">
+      <div class="bg-gray-800 rounded-lg p-8 max-w-md w-full mx-4 border border-gray-700">
+        <div class="text-center">
+          <i class="fas fa-trash text-red-600 text-xl mb-3"></i>
+          <h3 class="text-2xl font-bold mb-4 text-gray-100">Delete Review?</h3>
+          <p class="text-gray-300 mb-6">This action cannot be undone.</p>
+          <div class="flex justify-center space-x-3">
+            <button id="confirmDelete"
+                    class="bg-red-600 text-white px-6 py-2 rounded-md hover:bg-red-700 transition-colors duration-300">
+              Delete
+            </button>
+            <button id="cancelDelete"
+                    class="bg-gray-600 text-white px-6 py-2 rounded-md hover:bg-gray-700 transition-colors duration-300">
+              Cancel
+            </button>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-  <div id="serviceDetails"
-       class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden overflow-y-auto h-full w-full z-50">
-    <div class="relative top-20 mx-auto p-6 w-11/12 md:w-3/4 lg:w-1/2 shadow-xl rounded-xl bg-gray-800">
-      <div class="absolute top-0 right-0 pt-4 pr-4">
-        <button id="closeDetails" class="text-gray-500 hover:text-gray-400 transition-colors duration-200">
-          <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
-      </div>
-      <div class="mt-3">
-        <h2 id="serviceName" class="text-xl font-semibold text-gray-100 mb-4">Service Name</h2>
-        <div id="serviceMap" class="w-full h-64 rounded-lg overflow-hidden mb-6"></div>
-        <div id="serviceAnnouncement" class="mb-4 hidden">
-          <div class="p-3 bg-blue-50 rounded-md">
-            <div class="flex items-center">
-              <i class="fas fa-bullhorn text-blue-600 mr-2"></i>
-              <p class="text-sm text-blue-800"></p>
+
+    <!-- Service Details Modal -->
+    <div id="serviceDetails"
+         class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden overflow-y-auto h-full w-full z-50">
+      <div class="relative top-20 mx-auto p-6 w-11/12 md:w-3/4 lg:w-1/2 shadow-xl rounded-xl bg-gray-800">
+        <div class="absolute top-0 right-0 pt-4 pr-4">
+          <button id="closeDetails" class="text-gray-500 hover:text-gray-400 transition-colors duration-200">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+        <div class="mt-3">
+          <h2 id="serviceName" class="text-xl font-semibold text-gray-100 mb-4">Service Name</h2>
+          <div id="serviceMap" class="w-full h-64 rounded-lg overflow-hidden mb-6"></div>
+          <div id="serviceAnnouncement" class="mb-4 hidden">
+            <div class="p-3 bg-blue-50 rounded-md">
+              <div class="flex items-center">
+                <i class="fas fa-bullhorn text-blue-600 mr-2"></i>
+                <p class="text-sm text-blue-800"></p>
+              </div>
+            </div>
+          </div>
+          <div class="space-y-1 mb-4">
+            <p class="text-sm text-gray-300"><strong>Address:</strong> <span id="serviceAddress">123 Main St</span></p>
+            <p class="text-sm text-gray-300"><strong>Type:</strong> <span id="serviceType">Homeless</span></p>
+            <p class="text-sm text-gray-300"><strong>Rating:</strong> <span id="serviceRating">4.5</span></p>
+            <a id="getDirections" href="#" target="_blank" rel="noopener noreferrer"
+               class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mt-2">Get Directions</a>
+            <div class="space-y-1 mb-4 text-sm text-gray-300"><strong>Additional Description Details:</strong>
+              <div id="serviceDescription" class="text-sm mt-2 text-gray-400"></div>
             </div>
           </div>
         </div>
-        <div class="space-y-1 mb-4">
-          <p class="text-sm text-gray-300"><strong>Address:</strong> <span id="serviceAddress">123 Main St</span></p>
-          <p class="text-sm text-gray-300"><strong>Type:</strong> <span id="serviceType">Homeless</span></p>
-          <p class="text-sm text-gray-300"><strong>Rating:</strong> <span id="serviceRating">4.5</span></p>
-          <a id="getDirections" href="#" target="_blank" rel="noopener noreferrer"
-             class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mt-2">Get Directions</a>
-          <div class="space-y-1 mb-4 text-sm text-gray-300"><strong>Additional Description Details:</strong>
-            <div id="serviceDescription" class="text-sm mt-2 text-gray-400"></div>
-          </div>
-        </div>
       </div>
     </div>
-  </div>
 
-  <div class="h-32"></div>
+    <div class="h-32"></div>
+  </div>
 {% endblock %}
+
 {% block scripts %}
   <script>
       // Pass Django template variables to JS
@@ -321,6 +352,7 @@
           });
       });
 
+      // Confirmation dialog for removing profile image
       document.querySelector('form').addEventListener('submit', function (e) {
         const removeCheckbox = document.getElementById('id_remove_profile_image');
         if (removeCheckbox && removeCheckbox.checked) {
@@ -329,6 +361,6 @@
                 e.preventDefault();
             }
         }
-    });
+      });
   </script>
 {% endblock %}
