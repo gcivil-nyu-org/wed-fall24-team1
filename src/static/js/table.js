@@ -86,13 +86,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Append the rating element to the flex container
                 flexContainer.appendChild(ratingElement);
-
+                const iconContainer = document.createElement('div');
+                iconContainer.classList.add('icon-container'); // Add custom class for styling
                 // Check if username matches
                 if (username === review.Username) {
-                    // Create a container for the icons
-                    const iconContainer = document.createElement('div');
-                    iconContainer.classList.add('icon-container'); // Add custom class for styling
-
                     if (!review.ResponseText) {
                         const editIcon = document.createElement('i');
                         editIcon.classList.add('fas', 'fa-edit', 'text-blue-500', 'cursor-pointer');
@@ -106,11 +103,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     deleteIcon.title = "Delete Review";
                     deleteIcon.onclick = () => handleDeleteReview(review);
                     iconContainer.appendChild(deleteIcon);
-
-                    // Append the icon container to the flex container
-                    flexContainer.appendChild(iconContainer);
+                } else {
+                    // Flag icon - only show for reviews by other users
+                    const flagIcon = document.createElement('i');
+                    flagIcon.classList.add('fas', 'fa-flag', 'text-gray-400', 'hover:text-red-500', 'cursor-pointer');
+                    flagIcon.title = "Report this review";
+                    flagIcon.onclick = () => openFlagModal('REVIEW', review.ReviewId);
+                    iconContainer.appendChild(flagIcon);
                 }
-
+                flexContainer.appendChild(iconContainer);
                 // Append the flex container to the reviewDiv
                 reviewDiv.appendChild(flexContainer);
 

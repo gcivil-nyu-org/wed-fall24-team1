@@ -1,0 +1,100 @@
+{% comment %}
+This is a reusable modal template that will be included in other templates.
+Place this in a new file called '_flag_modal.html' in your templates directory.
+{% endcomment %}
+
+<div id="flagModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-gray-800 rounded-lg p-8 max-w-md w-full mx-4">
+        <h2 class="text-xl font-semibold text-gray-100 mb-4">Report Content</h2>
+
+        <form id="flagForm" class="space-y-4">
+            {% csrf_token %}
+            <input type="hidden" id="flagContentType" name="content_type">
+            <input type="hidden" id="flagObjectId" name="object_id">
+
+            <div>
+                <label for="flagReason" class="block text-sm font-medium text-gray-300 mb-2">
+                    Reason for reporting
+                </label>
+                <select id="flagReason" name="reason"
+                        class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-gray-200 focus:outline-none focus:border-blue-500">
+                    <option value="SPAM">Spam or advertising</option>
+                    <option value="OFFENSIVE">Offensive or inappropriate content</option>
+                    <option value="HARASSMENT">Harassment or hate speech</option>
+                    <option value="MISINFORMATION">False or misleading information</option>
+                    <option value="OTHER">Other reason</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="flagExplanation" class="block text-sm font-medium text-gray-300 mb-2">
+                    Additional details (optional)
+                </label>
+                <textarea id="flagExplanation" name="explanation" rows="3"
+                         class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-gray-200 focus:outline-none focus:border-blue-500"
+                         placeholder="Please provide any additional context..."></textarea>
+            </div>
+
+            <div class="flex justify-end space-x-3 mt-6">
+                <button type="button" onclick="closeFlagModal()"
+                        class="px-4 py-2 text-gray-300 hover:text-gray-100 transition-colors duration-150">
+                    Cancel
+                </button>
+                <button type="submit"
+                        class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors duration-150">
+                    Submit Report
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openFlagModal(contentType, objectId) {
+        document.getElementById('flagContentType').value = contentType;
+        document.getElementById('flagObjectId').value = objectId;
+        document.getElementById('flagModal').classList.remove('hidden');
+        document.getElementById('flagModal').classList.add('flex');
+    }
+
+    function closeFlagModal() {
+        document.getElementById('flagModal').classList.add('hidden');
+        document.getElementById('flagModal').classList.remove('flex');
+        document.getElementById('flagForm').reset();
+    }
+
+    document.getElementById('flagForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        try {
+            const formData = new FormData(this);
+            const response = await fetch('{% url "moderation:create_flag" %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Show success message
+                closeFlagModal();
+            } else {
+                // Show error message
+                alert(data.error || 'An error occurred while flagging the content');
+            }
+        } catch (error) {
+            alert('An error occurred while submitting the flag');
+            console.error('Flag submission error:', error);
+        }
+    });
+
+    // Close modal when clicking outside
+    document.getElementById('flagModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeFlagModal();
+        }
+    });
+</script>

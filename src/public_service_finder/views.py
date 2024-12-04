@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.shortcuts import render
 
+from moderation.models import Flag
 from public_service_finder.utils.enums.service_status import ServiceStatus
 from services.repositories import ServiceRepository
 
@@ -24,7 +25,14 @@ def admin_only_view_new_listings(request):
         return render(request, "403.html", status=403)
     service_repo = ServiceRepository()
     pending_services = service_repo.get_pending_approval_services()
-    return render(request, "admin_only.html", {"pending_services": pending_services})
+    flags = Flag.objects.filter(
+        status='PENDING'
+    ).select_related(
+        'flagger',
+        'reviewed_by'
+    ).order_by('-created_at')
+    return render(request, "admin_only.html", {"pending_services": pending_services,
+                                               "flags": flags})
 
 
 @login_required

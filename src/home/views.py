@@ -1,6 +1,8 @@
+from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import json
 import decimal
+
 from .repositories import HomeRepository
 from django.http import JsonResponse
 import uuid
