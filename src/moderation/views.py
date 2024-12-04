@@ -124,7 +124,11 @@ def review_flag(request, flag_id):
             Notification.objects.create(
                 recipient=flag.flagger,
                 sender=request.user,
-                message=f"Your flag has been reviewed and accepted" if flag.status == "REVOKED" else "Your flag has been reviewed and dismissed",
+                message=(
+                    "Your flag has been reviewed and accepted"
+                    if flag.status == "REVOKED"
+                    else "Your flag has been reviewed and dismissed"
+                ),
                 notification_type="flag_reviewed",
             )
 
