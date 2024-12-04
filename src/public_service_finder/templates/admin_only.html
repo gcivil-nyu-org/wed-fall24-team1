@@ -100,7 +100,7 @@
               <tbody>
               {% for flag in flags %}
                 <tr class="border-b border-gray-700 hover:bg-gray-750 transition-colors cursor-pointer"
-                    data-flag-id="{{ flag.id }}">
+                    data-flag-id="{{ flag.first_flag_id }}">
                   <td class="p-4 text-gray-300">
                     {{ flag.content_type|title }}
                   </td>
@@ -121,9 +121,9 @@
                     </div>
                   </td>
                   <td class="p-4">
-      <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-800 text-red-200">
-        {{ flag.flag_count }} flags
-      </span>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-800 text-red-200">
+                      {{ flag.flag_count }} flags
+                    </span>
                     <div class="text-sm text-gray-400 mt-2 space-y-2">
                       {% for flag_detail in flag.flags %}
                         <div class="flex items-start space-x-2">
@@ -143,11 +143,11 @@
                   </td>
                   <td class="p-4">
                     <div class="flex space-x-2">
-                      <button onclick="event.stopPropagation(); handleFlagAction('{{ flag.id }}', 'dismiss')"
+                      <button onclick="event.stopPropagation(); handleFlagAction('{{ flag.first_flag_id }}', 'dismiss')"
                               class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm transition-colors duration-150">
                         Dismiss
                       </button>
-                      <button onclick="event.stopPropagation(); handleFlagAction('{{ flag.id }}', 'revoke')"
+                      <button onclick="event.stopPropagation(); handleFlagAction('{{ flag.first_flag_id }}', 'revoke')"
                               class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm transition-colors duration-150">
                         Revoke
                       </button>
@@ -242,6 +242,7 @@
     `);
 
       async function handleFlagAction(flagId, action) {
+          console.log(flagId)
           try {
               const response = await fetch(`{% url 'moderation:review_flag' 0 %}`.replace('0', flagId), {
                   method: 'POST',
