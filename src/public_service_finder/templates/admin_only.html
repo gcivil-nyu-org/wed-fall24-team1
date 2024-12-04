@@ -108,7 +108,7 @@
                     <div class="max-w-md"
                          data-author="{{ flag.content_author }}"
                          data-full-content="{{ flag.content_preview }}"
-                         onclick="showContentModal('{{ flag.id }}')">
+                         onclick="showContentModal('{{ flag.first_flag_id }}')">
                       {% if flag.content_type == 'FORUM POST' %}
                         <div class="font-semibold">{{ flag.content_title }}</div>
                         <div class="text-sm text-gray-400">{{ flag.content_preview|truncatechars:40 }}</div>
