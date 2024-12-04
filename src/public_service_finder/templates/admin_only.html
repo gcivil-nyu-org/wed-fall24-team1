@@ -84,7 +84,7 @@
     </div>
 
     <!-- Flags Tab Content -->
-    <div id="flagsContent" class="tab-content hidden" style="min-width: 1050px;">
+    <div id="flagsContent" class="tab-content tab-hidden" style="min-width: 1050px;">
       {% if flags %}
         <div class="overflow-x-auto bg-gray-800 rounded-xl shadow-sm p-8">
           <table class="w-full">
@@ -213,10 +213,10 @@
           document.getElementById('flagsTab').classList.remove('tab-active');
           document.getElementById(tabName + 'Tab').classList.add('tab-active');
 
-          // Update content visibility
-          document.getElementById('servicesContent').classList.add('hidden');
-          document.getElementById('flagsContent').classList.add('hidden');
-          document.getElementById(tabName + 'Content').classList.remove('hidden');
+          // Update content visibility using our new specific class
+          document.getElementById('servicesContent').classList.add('tab-hidden');
+          document.getElementById('flagsContent').classList.add('tab-hidden');
+          document.getElementById(tabName + 'Content').classList.remove('tab-hidden');
       }
 
       // Add these styles for the active tab state
@@ -227,7 +227,7 @@
                 border-bottom: 2px solid rgb(96, 165, 250);
                 color: rgb(96, 165, 250);
             }
-            .hidden {
+            .tab-hidden {
                 display: none;
             }
         </style>

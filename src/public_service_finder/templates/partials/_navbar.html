@@ -206,6 +206,14 @@
                         <span>Home</span>
                     </a>
                 {% endif %}
+
+                {% if user.is_superuser %}
+                    <a href="{% url 'admin_only_view_new_listings' %}"
+                       class="flex items-center space-x-2 text-gray-300 hover:text-blue-400 font-medium">
+                        <i class="fas fa-list"></i>
+                        <span>Moderation</span>
+                    </a>
+                {% endif %}
             {% endif %}
 
             <a href="{% url 'forum:category_list' %}"
