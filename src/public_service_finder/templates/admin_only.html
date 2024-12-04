@@ -5,176 +5,179 @@
 {% block content %}
 
   <div class="min-h-screen bg-transparent">
-  <div class="container mx-auto px-4 py-8 max-w-[1400px] min-w-[1000px]">
-    <!-- Header Section -->
-    <div class="flex flex-col items-center mb-8 mt-6">
-      <h1 class="text-4xl font-bold text-gray-100">Admin Dashboard</h1>
-      <p class="text-gray-400 mt-2">Manage service listings and moderate content</p>
-    </div>
+    <div class="container mx-auto px-4 py-8 max-w-[1400px] min-w-[1000px]">
+      <!-- Header Section -->
+      <div class="flex flex-col items-center mb-8 mt-6">
+        <h1 class="text-4xl font-bold text-gray-100">Admin Dashboard</h1>
+        <p class="text-gray-400 mt-2">Manage service listings and moderate content</p>
+      </div>
 
-    <!-- Tab Navigation -->
-    <div class="flex space-x-4 mb-6">
-      <button onclick="switchTab('services')"
-              id="servicesTab"
-              class="px-6 py-3 text-gray-300 rounded-t-lg font-medium transition-colors duration-200 tab-active">
-        Service Approvals
-      </button>
-      <button onclick="switchTab('flags')"
-              id="flagsTab"
-              class="px-6 py-3 text-gray-300 rounded-t-lg font-medium transition-colors duration-200">
-        Flagged Content
-      </button>
-    </div>
+      <!-- Tab Navigation -->
+      <div class="flex space-x-4 mb-6">
+        <button onclick="switchTab('services')"
+                id="servicesTab"
+                class="px-6 py-3 text-gray-300 rounded-t-lg font-medium transition-colors duration-200 tab-active">
+          Service Approvals
+        </button>
+        <button onclick="switchTab('flags')"
+                id="flagsTab"
+                class="px-6 py-3 text-gray-300 rounded-t-lg font-medium transition-colors duration-200">
+          Flagged Content
+        </button>
+      </div>
 
-    <!-- Services Tab Content -->
-    <div id="servicesContent" class="tab-content" style="min-width: 1050px;">
-      {% if pending_services %}
-        <div class="overflow-x-auto bg-gray-800 rounded-xl shadow-sm p-8">
-          <table class="w-full">
-            <thead>
-            <tr class="text-left text-gray-300 border-b border-gray-700">
-              <th class="p-4">Service Name</th>
-              <th class="p-4">Description</th>
-              <th class="p-4">Address</th>
-              <th class="p-4">Status</th>
-              <th class="p-4">Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for service in pending_services %}
-              <tr class="border-b border-gray-700 hover:bg-gray-750 transition-colors">
-                <td class="p-4 text-gray-300">{{ service.name }}</td>
-                <td class="p-4 text-gray-300">{{ service.description }}</td>
-                <td class="p-4 text-gray-300">{{ service.address }}</td>
-                <td class="p-4">
+      <!-- Services Tab Content -->
+      <div id="servicesContent" class="tab-content" style="min-width: 1050px;">
+        {% if pending_services %}
+          <div class="overflow-x-auto bg-gray-800 rounded-xl shadow-sm p-8">
+            <table class="w-full">
+              <thead>
+              <tr class="text-left text-gray-300 border-b border-gray-700">
+                <th class="p-4">Service Name</th>
+                <th class="p-4">Description</th>
+                <th class="p-4">Address</th>
+                <th class="p-4">Status</th>
+                <th class="p-4">Actions</th>
+              </tr>
+              </thead>
+              <tbody>
+              {% for service in pending_services %}
+                <tr class="border-b border-gray-700 hover:bg-gray-750 transition-colors">
+                  <td class="p-4 text-gray-300">{{ service.name }}</td>
+                  <td class="p-4 text-gray-300">{{ service.description }}</td>
+                  <td class="p-4 text-gray-300">{{ service.address }}</td>
+                  <td class="p-4">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-800 text-yellow-200">
                                     {{ service.service_status }}
                                 </span>
-                </td>
-                <td class="p-4">
-                  <div class="flex space-x-2">
-                    <form method="POST" action="{% url 'admin_update_listing' service.id %}" class="inline">
-                      {% csrf_token %}
-                      <input type="hidden" name="status" value="approve">
-                      <button type="submit"
-                              class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm transition-colors duration-150">
-                        Approve
-                      </button>
-                    </form>
-                    <form method="POST" action="{% url 'admin_update_listing' service.id %}" class="inline">
-                      {% csrf_token %}
-                      <input type="hidden" name="status" value="reject">
-                      <button type="submit"
-                              class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm transition-colors duration-150">
-                        Reject
-                      </button>
-                    </form>
-                  </div>
-                </td>
-              </tr>
-            {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      {% else %}
-        <div class="bg-gray-800 rounded-xl shadow-sm p-8 text-center">
-          <p class="text-gray-300">No pending service listings at this time.</p>
-        </div>
-      {% endif %}
-    </div>
+                  </td>
+                  <td class="p-4">
+                    <div class="flex space-x-2">
+                      <form method="POST" action="{% url 'admin_update_listing' service.id %}" class="inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="status" value="approve">
+                        <button type="submit"
+                                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm transition-colors duration-150">
+                          Approve
+                        </button>
+                      </form>
+                      <form method="POST" action="{% url 'admin_update_listing' service.id %}" class="inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="status" value="reject">
+                        <button type="submit"
+                                class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm transition-colors duration-150">
+                          Reject
+                        </button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="bg-gray-800 rounded-xl shadow-sm p-8 text-center">
+            <p class="text-gray-300">No pending service listings at this time.</p>
+          </div>
+        {% endif %}
+      </div>
 
-    <!-- Flags Tab Content -->
-    <div id="flagsContent" class="tab-content tab-hidden" style="min-width: 1050px;">
-      {% if flags %}
-        <div class="overflow-x-auto bg-gray-800 rounded-xl shadow-sm p-8">
-          <table class="w-full">
-            <thead>
-            <tr class="text-left text-gray-300 border-b border-gray-700">
-              <th class="p-4">Content Type</th>
-              <th class="p-4">Content Preview</th>
-              <th class="p-4">Flag Reason</th>
-              <th class="p-4">Flagged By</th>
-              <th class="p-4">Date</th>
-              <th class="p-4">Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for flag in flags %}
-              <tr class="border-b border-gray-700 hover:bg-gray-750 transition-colors cursor-pointer"
-                  data-flag-id="{{ flag.id }}">
-                <td class="p-4 text-gray-300">
-                  {{ flag.content_type|title }}
-                </td>
-                <td class="p-4 text-gray-300">
-                  <div class="max-w-md"
-                       data-author="{{ flag.content_author }}"
-                       data-full-content="{{ flag.content_preview }}"
-                       onclick="showContentModal('{{ flag.id }}')">
-                    {% if flag.content_type == 'FORUM POST' %}
-                      <div class="font-semibold">{{ flag.content_title }}</div>
-                      <div class="text-sm text-gray-400">{{ flag.content_preview|truncatechars:40 }}</div>
-                    {% elif flag.content_type == 'FORUM COMMENT' %}
-                      <div class="text-sm text-gray-400">{{ flag.content_preview|truncatechars:40 }}</div>
-                    {% elif flag.content_type == 'REVIEW' %}
-                      <div class="font-semibold">Rating: {{ flag.content_rating }} ★</div>
-                      <div class="text-sm text-gray-400">{{ flag.content_preview|truncatechars:40 }}</div>
-                    {% endif %}
-                  </div>
-                </td>
-                <td class="p-4">
+      <!-- Flags Tab Content -->
+      <div id="flagsContent" class="tab-content tab-hidden" style="min-width: 1050px;">
+        {% if flags %}
+          <div class="overflow-x-auto bg-gray-800 rounded-xl shadow-sm p-8">
+            <table class="w-full">
+              <thead>
+              <tr class="text-left text-gray-300 border-b border-gray-700">
+                <th class="p-4">Content Type</th>
+                <th class="p-4">Content Preview</th>
+                <th class="p-4">Flag Reason</th>
+                <th class="p-4">Flagged By</th>
+                <th class="p-4">Date</th>
+                <th class="p-4">Actions</th>
+              </tr>
+              </thead>
+              <tbody>
+              {% for flag in flags %}
+                <tr class="border-b border-gray-700 hover:bg-gray-750 transition-colors cursor-pointer"
+                    data-flag-id="{{ flag.id }}">
+                  <td class="p-4 text-gray-300">
+                    {{ flag.content_type|title }}
+                  </td>
+                  <td class="p-4 text-gray-300">
+                    <div class="max-w-md"
+                         data-author="{{ flag.content_author }}"
+                         data-full-content="{{ flag.content_preview }}"
+                         onclick="showContentModal('{{ flag.id }}')">
+                      {% if flag.content_type == 'FORUM POST' %}
+                        <div class="font-semibold">{{ flag.content_title }}</div>
+                        <div class="text-sm text-gray-400">{{ flag.content_preview|truncatechars:40 }}</div>
+                      {% elif flag.content_type == 'FORUM COMMENT' %}
+                        <div class="text-sm text-gray-400">{{ flag.content_preview|truncatechars:40 }}</div>
+                      {% elif flag.content_type == 'REVIEW' %}
+                        <div class="font-semibold">Rating: {{ flag.content_rating }} ★</div>
+                        <div class="text-sm text-gray-400">{{ flag.content_preview|truncatechars:40 }}</div>
+                      {% endif %}
+                    </div>
+                  </td>
+                  <td class="p-4">
                   <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-800 text-yellow-200">
                     {{ flag.reason }}
                   </span>
-                  {% if flag.explanation %}
-                    <div class="text-sm text-gray-400 mt-1">{{ flag.explanation|truncatechars:50 }}</div>
-                  {% endif %}
-                </td>
-                <td class="p-4 text-gray-300">
-                  {{ flag.flagger.username }}
-                </td>
-                <td class="p-4 text-gray-400 text-sm">
-                  {{ flag.created_at|date:"M d, Y" }}
-                </td>
-                <td class="p-4">
-                  <div class="flex space-x-2">
-                    <button onclick="event.stopPropagation(); handleFlagAction('{{ flag.id }}', 'dismiss')"
-                            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm transition-colors duration-150">
-                      Dismiss
-                    </button>
-                    <button onclick="event.stopPropagation(); handleFlagAction('{{ flag.id }}', 'revoke')"
-                            class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm transition-colors duration-150">
-                      Revoke
-                    </button>
-                  </div>
-                </td>
+                    {% if flag.explanation %}
+                      <div class="text-sm text-gray-400 mt-1">{{ flag.explanation|truncatechars:50 }}</div>
+                    {% endif %}
+                  </td>
+                  <td class="p-4 text-gray-300">
+                    {{ flag.flagger.username }}
+                  </td>
+                  <td class="p-4 text-gray-400 text-sm">
+                    {{ flag.created_at|date:"M d, Y" }}
+                  </td>
+                  <td class="p-4">
+                    <div class="flex space-x-2">
+                      <button onclick="event.stopPropagation(); handleFlagAction('{{ flag.id }}', 'dismiss')"
+                              class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm transition-colors duration-150">
+                        Dismiss
+                      </button>
+                      <button onclick="event.stopPropagation(); handleFlagAction('{{ flag.id }}', 'revoke')"
+                              class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm transition-colors duration-150">
+                        Revoke
+                      </button>
+                    </div>
+                  </td>
 
-              </tr>
-            {% endfor %}
-            </tbody>
-          </table>
-        </div>
-        <div id="contentModal"
-             class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
-        <div class="bg-gray-800 rounded-lg p-8 max-w-2xl w-full mx-4 border border-gray-700">
-          <div class="flex justify-between items-start mb-4">
-            <div>
-              <h2 id="modalTitle" class="text-2xl font-bold text-gray-100"></h2>
-              <p id="modalAuthor" class="text-sm text-gray-400"></p>
-            </div>
-            <button onclick="hideContentModal()" class="text-gray-400 hover:text-gray-300">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-              </svg>
-            </button>
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table>
           </div>
-          <div id="modalContent" class="prose prose-invert max-w-none text-gray-300"></div>
-        </div>
-      {% else %}
-        <div class="bg-gray-800 rounded-xl shadow-sm p-8 text-center">
-          <p class="text-gray-300">No flagged content requires review at this time.</p>
-        </div>
+          <div id="contentModal"
+               class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 overflow-y-auto p-4">
+            <div class="bg-gray-800 rounded-lg p-8 max-w-2xl w-full border border-gray-700 my-auto">
+              <div class="flex justify-between items-start mb-4">
+                <div>
+                  <h2 id="modalTitle" class="text-2xl font-bold text-gray-100"></h2>
+                  <p id="modalAuthor" class="text-sm text-gray-400"></p>
+                </div>
+                <button onclick="hideContentModal()" class="text-gray-400 hover:text-gray-300">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                </button>
+              </div>
+              <div id="modalContent"
+                   class="prose prose-invert max-w-none text-gray-300 max-h-[70vh] overflow-y-auto"></div>
+            </div>
+          </div>
+        {% else %}
+          <div class="bg-gray-800 rounded-xl shadow-sm p-8 text-center">
+            <p class="text-gray-300">No flagged content requires review at this time.</p>
+          </div>
 
-      {% endif %}
+        {% endif %}
       </div>
     </div>
   </div>

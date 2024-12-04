@@ -1,8 +1,3 @@
-{% comment %}
-This is a reusable modal template that will be included in other templates.
-Place this in a new file called '_flag_modal.html' in your templates directory.
-{% endcomment %}
-
 <div id="flagModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
     <div class="bg-gray-800 rounded-lg p-8 max-w-md w-full mx-4">
         <h2 class="text-xl font-semibold text-gray-100 mb-4">Report Content</h2>
@@ -32,7 +27,8 @@ Place this in a new file called '_flag_modal.html' in your templates directory.
                 </label>
                 <textarea id="flagExplanation" name="explanation" rows="3"
                          class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-gray-200 focus:outline-none focus:border-blue-500"
-                         placeholder="Please provide any additional context..."></textarea>
+                         placeholder="Please provide any additional context..."
+                maxlength="100"></textarea>
             </div>
 
             <div class="flex justify-end space-x-3 mt-6">

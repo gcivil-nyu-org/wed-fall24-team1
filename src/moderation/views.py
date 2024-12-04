@@ -7,6 +7,8 @@ from django.views.decorators.http import require_POST
 
 from accounts.models import CustomUser
 from forum.models import Post, Comment, Notification
+from home.repositories import HomeRepository
+from services.models import ReviewDTO
 from services.repositories import ReviewRepository
 from .models import Flag
 
@@ -127,8 +129,10 @@ def review_flag(request, flag_id):
                 flagged_object = flag.get_content_object()
 
                 if isinstance(flagged_object, (Post, Comment)):
-                    flagged_object.content = "<deleted by admin>"
-                    flagged_object.save()
+                    flagged_object.delete()
+                elif isinstance(flagged_object, ReviewDTO):
+                    home_repo = HomeRepository()
+                    home_repo.delete_review(flagged_object.review_id)
 
             Notification.objects.create(
                 recipient=flag.flagger,
@@ -148,5 +152,16 @@ def review_flag(request, flag_id):
 
         return JsonResponse({"success": True, "status": flag.status})
 
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+@login_required
+def check_flag_status(request, content_type, object_id):
+    try:
+        has_pending_flag = Flag.objects.filter(
+            content_type=content_type, object_id=object_id, status="PENDING"
+        ).exists()
+        return JsonResponse({"hasPendingFlag": has_pending_flag})
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)

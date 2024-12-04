@@ -105,11 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     iconContainer.appendChild(deleteIcon);
                 } else {
                     // Flag icon - only show for reviews by other users
-                    const flagIcon = document.createElement('i');
-                    flagIcon.classList.add('fas', 'fa-flag', 'text-gray-400', 'hover:text-red-500', 'cursor-pointer');
-                    flagIcon.title = "Report this review";
-                    flagIcon.onclick = () => openFlagModal('REVIEW', review.ReviewId);
-                    iconContainer.appendChild(flagIcon);
+                    addFlagIconToReview(review, iconContainer, username);
                 }
                 flexContainer.appendChild(iconContainer);
                 // Append the flex container to the reviewDiv
@@ -486,4 +482,43 @@ function getCsrfToken() {
         if (name === 'csrftoken') return value;
     }
     return '';
+}
+
+async function checkFlagStatus(contentType, objectId) {
+    try {
+        const response = await fetch(`/moderation/check_flag_status/${contentType}/${objectId}/`);
+        if (!response.ok) throw new Error('Failed to check flag status');
+        return await response.json();
+    } catch (error) {
+        console.error('Error checking flag status:', error);
+        return { hasPendingFlag: false };
+    }
+}
+
+function createFlagIcon(contentType, objectId, container) {
+    checkFlagStatus(contentType, objectId).then(status => {
+        container.innerHTML = ''; // Clear existing content
+
+        if (status.hasPendingFlag) {
+            // Create "under review" icon
+            const reviewIcon = document.createElement('i');
+            reviewIcon.classList.add('fas', 'fa-clock', 'text-yellow-500');
+            reviewIcon.title = "This content is under review";
+            container.appendChild(reviewIcon);
+
+        } else {
+            // Create normal flag icon
+            const flagIcon = document.createElement('i');
+            flagIcon.classList.add('fas', 'fa-flag', 'text-gray-400', 'hover:text-red-500', 'cursor-pointer');
+            flagIcon.title = "Report this content";
+            flagIcon.onclick = () => openFlagModal(contentType, objectId);
+            container.appendChild(flagIcon);
+        }
+    });
+}
+
+function addFlagIconToReview(review, iconContainer, username) {
+    if (username !== review.Username) {
+        createFlagIcon('REVIEW', review.ReviewId, iconContainer);
+    }
 }
