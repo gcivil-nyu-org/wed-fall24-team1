@@ -39,99 +39,6 @@ function formatTimestamp(utcTimestamp) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    async function fetchAndDisplayReviews(serviceId, page = 1) {
-        try {
-            const response = await fetch(`/home/get_reviews/${serviceId}/?page=${page}`);
-            if (!response.ok) {
-                throw new Error(`Failed to fetch reviews. Status: ${response.status}`);
-            }
-
-            const {reviews, has_next, has_previous, current_page} = await response.json();
-
-            const reviewsContainer = document.getElementById('reviewsContainer');
-            reviewsContainer.innerHTML = '';
-
-            if (reviews.length === 0) {
-                reviewsContainer.innerHTML = '<p class="bg-gray-800 p-4 rounded shadow mb-4">No reviews yet.</p>';
-                return;
-            }
-
-            reviews.forEach(review => {
-                const reviewDiv = document.createElement('div');
-                reviewDiv.classList.add('bg-gray-700', 'rounded', 'shadow', 'p-4', 'mb-4');
-
-                const rating = parseFloat(review.RatingStars).toFixed(2);
-
-                const ratingElement = document.createElement('p');
-                ratingElement.classList.add('text-yellow-400', 'font-semibold');
-                ratingElement.textContent = `${rating} ★`;
-                reviewDiv.appendChild(ratingElement);
-
-                const reviewText = document.createElement('p');
-                reviewText.classList.add('text-sm', 'text-gray-400');
-                reviewText.textContent = review.RatingMessage;
-                reviewDiv.appendChild(reviewText);
-
-                const timestamp = formatTimestamp(review.Timestamp);
-                const meta = document.createElement('p');
-                meta.classList.add('text-xm', 'text-gray-400');
-                meta.textContent = `By ${review.Username} on ${timestamp}`;
-                reviewDiv.appendChild(meta);
-
-                if (review.ResponseText) {
-                    const responseDiv = document.createElement('div');
-                    responseDiv.classList.add('mt-3', 'p-3', 'bg-gray-600', 'rounded');
-
-                    const responseHeader = document.createElement('p');
-                    responseHeader.classList.add('font-semibold', 'text-sm', 'text-blue-400');
-                    responseHeader.textContent = "Provider Response:";
-                    responseDiv.appendChild(responseHeader);
-
-                    const responseText = document.createElement('p');
-                    responseText.classList.add('text-sm', 'text-gray-400');
-                    responseText.textContent = review.ResponseText;
-                    responseDiv.appendChild(responseText);
-
-                    const respondedAt = formatTimestamp(review.RespondedAt);
-                    console.log(review.RespondedAt)
-                    const responseMeta = document.createElement('p');
-                    responseMeta.classList.add('text-xs', 'text-gray-400');
-                    responseMeta.textContent = `Responded on ${respondedAt}`;
-                    responseDiv.appendChild(responseMeta);
-
-                    reviewDiv.appendChild(responseDiv);
-                }
-
-                reviewsContainer.appendChild(reviewDiv);
-            });
-
-            // Pagination controls
-            const paginationDiv = document.createElement('div');
-            paginationDiv.classList.add('flex', 'justify-between', 'mt-4');
-
-            if (has_previous) {
-                const prevButton = document.createElement('button');
-                prevButton.classList.add('bg-blue-500', 'text-white', 'px-4', 'py-2', 'rounded');
-                prevButton.textContent = 'Previous';
-                prevButton.addEventListener('click', () => fetchAndDisplayReviews(serviceId, current_page - 1));
-                paginationDiv.appendChild(prevButton);
-            }
-
-            if (has_next) {
-                const nextButton = document.createElement('button');
-                nextButton.classList.add('bg-blue-500', 'text-white', 'px-4', 'py-2', 'rounded');
-                nextButton.textContent = 'Next';
-                nextButton.addEventListener('click', () => fetchAndDisplayReviews(serviceId, current_page + 1));
-                paginationDiv.appendChild(nextButton);
-            }
-
-            reviewsContainer.appendChild(paginationDiv);
-        } catch (error) {
-            console.error('Error fetching reviews:', error);
-            alert('Failed to load reviews. Please try again.');
-        }
-    }
-
     const tabs = ['posts', 'bookmarks', 'reviews'];
     let activeTab = 'posts';
 
@@ -272,7 +179,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Fetch and display reviews
-        fetchAndDisplayReviews(service.Id, 1);
     }
 
     // Expose the function globally
@@ -287,47 +193,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Submit review event listener
-    document.getElementById('submitReview').addEventListener('click', async () => {
-        const rating = document.getElementById('reviewRating').value;
-        const message = document.getElementById('reviewText').value;
-        const serviceId = itemsData.find(item => item.Name === document.getElementById('serviceName').textContent).Id;
-
-        if (rating === "" || message.trim() === "") {
-            alert("Please provide both a rating and a message.");
-            return;
-        }
-
-        const reviewData = {
-            service_id: serviceId,
-            rating: parseInt(rating),
-            message: message,
-        };
-
-        try {
-            const response = await fetch('/home/submit_review/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCsrfToken(),
-                },
-                body: JSON.stringify(reviewData),
-            });
-
-            if (response.ok) {
-                const result = await response.json();
-                fetchAndDisplayReviews(serviceId, 1);
-                document.getElementById('reviewRating').value = '';
-                document.getElementById('reviewText').value = '';
-            } else {
-                const error = await response.json();
-                alert(error.error || "Failed to submit review.");
-            }
-        } catch (error) {
-            console.error('Error submitting review:', error);
-            alert("An error occurred. Please try again.");
-        }
-    });
 });
 
 document.addEventListener('DOMContentLoaded', () => {
