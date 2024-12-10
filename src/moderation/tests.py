@@ -10,10 +10,9 @@ from django.db import IntegrityError
 
 from accounts.models import CustomUser
 from services.models import ReviewDTO
-from services.repositories import ReviewRepository
 from forum.models import Post, Comment, Category, Notification
-from home.repositories import HomeRepository  # Added HomeRepository
-from moderation.models import Flag  # Adjust if needed based on your app structure
+from home.repositories import HomeRepository
+from moderation.models import Flag
 
 
 class ModerationViewsTest(TestCase):
@@ -158,10 +157,10 @@ class FlagModelTest(TestCase):
 
     def setUp(self):
         self.flagger = CustomUser.objects.create_user(
-            username='flaggeruser', email='flagger@example.com', password='testpass'
+            username="flaggeruser", email="flagger@example.com", password="testpass"
         )
         self.author = CustomUser.objects.create_user(
-            username='authoruser', email='author@example.com', password='authorpass'
+            username="authoruser", email="author@example.com", password="authorpass"
         )
 
         self.category = Category.objects.create(name="Test Category")
@@ -170,13 +169,11 @@ class FlagModelTest(TestCase):
             title="Sample Post",
             content="This is a sample forum post.",
             author=self.author,
-            category=self.category
+            category=self.category,
         )
 
         self.comment = Comment.objects.create(
-            content="This is a sample comment.",
-            author=self.author,
-            post=self.post
+            content="This is a sample comment.", author=self.author, post=self.post
         )
 
         self.review_id = str(uuid.uuid4())
@@ -191,10 +188,10 @@ class FlagModelTest(TestCase):
             rating_message="Excellent service",
             timestamp=datetime.now().isoformat(),
             responseText="",
-            responded_at=""
+            responded_at="",
         )
 
-    @patch('services.repositories.ReviewRepository.get_review')
+    @patch("services.repositories.ReviewRepository.get_review")
     def test_flag_for_post(self, mock_get_review):
         # For Posts, no call to ReviewRepository should be made
         flag = Flag.objects.create(
@@ -209,7 +206,7 @@ class FlagModelTest(TestCase):
         self.assertIsNone(flag.content_rating)
         mock_get_review.assert_not_called()
 
-    @patch('services.repositories.ReviewRepository.get_review')
+    @patch("services.repositories.ReviewRepository.get_review")
     def test_flag_for_comment(self, mock_get_review):
         # For Comments, no call to ReviewRepository
         flag = Flag.objects.create(
@@ -223,7 +220,7 @@ class FlagModelTest(TestCase):
         self.assertIsNone(flag.content_rating)
         mock_get_review.assert_not_called()
 
-    @patch('services.repositories.ReviewRepository.get_review')
+    @patch("services.repositories.ReviewRepository.get_review")
     def test_flag_for_review(self, mock_get_review):
         mock_get_review.return_value = self.mock_review_dto
         flag = Flag.objects.create(
@@ -257,7 +254,7 @@ class FlagModelTest(TestCase):
         obj = flag.get_content_object()
         self.assertEqual(obj, self.comment)
 
-    @patch('services.repositories.ReviewRepository.get_review')
+    @patch("services.repositories.ReviewRepository.get_review")
     def test_get_content_object_review(self, mock_get_review):
         mock_get_review.return_value = self.mock_review_dto
         flag = Flag.objects.create(
@@ -274,7 +271,7 @@ class FlagModelTest(TestCase):
             content_type="FORUM POST",
             object_id="999999",
             flagger=self.flagger,
-            reason="OTHER"
+            reason="OTHER",
         )
         self.assertIsNone(flag.get_content_object())
 
@@ -283,7 +280,7 @@ class FlagModelTest(TestCase):
             content_type="FORUM POST",
             object_id=12345,
             flagger=self.flagger,
-            reason="SPAM"
+            reason="SPAM",
         )
         self.assertIsInstance(flag.object_id, str)
         self.assertEqual(flag.object_id, "12345")
@@ -293,7 +290,7 @@ class FlagModelTest(TestCase):
             content_type="FORUM POST",
             object_id=self.post.id,
             flagger=self.flagger,
-            reason="SPAM"
+            reason="SPAM",
         )
         # Attempting to create the same flag again should fail
         with self.assertRaises(IntegrityError):
@@ -301,7 +298,7 @@ class FlagModelTest(TestCase):
                 content_type="FORUM POST",
                 object_id=self.post.id,
                 flagger=self.flagger,
-                reason="SPAM"
+                reason="SPAM",
             )
 
     def test_ordering(self):
@@ -309,13 +306,13 @@ class FlagModelTest(TestCase):
             content_type="FORUM POST",
             object_id=self.post.id,
             flagger=self.flagger,
-            reason="SPAM"
+            reason="SPAM",
         )
         f2 = Flag.objects.create(
             content_type="FORUM COMMENT",
             object_id=self.comment.id,
             flagger=self.flagger,
-            reason="OFFENSIVE"
+            reason="OFFENSIVE",
         )
         flags = list(Flag.objects.all())
         # f2 created after f1, so should appear first due to "-created_at" ordering
@@ -327,7 +324,7 @@ class FlagModelTest(TestCase):
             content_type="FORUM POST",
             object_id=self.post.id,
             flagger=self.flagger,
-            reason="SPAM"
+            reason="SPAM",
         )
         expected_str = f"Flag by {self.flagger.username} on FORUM POST (PENDING)"
         self.assertEqual(str(flag), expected_str)
@@ -347,10 +344,13 @@ class ModerationViewsAdditionalTest(TestCase):
 
         # Create regular user and admin user
         self.regular_user = CustomUser.objects.create_user(
-            username='regularuser', email='regular@example.com', password='regularpass'
+            username="regularuser", email="regular@example.com", password="regularpass"
         )
         self.admin_user = CustomUser.objects.create_user(
-            username='adminuser', email='admin@example.com', password='adminpass', is_superuser=True
+            username="adminuser",
+            email="admin@example.com",
+            password="adminpass",
+            is_superuser=True,
         )
 
         # Ensure regular_user is not a superuser
@@ -363,12 +363,10 @@ class ModerationViewsAdditionalTest(TestCase):
             title="Test Post",
             content="Content of the test post.",
             author=self.regular_user,
-            category=self.category
+            category=self.category,
         )
         self.comment = Comment.objects.create(
-            content="Test comment.",
-            author=self.regular_user,
-            post=self.post
+            content="Test comment.", author=self.regular_user, post=self.post
         )
 
         # Create a ReviewDTO instance
@@ -382,18 +380,18 @@ class ModerationViewsAdditionalTest(TestCase):
             rating_message="Good service.",
             timestamp=datetime.now().isoformat(),
             responseText="",
-            responded_at=""
+            responded_at="",
         )
 
     def login_regular_user(self):
         """Helper method to log in as regular user"""
-        self.client.login(username='regularuser', password='regularpass')
+        self.client.login(username="regularuser", password="regularpass")
 
     def login_admin_user(self):
         """Helper method to log in as admin user"""
-        self.client.login(username='adminuser', password='adminpass')
+        self.client.login(username="adminuser", password="adminpass")
 
-    @patch('services.repositories.ReviewRepository.get_review')
+    @patch("services.repositories.ReviewRepository.get_review")
     def test_create_flag_post_success(self, mock_get_review):
         """Test successful flag creation for a forum post"""
         mock_get_review.return_value = None  # Not used for posts
@@ -406,7 +404,7 @@ class ModerationViewsAdditionalTest(TestCase):
                 "content_type": "FORUM POST",
                 "object_id": self.post.id,
                 "reason": "SPAM",
-                "explanation": "This post is spam."
+                "explanation": "This post is spam.",
             },
         )
 
@@ -417,22 +415,18 @@ class ModerationViewsAdditionalTest(TestCase):
 
         # Verify the flag was created
         flag = Flag.objects.get(
-            content_type="FORUM POST",
-            object_id=self.post.id,
-            flagger=self.regular_user
+            content_type="FORUM POST", object_id=self.post.id, flagger=self.regular_user
         )
         self.assertEqual(flag.reason, "SPAM")
         self.assertEqual(flag.explanation, "This post is spam.")
 
         # Verify notifications were created for admins
         notifications = Notification.objects.filter(
-            recipient=self.admin_user,
-            notification_type="flag_admin",
-            is_read=False
+            recipient=self.admin_user, notification_type="flag_admin", is_read=False
         )
         self.assertTrue(notifications.exists())
 
-    @patch('services.repositories.ReviewRepository.get_review')
+    @patch("services.repositories.ReviewRepository.get_review")
     def test_create_flag_comment_success(self, mock_get_review):
         """Test successful flag creation for a forum comment"""
         mock_get_review.return_value = None  # Not used for comments
@@ -445,7 +439,7 @@ class ModerationViewsAdditionalTest(TestCase):
                 "content_type": "FORUM COMMENT",
                 "object_id": self.comment.id,
                 "reason": "OFFENSIVE",
-                "explanation": "This comment is offensive."
+                "explanation": "This comment is offensive.",
             },
         )
 
@@ -458,20 +452,18 @@ class ModerationViewsAdditionalTest(TestCase):
         flag = Flag.objects.get(
             content_type="FORUM COMMENT",
             object_id=self.comment.id,
-            flagger=self.regular_user
+            flagger=self.regular_user,
         )
         self.assertEqual(flag.reason, "OFFENSIVE")
         self.assertEqual(flag.explanation, "This comment is offensive.")
 
         # Verify notifications were created for admins
         notifications = Notification.objects.filter(
-            recipient=self.admin_user,
-            notification_type="flag_admin",
-            is_read=False
+            recipient=self.admin_user, notification_type="flag_admin", is_read=False
         )
         self.assertTrue(notifications.exists())
 
-    @patch('services.repositories.ReviewRepository.get_review')
+    @patch("services.repositories.ReviewRepository.get_review")
     def test_create_flag_review_success(self, mock_get_review):
         """Test successful flag creation for a review"""
         mock_get_review.return_value = self.review_dto
@@ -484,7 +476,7 @@ class ModerationViewsAdditionalTest(TestCase):
                 "content_type": "REVIEW",
                 "object_id": self.review_id,
                 "reason": "MISINFORMATION",
-                "explanation": "This review contains false information."
+                "explanation": "This review contains false information.",
             },
         )
 
@@ -495,9 +487,7 @@ class ModerationViewsAdditionalTest(TestCase):
 
         # Verify the flag was created
         flag = Flag.objects.get(
-            content_type="REVIEW",
-            object_id=self.review_id,
-            flagger=self.regular_user
+            content_type="REVIEW", object_id=self.review_id, flagger=self.regular_user
         )
         self.assertEqual(flag.reason, "MISINFORMATION")
         self.assertEqual(flag.explanation, "This review contains false information.")
@@ -505,9 +495,7 @@ class ModerationViewsAdditionalTest(TestCase):
 
         # Verify notifications were created for admins
         notifications = Notification.objects.filter(
-            recipient=self.admin_user,
-            notification_type="flag_admin",
-            is_read=False
+            recipient=self.admin_user, notification_type="flag_admin", is_read=False
         )
         self.assertTrue(notifications.exists())
 
@@ -521,7 +509,7 @@ class ModerationViewsAdditionalTest(TestCase):
                 "content_type": "INVALID_TYPE",
                 "object_id": "test123",
                 "reason": "SPAM",
-                "explanation": "Invalid content type test."
+                "explanation": "Invalid content type test.",
             },
         )
 
@@ -542,7 +530,7 @@ class ModerationViewsAdditionalTest(TestCase):
                 "content_type": "FORUM POST",
                 "object_id": "nonexistent_post",
                 "reason": "SPAM",
-                "explanation": "Nonexistent post test."
+                "explanation": "Nonexistent post test.",
             },
         )
 
@@ -550,7 +538,7 @@ class ModerationViewsAdditionalTest(TestCase):
         data = json.loads(response.content)
         self.assertIn("Post not found", data["error"])
 
-    @patch('services.repositories.ReviewRepository.get_review')
+    @patch("services.repositories.ReviewRepository.get_review")
     def test_create_flag_nonexistent_review(self, mock_get_review):
         """Test flag creation for a nonexistent review"""
         mock_get_review.return_value = None
@@ -563,7 +551,7 @@ class ModerationViewsAdditionalTest(TestCase):
                 "content_type": "REVIEW",
                 "object_id": "nonexistent_review",
                 "reason": "SPAM",
-                "explanation": "Nonexistent review test."
+                "explanation": "Nonexistent review test.",
             },
         )
 
@@ -579,7 +567,7 @@ class ModerationViewsAdditionalTest(TestCase):
             object_id=self.post.id,
             flagger=self.regular_user,
             reason="SPAM",
-            explanation="First flag."
+            explanation="First flag.",
         )
 
         self.login_regular_user()
@@ -591,7 +579,7 @@ class ModerationViewsAdditionalTest(TestCase):
                 "content_type": "FORUM POST",
                 "object_id": self.post.id,
                 "reason": "SPAM",
-                "explanation": "Second flag attempt."
+                "explanation": "Second flag attempt.",
             },
         )
 
@@ -607,14 +595,14 @@ class ModerationViewsAdditionalTest(TestCase):
                 "content_type": "FORUM POST",
                 "object_id": self.post.id,
                 "reason": "SPAM",
-                "explanation": "Unauthenticated flag attempt."
+                "explanation": "Unauthenticated flag attempt.",
             },
         )
 
         self.assertEqual(response.status_code, 302)  # Redirect to login
         self.assertTrue("/login/" in response.url)
 
-    @patch('services.repositories.ReviewRepository.get_review')
+    @patch("services.repositories.ReviewRepository.get_review")
     def test_review_flag_dismiss(self, mock_get_review):
         """Test admin dismissing a flag"""
         mock_get_review.return_value = self.review_dto
@@ -625,14 +613,13 @@ class ModerationViewsAdditionalTest(TestCase):
             object_id=self.review_id,
             flagger=self.regular_user,
             reason="SPAM",
-            explanation="Flag to dismiss."
+            explanation="Flag to dismiss.",
         )
 
         self.login_admin_user()
 
         response = self.client.post(
-            reverse("moderation:review_flag", args=[flag.id]),
-            {"action": "dismiss"}
+            reverse("moderation:review_flag", args=[flag.id]), {"action": "dismiss"}
         )
 
         self.assertEqual(response.status_code, 200)
@@ -649,11 +636,11 @@ class ModerationViewsAdditionalTest(TestCase):
         notification = Notification.objects.get(
             recipient=self.regular_user,
             notification_type="flag_reviewed",
-            message="Your flag has been reviewed and dismissed"
+            message="Your flag has been reviewed and dismissed",
         )
         self.assertIsNotNone(notification)
 
-    @patch('services.repositories.ReviewRepository.get_review')
+    @patch("services.repositories.ReviewRepository.get_review")
     def test_review_flag_revoke(self, mock_get_review):
         """Test admin revoking a flag and deleting the content"""
         mock_get_review.return_value = self.review_dto
@@ -664,16 +651,15 @@ class ModerationViewsAdditionalTest(TestCase):
             object_id=self.review_id,
             flagger=self.regular_user,
             reason="SPAM",
-            explanation="Flag to revoke."
+            explanation="Flag to revoke.",
         )
 
         self.login_admin_user()
 
         # Mock HomeRepository.delete_review
-        with patch.object(HomeRepository, 'delete_review') as mock_delete_review:
+        with patch.object(HomeRepository, "delete_review") as mock_delete_review:
             response = self.client.post(
-                reverse("moderation:review_flag", args=[flag.id]),
-                {"action": "revoke"}
+                reverse("moderation:review_flag", args=[flag.id]), {"action": "revoke"}
             )
 
             self.assertEqual(response.status_code, 200)
@@ -694,7 +680,7 @@ class ModerationViewsAdditionalTest(TestCase):
             notification = Notification.objects.get(
                 recipient=self.regular_user,
                 notification_type="flag_reviewed",
-                message="Your flag has been reviewed and accepted"
+                message="Your flag has been reviewed and accepted",
             )
             self.assertIsNotNone(notification)
 
@@ -706,14 +692,14 @@ class ModerationViewsAdditionalTest(TestCase):
             object_id=self.post.id,
             flagger=self.regular_user,
             reason="SPAM",
-            explanation="Flag with invalid action."
+            explanation="Flag with invalid action.",
         )
 
         self.login_admin_user()
 
         response = self.client.post(
             reverse("moderation:review_flag", args=[flag.id]),
-            {"action": "invalid_action"}
+            {"action": "invalid_action"},
         )
 
         self.assertEqual(response.status_code, 400)
@@ -726,7 +712,7 @@ class ModerationViewsAdditionalTest(TestCase):
 
         response = self.client.post(
             reverse("moderation:review_flag", args=[999]),  # Assuming 999 doesn't exist
-            {"action": "dismiss"}
+            {"action": "dismiss"},
         )
 
         self.assertEqual(response.status_code, 404)
@@ -740,12 +726,11 @@ class ModerationViewsAdditionalTest(TestCase):
             object_id=self.post.id,
             flagger=self.regular_user,
             reason="SPAM",
-            explanation="Flag by unauthenticated user."
+            explanation="Flag by unauthenticated user.",
         )
 
         response = self.client.post(
-            reverse("moderation:review_flag", args=[flag.id]),
-            {"action": "dismiss"}
+            reverse("moderation:review_flag", args=[flag.id]), {"action": "dismiss"}
         )
 
         self.assertEqual(response.status_code, 302)  # Redirect to login
@@ -759,7 +744,7 @@ class ModerationViewsAdditionalTest(TestCase):
             object_id=self.post.id,
             flagger=self.regular_user,
             reason="SPAM",
-            explanation="User has flagged this post."
+            explanation="User has flagged this post.",
         )
 
         self.login_regular_user()
@@ -784,14 +769,14 @@ class ModerationViewsAdditionalTest(TestCase):
         """Test checking flag status when user has not flagged the content"""
         # Create a flag by another user
         other_user = CustomUser.objects.create_user(
-            username='otheruser', email='other@example.com', password='otherpass'
+            username="otheruser", email="other@example.com", password="otherpass"
         )
         Flag.objects.create(
             content_type="FORUM POST",
             object_id=self.post.id,
             flagger=other_user,
             reason="SPAM",
-            explanation="Another user has flagged this post."
+            explanation="Another user has flagged this post.",
         )
 
         self.login_regular_user()
