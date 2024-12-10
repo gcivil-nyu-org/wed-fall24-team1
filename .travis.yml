@@ -12,7 +12,7 @@ script:
   - python src/manage.py makemigrations --check --dry-run
   - black . --check
   - flake8 .
-  - PYTHONPATH=. coverage run --source='.' src/manage.py test accounts home public_service_finder services forum
+  - PYTHONPATH=. coverage run --source='.' src/manage.py test accounts home public_service_finder services forum moderation
 
 after_success:
   - coveralls

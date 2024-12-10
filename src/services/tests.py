@@ -1247,9 +1247,6 @@ class ServiceAnalyticsViewsTest(TestCase):
         mock_compute_metrics.assert_called_once_with(str(self.service_provider.id))
 
 
-# tests.py (continued)
-
-
 class DTOModelTests(TestCase):
     def test_service_dto_from_dynamodb_item_with_service_status_prefix(self):
         # ServiceStatus with prefix
@@ -1542,3 +1539,191 @@ class ReviewRepositoryTestCase(TestCase):
         review = self.review_repo.get_review(self.review_id)
         self.assertIsNone(review)
         # mock_table.get_item.assert_called_once_with(Key={"ReviewId": self.review_id})
+
+
+class ServiceRepositoryMoreTests(TestCase):
+    def setUp(self):
+        # Start patching
+        self.patcher = patch("services.repositories.boto3.resource")
+        self.mock_boto_resource = self.patcher.start()
+        self.mock_table = MagicMock()
+        self.mock_boto_resource.return_value.Table.return_value = self.mock_table
+
+        self.service_repo = ServiceRepository()
+        self.service_id = str(uuid.uuid4())
+        self.new_status = ServiceStatus.PENDING_APPROVAL.value
+        self.sample_service = ServiceDTO(
+            id=str(uuid.uuid4()),
+            name="Test Service",
+            address="123 Test St",
+            category="Mental Health Center",
+            provider_id="test_provider_id",
+            latitude=Decimal("40.7128"),
+            longitude=Decimal("-74.0060"),
+            ratings=Decimal("4.5"),
+            description={"hours": "9-5"},
+            service_created_timestamp="2022-01-01T12:00:00Z",
+            service_status=ServiceStatus.APPROVED.value,
+            service_approved_timestamp="2022-01-01T12:00:00Z",
+            is_active=True,
+        )
+
+    def tearDown(self):
+        self.patcher.stop()
+
+    def test_get_pending_approval_services_success(self):
+        self.mock_table.scan.return_value = {
+            "Items": [
+                {
+                    "Id": "pending-service-id",
+                    "Name": "Pending Service",
+                    "Address": "456 Pending Road",
+                    "Category": "FOOD",
+                    "ProviderId": "provider123",
+                    "Lat": "40.7128",
+                    "Log": "-74.0060",
+                    "Ratings": "3.5",
+                    "Description": {"notes": "This is pending."},
+                    "CreatedTimestamp": "2022-02-01T12:00:00Z",
+                    "ServiceStatus": "PENDING_APPROVAL",
+                    "ApprovedTimestamp": "",
+                    "IsActive": False,
+                }
+            ]
+        }
+        pending_services = self.service_repo.get_pending_approval_services()
+        self.assertEqual(len(pending_services), 1)
+        self.assertEqual(
+            pending_services[0].service_status, ServiceStatus.PENDING_APPROVAL.value
+        )
+        self.mock_table.scan.assert_called_once()
+
+    def test_get_pending_approval_services_client_error(self):
+        error_response = {
+            "Error": {"Code": "InternalServerError", "Message": "Error scanning."}
+        }
+        self.mock_table.scan.side_effect = ClientError(error_response, "Scan")
+        pending_services = self.service_repo.get_pending_approval_services()
+        self.assertEqual(len(pending_services), 0)
+        self.mock_table.scan.assert_called_once()
+
+    def test_update_service_error_handling(self):
+        # Simulate ClientError
+        error_response = {
+            "Error": {
+                "Code": "ConditionalCheckFailedException",
+                "Message": "Item not found.",
+            }
+        }
+        self.mock_table.put_item.side_effect = ClientError(error_response, "PutItem")
+        updated_service = self.sample_service
+        updated_service.name = "Updated Name"
+        result = self.service_repo.update_service(updated_service)
+        self.assertIsNone(result)
+        self.mock_table.put_item.assert_called_once()
+
+    def test_delete_service_error_handling(self):
+        error_response = {
+            "Error": {"Code": "AccessDeniedException", "Message": "No access."}
+        }
+        self.mock_table.delete_item.side_effect = ClientError(
+            error_response, "DeleteItem"
+        )
+        result = self.service_repo.delete_service(self.sample_service.id)
+        self.assertFalse(result)
+        self.mock_table.delete_item.assert_called_once()
+
+    def test_create_service_error_handling(self):
+        error_response = {
+            "Error": {
+                "Code": "ProvisionedThroughputExceededException",
+                "Message": "Throughput exceeded.",
+            }
+        }
+        self.mock_table.put_item.side_effect = ClientError(error_response, "PutItem")
+        result = self.service_repo.create_service(self.sample_service)
+        self.assertIsNone(result)
+        self.mock_table.put_item.assert_called_once()
+
+
+class ReviewRepositoryMoreTests(TestCase):
+    def setUp(self):
+        self.patcher = patch("services.repositories.boto3.resource")
+        self.mock_boto_resource = self.patcher.start()
+        self.mock_table = MagicMock()
+        self.mock_boto_resource.return_value.Table.return_value = self.mock_table
+
+        self.review_repo = ReviewRepository()
+        self.review_id = str(uuid.uuid4())
+        self.sample_review = ReviewDTO(
+            review_id=self.review_id,
+            service_id="service123",
+            user_id="user123",
+            username="reviewer",
+            rating_stars=5,
+            rating_message="Excellent service",
+            timestamp="2022-01-01T12:00:00Z",
+        )
+
+    def tearDown(self):
+        self.patcher.stop()
+
+    def test_respond_to_review_success(self):
+        self.mock_table.update_item.return_value = {}
+        result = self.review_repo.respond_to_review(
+            self.review_id, "We appreciate your feedback!"
+        )
+        self.assertTrue(result)
+        self.mock_table.update_item.assert_called_once()
+
+    def test_respond_to_review_error_handling(self):
+        error_response = {
+            "Error": {
+                "Code": "ResourceNotFoundException",
+                "Message": "Review not found.",
+            }
+        }
+        self.mock_table.update_item.side_effect = ClientError(
+            error_response, "UpdateItem"
+        )
+        result = self.review_repo.respond_to_review(self.review_id, "Response text")
+        self.assertFalse(result)
+        self.mock_table.update_item.assert_called_once()
+
+    def test_get_reviews_for_service_success(self):
+        self.mock_table.query.return_value = {
+            "Items": [
+                {
+                    "ReviewId": "r1",
+                    "ServiceId": "service123",
+                    "UserId": "userABC",
+                    "Username": "testuser",
+                    "RatingStars": "4",
+                    "RatingMessage": "Good",
+                    "Timestamp": "2022-02-01T12:00:00Z",
+                },
+                {
+                    "ReviewId": "r2",
+                    "ServiceId": "service123",
+                    "UserId": "userXYZ",
+                    "Username": "anotheruser",
+                    "RatingStars": "5",
+                    "RatingMessage": "Excellent",
+                    "Timestamp": "2022-02-02T12:00:00Z",
+                },
+            ]
+        }
+        reviews = self.review_repo.get_reviews_for_service("service123")
+        self.assertEqual(len(reviews), 2)
+        self.assertEqual(reviews[0].rating_message, "Good")
+        self.assertEqual(reviews[1].rating_message, "Excellent")
+        self.mock_table.query.assert_called_once()
+
+    def test_get_reviews_for_service_client_error(self):
+        error_response = {
+            "Error": {"Code": "InternalServerError", "Message": "Something went wrong."}
+        }
+        self.mock_table.query.side_effect = ClientError(error_response, "Query")
+        reviews = self.review_repo.get_reviews_for_service("service123")
+        self.assertEqual(len(reviews), 0)
+        self.mock_table.query.assert_called_once()
