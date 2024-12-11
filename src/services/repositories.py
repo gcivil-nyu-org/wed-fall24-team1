@@ -27,7 +27,7 @@ class ServiceRepository:
             log.info(f"Persisted service: {item} to DynamoDB")
             return service_dto
         except ClientError as e:
-            log.error(f"Error creating service: {e.responseText['Error']['Message']}")
+            log.error(f"Error creating service: {e.response['Error']['Message']}")
             return None
 
     def get_services_by_provider(self, provider_id: int) -> list[ServiceDTO]:
@@ -43,7 +43,7 @@ class ServiceRepository:
             log.debug(f"Fetched {len(services)} services for provider {provider_id}")
             return services
         except ClientError as e:
-            log.error(f"Error fetching services: {e.responseText['Error']['Message']}")
+            log.error(f"Error fetching services: {e.response['Error']['Message']}")
             return []
 
     def get_service(self, service_id: str) -> ServiceDTO | None:
@@ -55,7 +55,7 @@ class ServiceRepository:
             return ServiceDTO.from_dynamodb_item(item) if item else None
         except ClientError as e:
             log.error(
-                f"Error fetching service {service_id}: {e.responseText['Error']['Message']}"
+                f"Error fetching service {service_id}: {e.response['Error']['Message']}"
             )
             return None
 
@@ -80,7 +80,7 @@ class ServiceRepository:
             response = self.table.put_item(Item=item)
             return service_dto if response else None
         except ClientError as e:
-            print(e.response["Error"]["Message"])
+            log.error(f"Error updating service: {e.response['Error']['Message']}")
             return None
 
     def delete_service(self, service_id: str) -> bool:
@@ -88,23 +88,23 @@ class ServiceRepository:
             self.table.delete_item(Key={"Id": service_id})
             return True
         except ClientError as e:
-            print(e.response["Error"]["Message"])
+            log.error(
+                f"Error deleting service {service_id}: {e.response['Error']['Message']}"
+            )
             return False
 
     def update_service_status(self, service_id: str, new_status: str) -> bool:
         try:
-            # Update service status
             service_id_str = str(service_id)
             response = self.table.update_item(
                 Key={"Id": service_id_str},
                 UpdateExpression="SET ServiceStatus = :new_status",
                 ExpressionAttributeValues={":new_status": new_status},
-                ConditionExpression="attribute_exists(Id)",  # Ensure item exists
+                ConditionExpression="attribute_exists(Id)",
                 ReturnValues="UPDATED_NEW",
             )
-            print("response: " + response)
+            print("response:", response)
 
-            # Logging successful update
             log.info(
                 f"Updated ServiceStatus for service ID {service_id} to {new_status}"
             )
@@ -116,9 +116,7 @@ class ServiceRepository:
                 log.error(
                     f"Error updating service status for ID {service_id}: {e.response['Error']['Message']}"
                 )
-
             return False
-
         except Exception as e:
             log.error(
                 f"Unexpected error updating service status for ID {service_id}, exception: {e}"
@@ -142,7 +140,7 @@ class ReviewRepository:
             return ReviewDTO.from_dynamodb_item(item) if item else None
         except ClientError as e:
             log.error(
-                f"Error fetching review {review_id}: {e.responseText['Error']['Message']}"
+                f"Error fetching review {review_id}: {e.response['Error']['Message']}"
             )
             return None
 
@@ -158,9 +156,7 @@ class ReviewRepository:
             self.table.update_item(
                 Key={"ReviewId": review_id},
                 UpdateExpression="SET #response_text = :responseText, RespondedAt = :responded_at",
-                ExpressionAttributeNames={
-                    "#response_text": "ResponseText"
-                },  # Alias for reserved keyword
+                ExpressionAttributeNames={"#response_text": "ResponseText"},
                 ExpressionAttributeValues={
                     ":responseText": response_text,
                     ":responded_at": current_time,
@@ -178,7 +174,7 @@ class ReviewRepository:
         """Retrieve all reviews for a given service ID."""
         try:
             response = self.table.query(
-                IndexName="ServiceIdIndex",  # Ensure this index exists in your DynamoDB table
+                IndexName="ServiceIdIndex",
                 KeyConditionExpression=Key("ServiceId").eq(service_id),
             )
             items = response.get("Items", [])

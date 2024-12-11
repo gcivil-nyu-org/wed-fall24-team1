@@ -228,7 +228,7 @@ class HomeRepository:
                 service = self.services_table.get_item(Key={"Id": service_id}).get(
                     "Item"
                 )
-                if service:
+                if service and service.get("ServiceStatus", "APPROVED") == "APPROVED":
                     services.append(service)
             return services
         except ClientError as e:

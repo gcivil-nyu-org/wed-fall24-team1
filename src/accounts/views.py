@@ -16,7 +16,7 @@ from dateutil.parser import parse as parse_date
 import uuid
 import boto3
 from botocore.exceptions import ClientError
-
+from django.contrib.auth import login
 
 from accounts.models import CustomUser
 from forum.models import Post
@@ -69,6 +69,9 @@ def register(request):
                     return render(request, "register.html", {"form": form})
 
             user.save()  # Now save to DB            login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+
+            login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+
             if user.user_type == "service_provider":
                 return redirect("services:list")
             else:
