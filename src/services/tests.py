@@ -466,7 +466,7 @@ class ServiceRepositoryTestCase(TestCase):
             name="Test Service",
             address="123 Test St",
             category="Mental Health Center",
-            provider_id="test_provider_id",
+            provider_id="-1",
             latitude=Decimal("40.7128"),
             longitude=Decimal("-74.0060"),
             ratings=Decimal("4.5"),
@@ -483,12 +483,12 @@ class ServiceRepositoryTestCase(TestCase):
         mock_get_services_by_provider.return_value = [self.sample_service]
 
         # Act
-        result = self.service_repo.get_services_by_provider("test_provider_id")
+        result = self.service_repo.get_services_by_provider(-1)
 
         # Assert
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0].name, "Test Service")
-        mock_get_services_by_provider.assert_called_once_with("test_provider_id")
+        mock_get_services_by_provider.assert_called_once_with(-1)
 
     @patch("services.repositories.ServiceRepository.get_service")
     def test_get_service(self, mock_get_service):
@@ -1557,7 +1557,7 @@ class ServiceRepositoryMoreTests(TestCase):
             name="Test Service",
             address="123 Test St",
             category="Mental Health Center",
-            provider_id="test_provider_id",
+            provider_id="-1",
             latitude=Decimal("40.7128"),
             longitude=Decimal("-74.0060"),
             ratings=Decimal("4.5"),

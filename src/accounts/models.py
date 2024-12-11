@@ -4,8 +4,8 @@ from django.db import models
 
 class CustomUser(AbstractUser):
     USER_TYPE_CHOICES = (
-        ("service_provider", "Service Provider"),
         ("user", "User"),
+        ("service_provider", "Service Provider"),
     )
 
     email = models.EmailField(unique=True)
