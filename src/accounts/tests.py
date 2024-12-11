@@ -1,15 +1,16 @@
 from unittest.mock import patch
-from accounts.backends import EmailOrUsernameBackend
 
-from accounts.forms import ServiceProviderLoginForm, UserLoginForm, UserRegisterForm
-from accounts.models import CustomUser
-from django.contrib.auth import authenticate
-from django.contrib.auth import get_user_model
+from django.contrib.auth import authenticate, get_user_model
 from django.test import TestCase, Client, RequestFactory
 from django.urls import reverse
 
+from accounts.backends import EmailOrUsernameBackend
+from accounts.forms import ServiceProviderLoginForm, UserLoginForm, UserRegisterForm
+from accounts.models import CustomUser
 
-# ---------- Model Tests ----------
+User = get_user_model()
+
+
 class CustomUserModelTest(TestCase):
     def setUp(self):
         self.user = CustomUser.objects.create_user(
@@ -60,7 +61,6 @@ class UserRegisterFormTest(TestCase):
 
 # ---------- View Tests ----------
 class RegisterViewTest(TestCase):
-
     def test_register_view_post_valid_data(self):
         """Test POST request with valid data to the registration page."""
         response = self.client.post(
@@ -118,6 +118,39 @@ class UserLoginViewTest(TestCase):
         )
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse("home"))
+
+
+class ServiceProviderLoginViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.sp_user = CustomUser.objects.create_user(
+            username="spuser",
+            email="spuser@example.com",
+            password="Testpassword123!",
+            user_type="service_provider",
+        )
+
+    def test_service_provider_login_valid(self):
+        """Test service provider login with valid credentials."""
+        response = self.client.post(
+            reverse("service_provider_login"),
+            {"email": "spuser@example.com", "password": "Testpassword123!"},
+        )
+        self.assertEqual(response.status_code, 302)
+        # Assuming "services:list" is the redirect for service providers:
+        # Update to your actual service provider dashboard URL if different
+        self.assertRedirects(response, reverse("services:list"))
+
+    def test_service_provider_login_invalid(self):
+        """Test service provider login with invalid credentials."""
+        response = self.client.post(
+            reverse("service_provider_login"),
+            {"email": "wrong@example.com", "password": "wrongpassword"},
+        )
+        self.assertEqual(response.status_code, 200)
+        form = response.context.get("form")
+        self.assertFalse(form.is_valid())
+        self.assertIn("Invalid email or password.", form.errors["__all__"])
 
 
 class LogoutViewTest(TestCase):
@@ -189,18 +222,6 @@ class UserTypeRedirectTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse("home"))
 
-    # def test_service_provider_redirects_to_dashboard(self):
-    #     """Test if a service provider is redirected to the dashboard after registration."""
-    #     response = self.client.post(reverse("register"), {
-    #         "username": "provider1",
-    #         "email": "provider1@example.com",
-    #         "password1": "Testpassword123!",
-    #         "password2": "Testpassword123!",
-    #         "user_type": "service_provider"
-    #     })
-    #     self.assertEqual(response.status_code, 302)
-    #     self.assertRedirects(response, reverse("service_provider_dashboard"))
-
 
 class EmptyRegisterFormTest(TestCase):
     def test_register_view_post_empty_data(self):
@@ -238,22 +259,6 @@ class DuplicateEmailTest(TestCase):
             password="ExistingPassword123!",
             user_type="user",
         )
-
-    # def test_register_duplicate_email(self):
-    #     """Test registration with a duplicate email."""
-    #     response = self.client.post(
-    #         reverse("register"),
-    #         {
-    #             "username": "newuser",
-    #             "email": "duplicate@example.com",
-    #             "password1": "NewPassword123!",
-    #             "password2": "NewPassword123!",
-    #             "user_type": "user",
-    #         },
-    #     )
-    #     form = response.context.get("form")
-    #     self.assertIsNotNone(form)
-    #     self.assertFalse(form.is_valid())
 
 
 class EmailOrUsernameBackendTest(TestCase):
@@ -319,7 +324,7 @@ class ProfileViewTest(TestCase):
             password="testpassword",
             user_type="service_provider",
         )
-        # Create a user with type "user" and corresponding ServiceSeeker profile
+        # Create a user with type "user"
         self.service_seeker_user = CustomUser.objects.create_user(
             username="seeker",
             email="seeker@example.com",
@@ -336,41 +341,13 @@ class ProfileViewTest(TestCase):
 
     def test_profile_view_service_seeker_get(self):
         """Test that the profile view renders correctly for a user with type 'user'."""
-        # Log in as service seeker
         self.client.login(username="seeker", password="testpassword")
-
         response = self.client.get(reverse("profile_view"))
-
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "profile_base.html")
-
-    # def test_profile_view_service_seeker_post(self):
-    #     """Test that the profile view updates profile information on a POST request."""
-    #     # Log in as service seeker
-    #     self.client.login(username="seeker", password="testpassword")
-
-    #     # Define new data for the form submission
-    #     form_data = {
-    #         "location_preference": "New Location Value",  # Assuming these are IDs of bookmarked services
-    #     }
-    #     response = self.client.post(
-    #         reverse("accounts:profile_view"),
-    #         data=json.dumps(form_data),
-    #         content_type="application/json"  # Set JSON content type
-    #     )
-
-    #     # Reload the service seeker profile from the database
-    #     self.service_seeker.refresh_from_db()
-
-    #     # Assert redirection and form data update
-    #     self.assertEqual(response.status_code, 302)
-    #     # self.assertRedirects(response, reverse("accounts:profile_view"))
-    #     self.assertEqual(self.service_seeker.location_preference, "New Location Value")
-    #     self.assertQuerysetEqual(
-    #         self.service_seeker.bookmarked_services.all(),
-    #         [1, 2],  # Replace with actual objects or IDs you expect
-    #         transform=lambda x: x.id  # If you use IDs
-    #     )
+        self.assertNotContains(
+            response, "is_service_provider"
+        )  # since user is not provider
 
 
 class UserRegisterFormEdgeCaseTest(TestCase):
@@ -432,9 +409,9 @@ class UserLoginFormEmailAndUsernameTest(TestCase):
 
     def test_login_with_email(self):
         """Test login with a valid email and password."""
-        request = self.factory.post("/login/")  # Simulate a POST request
+        request = self.factory.post("/login/")
         form_data = {"username": "testuser@example.com", "password": "ValidPass123!"}
-        form = UserLoginForm(data=form_data, request=request)  # Pass the request object
+        form = UserLoginForm(data=form_data, request=request)
         self.assertFalse(form.is_valid())
 
     def test_login_with_invalid_email_or_username(self):
@@ -528,7 +505,7 @@ class EmailOrUsernameBackendUncoveredTest(TestCase):
         self.assertIsNone(user)
 
     def test_user_not_found_by_username(self):
-        """Test backend tries email authentication if username doesn't exist."""
+        """Test backend tries email if username doesn't exist."""
         request = self.factory.post("/login/")
         user = authenticate(
             request=request, username="nonexistent", password="TestPass123!"
@@ -536,7 +513,7 @@ class EmailOrUsernameBackendUncoveredTest(TestCase):
         self.assertIsNone(user)
 
     def test_user_not_found_by_username_or_email(self):
-        """Test authenticate() returns None if both username and email don't exist."""
+        """Test returns None if both username and email don't exist."""
         request = self.factory.post("/login/")
         user = authenticate(
             request=request, username="wrongemail@example.com", password="TestPass123!"
@@ -551,7 +528,7 @@ class EmailOrUsernameBackendUncoveredTest(TestCase):
 
     def test_authenticate_with_inactive_user(self):
         """Test that an inactive user cannot authenticate."""
-        self.user.is_active = False  # Set user as inactive
+        self.user.is_active = False
         self.user.save()
 
         request = self.factory.post("/login/")
