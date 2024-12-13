@@ -9,6 +9,7 @@
 [![Build Status](https://app.travis-ci.com/gcivil-nyu-org/wed-fall24-team1.svg?branch=develop)](https://app.travis-ci.com/github/gcivil-nyu-org/wed-fall24-team1/branches)
 [![Coverage Status](https://coveralls.io/repos/github/gcivil-nyu-org/wed-fall24-team1/badge.png?branch=develop)](https://coveralls.io/github/gcivil-nyu-org/wed-fall24-team1?branch=develop)
 
+![App Home page](https://github.com/user-attachments/assets/100e9620-46fe-4c39-b95b-e75e0d2bf91f)
 
 **NYC Public Service Finder** is a full-stack Django web application designed to help NYC residents locate, filter, and engage with a variety of public services. The platform consolidates essential services like shelters, food pantries, mental health centers, and restrooms into one convenient interface. Beyond location-based search and filtering, it includes user accounts, service providers’ dashboards, announcements, user reviews, a forum for community discussions, and moderation functionalities.
 
