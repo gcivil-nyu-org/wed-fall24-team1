@@ -231,7 +231,7 @@ Open an issue first for large changes.
 
 ## License
 
-Specify your license in a `LICENSE` file (e.g., MIT).
+This project is licensed under the [MIT License](LICENSE.txt).
 
 ---
 
