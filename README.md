@@ -64,16 +64,16 @@
 
 ## Technology Stack
 
-- **⚙️ Backend:** Django (Python)
-- **📂 Databases:**  
+- **Backend:** Django (Python)
+- **Databases:**  
   - **Primary (Relational):** Supabase (PostgreSQL) for user accounts, forums, and relational data  
   - **NoSQL (Key-Value Store):** Amazon DynamoDB for services, reviews, and bookmarks
-- **🎨 Frontend:** HTML5, CSS3, JavaScript (with Tailwind CSS)
-- **🖼️ Storage:** Amazon S3 for user and service images
-- **📍 Geocoding:** Nominatim / Geopy for address-to-coordinate conversions
-- **🚀 CI/CD:** Travis CI for continuous integration and deployment
-- **🛠️ Version Control:** Git & GitHub
-- **🔒 Authentication:** Django’s built-in auth plus Django Allauth for social login (e.g., Google OAuth2)
+- **Frontend:** HTML5, CSS3, JavaScript (with Tailwind CSS)
+- **Storage:** Amazon S3 for user and service images
+- **Geocoding:** Nominatim / Geopy for address-to-coordinate conversions
+- **CI/CD:** Travis CI for continuous integration and deployment
+- **Version Control:** Git & GitHub
+- **Authentication:** Django’s built-in auth plus Django Allauth for social login (e.g., Google OAuth2)
 
 
 ---
