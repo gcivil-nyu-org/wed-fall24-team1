@@ -18,62 +18,63 @@
 ## Key Features
 
 ### For Service Seekers
-- **Search and Filter Services:**  
+- **🔍 Search and Filter Services:**  
   Find services by category, keyword, radius from your location, or rating.
 
-- **Distance and Rating Sorting:**  
+- **📏 Distance and Rating Sorting:**  
   Sort results to prioritize proximity or quality (ratings).
 
-- **Interactive Map:**  
+- **🗺️ Interactive Map:**  
   Visualize services on a live map with direction links and bookmark them for future reference.
 
-- **User Reviews & Ratings:**  
+- **⭐ User Reviews & Ratings:**  
   Submit and view reviews for services, enhancing transparency and trust.
 
-- **Bookmarks & Profile:**  
+- **📌 Bookmarks & Profile:**  
   Save favorite services, view your reviews, manage your profile image, and more.
 
 ### For Service Providers
-- **Service Listing Management:**  
+- **📝 Service Listing Management:**  
   Create, edit, and deactivate services. Submitted services await admin approval.
 
-- **Announcements:**  
+- **📢 Announcements:**  
   Broadcast timely messages (e.g., special events, temporary closures) to users who have bookmarked your services.
 
-- **Respond to Reviews:**  
+- **💬 Respond to Reviews:**  
   Address user feedback directly, improve your service’s reputation, and provide additional information.
 
 ### Community Interaction
-- **Forum Discussions:**  
+- **💻 Forum Discussions:**  
   Engage in community discussions organized by categories, comment on posts, and get notified about replies.
 
-- **Flag Inappropriate Content:**  
+- **🚩 Flag Inappropriate Content:**  
   Users can flag forum posts, comments, or reviews they find inappropriate. Admins review these flags and take action to maintain a safe environment.
 
 ### Moderation & Admin
-- **Content Moderation:**  
+- **🔍 Content Moderation:**  
   Admins can review flagged content, dismiss or revoke it, and ensure a positive, respectful community environment.
 
-- **Approval Workflow:**  
+- **✅ Approval Workflow:**  
   System administrators approve or reject new service listings.
 
-- **Analytics & Dashboards:**  
+- **📊 Analytics & Dashboards:**  
   Service providers can access dashboards featuring bookmarks over time, reviews, average ratings, distribution by category, and more.
 
 ---
 
 ## Technology Stack
 
-- **Backend:** Django (Python)
-- **Databases:**  
+- **⚙️ Backend:** Django (Python)
+- **📂 Databases:**  
   - **Primary (Relational):** Supabase (PostgreSQL) for user accounts, forums, and relational data  
   - **NoSQL (Key-Value Store):** Amazon DynamoDB for services, reviews, and bookmarks
-- **Frontend:** HTML5, CSS3, JavaScript (with Tailwind CSS)
-- **Storage:** Amazon S3 for user and service images
-- **Geocoding:** Nominatim / Geopy for address-to-coordinate conversions
-- **CI/CD:** Travis CI for continuous integration and deployment
-- **Version Control:** Git & GitHub
-- **Authentication:** Django’s built-in auth plus Django Allauth for social login (e.g., Google OAuth2)
+- **🎨 Frontend:** HTML5, CSS3, JavaScript (with Tailwind CSS)
+- **🖼️ Storage:** Amazon S3 for user and service images
+- **📍 Geocoding:** Nominatim / Geopy for address-to-coordinate conversions
+- **🚀 CI/CD:** Travis CI for continuous integration and deployment
+- **🛠️ Version Control:** Git & GitHub
+- **🔒 Authentication:** Django’s built-in auth plus Django Allauth for social login (e.g., Google OAuth2)
+
 
 ---
 
@@ -190,19 +191,19 @@ CI via Travis and coverage reports via Coveralls are integrated. Check badges ab
 
 ## Additional Features
 
-- **User Authentication & Social Login:**  
+- **🔐 User Authentication & Social Login:**  
   Standard username/password plus Google OAuth2 support, password resets, and custom user model.
 
-- **Forums & Notifications:**  
+- **💬 Forums & Notifications:**  
   Community discussions with categories, posts, comments, and profanity filtering. Users receive notifications for replies, approvals, announcements, etc.
 
-- **Flagging & Moderation:**
+- **🚩 Flagging & Moderation:**  
   Users can flag content. Admins have a dedicated workflow to handle flagged items, ensuring a respectful platform.
 
-- **Provider Dashboards & Analytics:**
+- **📊 Provider Dashboards & Analytics:**  
   Analyze metrics like bookmarks over time, reviews, rating distribution, and category distribution for continuous service improvement.
 
-- **Announcements:**
+- **📢 Announcements:**  
   Service providers can post announcements to inform users about changes, events, or temporary closures. Users with the service bookmarked receive notifications.
 
 ---
