@@ -81,16 +81,16 @@
 
 ```
 wed-fall24-team1/
-├── accounts/ # User auth, registration, social login, password reset 
-├── forum/ # Discussion forum (categories, posts, comments, notifications)
-├── home/ # Main landing page, service listing, bookmarks, reviews, DynamoDB integration 
-├── moderation/ # Flagging and moderation of user-generated content 
-├── public_service_finder/ # Core Django project settings, URLs 
-├── services/ # Service providers’ dashboards, CRUD for services, announcements, analytics 
-├── static/ # Static files (CSS, JS, images) 
-├── templates/ # HTML templates (global and per-app) 
-├── manage.py # Django management script 
-└── requirements.txt # Python dependencies
+├── accounts/                  # User auth, registration, social login, password reset 
+├── forum/                     # Discussion forum (categories, posts, comments, notifications)
+├── home/                      # Main landing page, service listing, bookmarks, reviews, DynamoDB integration 
+├── moderation/                # Flagging and moderation of user-generated content 
+├── public_service_finder/     # Core Django project settings, URLs 
+├── services/                  # Service providers’ dashboards, CRUD for services, announcements, analytics 
+├── static/                    # Static files (CSS, JS, images) 
+├── templates/                 # HTML templates (global and per-app) 
+├── manage.py                  # Django management script 
+└── requirements.txt           # Python dependencies
 ```
 
 ---
