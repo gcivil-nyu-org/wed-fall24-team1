@@ -3,8 +3,6 @@ asttokens==2.4.1
 better-profanity==0.7.0
 black==24.10.0
 blessed==1.20.0
-boto3==1.35.34
-botocore==1.35.34
 Bottleneck==1.4.0
 Brotli==1.1.0
 cement==2.10.14
@@ -50,7 +48,7 @@ pexpect==4.9.0
 pillow==11.0.0
 platformdirs==4.3.6
 prompt_toolkit==3.0.48
-psycopg2-binary==2.9.9
+psycopg2-binary==2.9.10
 ptyprocess==0.7.0
 pure_eval==0.2.3
 pycodestyle==2.12.1
@@ -74,3 +72,4 @@ typing_extensions==4.12.2
 tzdata==2024.2
 urllib3==2.2.3
 wcwidth==0.2.13
+pymongo==4.10.1
