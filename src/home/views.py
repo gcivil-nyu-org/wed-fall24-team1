@@ -169,7 +169,6 @@ def home_view(request):
         processed_items.sort(key=rating_sort_key)
     else:
         processed_items.sort(key=lambda x: float(x.get("Distance", float("inf"))))
-
     # Paginate the results, showing 10 items per page
     paginator = Paginator(processed_items, 10)
     page_number = request.GET.get("page", 1)
@@ -187,8 +186,8 @@ def home_view(request):
             "Id": item.get("Id"),
             "Name": item.get("Name", "No Name"),
             "Address": item.get("Address", "N/A"),
-            "Lat": float(item.get("Lat")) if item.get("Lat") else None,
-            "Log": float(item.get("Log")) if item.get("Log") else None,
+            "Lat": float(item.get("Latitude")) if item.get("Latitude") else None,
+            "Log": float(item.get("Longitude")) if item.get("Longitude") else None,
             "Ratings": (
                 str(item.get("Ratings"))
                 if item.get("Ratings") not in [None, "N/A"]
@@ -206,7 +205,6 @@ def home_view(request):
         }
         for item in page_obj
     ]
-
     # Render the home page with context data
     return render(
         request,

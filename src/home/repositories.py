@@ -64,13 +64,12 @@ class HomeRepository:
 
         response = self.services_table.scan(**scan_kwargs)
         items = response.get("Items", [])
-
         # Filter items based on radius if provided
         if radius and ulat and ulon:
             filtered_items = []
             for item in items:
-                item_lat = item.get("Lat", "0")
-                item_lon = item.get("Log", "0")
+                item_lat = item.get("Latitude", "0")
+                item_lon = item.get("Longitude", "0")
                 if item_lat and item_lon and item_lat != "0" and item_lon != "0":
                     distance = dist.distance((item_lat, item_lon), (ulat, ulon)).miles
                     item["Distance"] = distance

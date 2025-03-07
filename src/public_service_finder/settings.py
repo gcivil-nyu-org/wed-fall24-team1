@@ -31,8 +31,8 @@ SUPABASE_DB_HOST = config("SUPABASE_DB_HOST")
 SUPABASE_DB_PORT = config("SUPABASE_DB_PORT")
 
 AWS_REGION = "us-east-1"
-DYNAMODB_TABLE_SERVICES = "services"
-DYNAMODB_TABLE_REVIEWS = "reviews"
+DYNAMODB_TABLE_SERVICES = "service"
+DYNAMODB_TABLE_REVIEWS = "reviewTable"
 DYNAMODB_TABLE_BOOKMARKS = "bookmark"
 AWS_STORAGE_BUCKET_NAME = "nycservicefinder-images-s3"  # Replace with your bucket name
 AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
