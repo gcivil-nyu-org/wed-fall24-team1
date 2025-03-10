@@ -186,8 +186,8 @@ def home_view(request):
             "Id": item.get("Id"),
             "Name": item.get("Name", "No Name"),
             "Address": item.get("Address", "N/A"),
-            "Lat": float(item.get("Latitude")) if item.get("Latitude") else None,
-            "Log": float(item.get("Longitude")) if item.get("Longitude") else None,
+            "Lat": float(item.get("Lat")) if item.get("Lat") else None,
+            "Log": float(item.get("Log")) if item.get("Log") else None,
             "Ratings": (
                 str(item.get("Ratings"))
                 if item.get("Ratings") not in [None, "N/A"]
